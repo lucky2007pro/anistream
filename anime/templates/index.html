@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AniStream - Zamonaviy Anime Sayti</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-base: #0f0f13;
+            --bg-surface: #1a1a24;
+            --accent: #ff3366;
+            --accent-hover: #ff003c;
+            --text-light: #ffffff;
+            --text-dim: #8a8a9d;
+            --glass-bg: rgba(26, 26, 36, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-light);
+            overflow-x: hidden;
+        }
+
+        /* ----- NAVBAR ----- */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: linear-gradient(to bottom, rgba(15, 15, 19, 0.9), transparent);
+            backdrop-filter: blur(10px);
+            transition: background 0.3s ease;
+        }
+
+        .nav-brand {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--text-light);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-brand span {
+            color: var(--accent);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 35px;
+        }
+
+        .nav-menu a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .nav-menu a:hover {
+            color: var(--accent);
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover::after {
+            width: 100%;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        /* ----- YT USLUBIDAGI YANGI IKONKALAR ----- */
+        .action-icon {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-size: 1.4rem;
+        }
+
+        .action-icon:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-btn {
+           background: var(--glass-bg);
+           border: 1px solid var(--glass-border);
+        }
+        .profile-btn:hover {
+             background: var(--accent);
+             border-color: var(--accent);
+             transform: translateY(-2px);
+        }
+
+        /* ----- HERO SLIDER ----- */
+        .slider-container {
+            position: relative;
+            width: 100%;
+            height: 75vh;
+            overflow: hidden;
+        }
+
+        .slides-wrapper {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            padding: 5% 5% 8% 5%;
+            overflow: hidden;
+        }
+
+        .slide-bg {
+            position: absolute;
+            top: -10%;
+            left: -10%;
+            width: 120%;
+            height: 120%;
+            background-size: cover;
+            background-position: center;
+            z-index: 1;
+            transition: transform 0.1s linear;
+        }
+
+        .slide-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 2;
+            background: linear-gradient(to right, rgba(15,15,19,0.95) 0%, rgba(15,15,19,0.4) 50%, transparent 100%),
+                        linear-gradient(to top, rgba(15,15,19,1) 0%, transparent 40%);
+        }
+
+        .slide-content {
+            position: relative;
+            z-index: 10;
+            max-width: 700px;
+        }
+
+        .tags {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .tag {
+            background: rgba(255, 51, 102, 0.15);
+            color: var(--accent);
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            border: 1px solid rgba(255, 51, 102, 0.3);
+        }
+
+        .tag.rating {
+            background: rgba(255, 193, 7, 0.15);
+            color: #ffc107;
+            border-color: rgba(255, 193, 7, 0.3);
+        }
+
+        .slide-title {
+            font-size: 4rem;
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 15px;
+            text-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        }
+
+        .slide-desc {
+            font-size: 1.1rem;
+            color: var(--text-dim);
+            line-height: 1.6;
+            margin-bottom: 25px;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .btn-main {
+            padding: 14px 30px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(255, 51, 102, 0.3);
+        }
+
+        .btn-main:hover {
+            background: var(--accent-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 30px rgba(255, 51, 102, 0.5);
+        }
+
+        .slider-controls {
+            position: absolute;
+            bottom: 30px;
+            right: 5%;
+            display: flex;
+            gap: 10px;
+            z-index: 20;
+        }
+
+        .dot {
+            width: 30px;
+            height: 4px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .dot.active {
+            background: var(--accent);
+            width: 50px;
+        }
+
+        /* ----- MAIN CONTENT ----- */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 5%;
+        }
+
+        /* Ramazon banneri olib tashlandi, Section Header margini to'g'irlandi */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin: 40px 0 30px 0; /* Tepadan biroz yaqinlashtirildi */
+        }
+
+        .section-title h3 {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+
+        .section-title span {
+            color: var(--accent);
+        }
+
+        .view-all {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+
+        .view-all:hover {
+            color: var(--text-light);
+        }
+
+        /* ----- YANGILANGAN KARTOCHKALAR (HOVER EFFEKTLI) ----- */
+        .cards-carousel {
+            display: flex;
+            gap: 20px;
+            overflow-x: auto;
+            padding-bottom: 30px;
+            scrollbar-width: none;
+        }
+
+        .cards-carousel::-webkit-scrollbar {
+            display: none;
+        }
+
+        .card-wrapper {
+             width: 220px;
+             flex-shrink: 0;
+             text-decoration: none;
+             color: inherit;
+             display: flex;
+             flex-direction: column;
+             gap: 10px;
+        }
+
+        .anime-card {
+            width: 100%;
+            height: 310px;
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        /* Ramka kattalashishi va oldinga chiqishi */
+        .card-wrapper:hover .anime-card {
+            transform: scale(1.05);
+            border-color: var(--accent);
+            box-shadow: 0 10px 20px rgba(255, 51, 102, 0.2);
+        }
+
+        .anime-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .card-wrapper:hover .anime-card img {
+            transform: scale(1.1);
+        }
+
+        .anime-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, rgba(15,15,19,0.9) 0%, rgba(15,15,19,0.2) 50%, transparent 100%);
+            transition: background 0.3s;
+        }
+
+        .card-wrapper:hover .anime-card::after {
+            background: linear-gradient(to top, rgba(255, 51, 102, 0.6) 0%, rgba(15,15,19,0.4) 60%, transparent 100%);
+        }
+
+        .top-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: #FFC107;
+            z-index: 10;
+        }
+
+        .badge-quality {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent);
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: white;
+            z-index: 10;
+        }
+
+        .card-info-bottom {
+             display: flex;
+             flex-direction: column;
+             gap: 4px;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--text-light);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: color 0.3s ease;
+        }
+
+        /* Hoverda nom pushti rangga kiradi */
+        .card-wrapper:hover .card-title {
+             color: var(--accent);
+        }
+
+        .card-meta {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-dim);
+        }
+
+        .tag-jp { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.65rem; }
+
+
+        /* ----- PROFIL YON MENYUSI (SIDEBAR) ----- */
+        .profile-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
+            z-index: 1999; opacity: 0; visibility: hidden; transition: 0.3s;
+        }
+
+        .profile-sidebar {
+            position: fixed; top: 0; right: -350px;
+            width: 350px; height: 100vh;
+            background: var(--bg-surface);
+            border-left: 1px solid var(--glass-border);
+            z-index: 2000; overflow-y: auto;
+            transition: right 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+            padding: 20px; box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+        }
+
+        .profile-sidebar::-webkit-scrollbar { display: none; }
+        .profile-sidebar { scrollbar-width: none; }
+
+        .profile-overlay.active { opacity: 1; visibility: visible; }
+        .profile-sidebar.active { right: 0; }
+
+        .sidebar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .premium-btn {
+            background: linear-gradient(90deg, #ff8a00, #e52e71);
+            color: white; border: none; padding: 10px 15px;
+            border-radius: 8px; font-weight: 800; font-size: 0.8rem; cursor: pointer;
+        }
+        .close-btn {
+            background: transparent; border: 1px solid var(--glass-border);
+            color: white; width: 35px; height: 35px; border-radius: 50%;
+            font-size: 1.2rem; cursor: pointer; transition: 0.3s;
+        }
+        .close-btn:hover { background: var(--accent); border-color: var(--accent); }
+
+        .user-info-section { text-align: center; margin-bottom: 30px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 20px; }
+        .avatar-large {
+            width: 80px; height: 80px; background: var(--accent);
+            border-radius: 50%; margin: 0 auto 15px auto;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 2rem; font-weight: 900; box-shadow: 0 0 20px rgba(255,51,102,0.4);
+        }
+        .user-name { font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; }
+        .user-handle { color: var(--accent); font-size: 0.9rem; font-weight: 600; background: rgba(255,51,102,0.1); padding: 4px 10px; border-radius: 20px; }
+
+        .menu-section { margin-bottom: 25px; }
+        .menu-title { font-size: 0.75rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; padding-left: 10px; }
+
+        .menu-item {
+            display: flex; align-items: center; padding: 12px 10px;
+            color: #d1d1d6; text-decoration: none; font-weight: 600;
+            font-size: 1rem; border-radius: 10px; transition: 0.3s;
+        }
+        .menu-item:hover { background: rgba(255,255,255,0.05); color: white; padding-left: 15px; }
+        .menu-item span:first-child { width: 30px; font-size: 1.2rem; opacity: 0.8; }
+
+        .menu-item .arrow { margin-left: auto; color: var(--text-dim); font-size: 1.2rem; }
+        .menu-item .value { margin-left: auto; color: var(--text-dim); font-size: 0.85rem; margin-right: 10px; }
+
+        .ai-badge { background: linear-gradient(90deg, #ff3366, #ff8a00); color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 900; margin-left: auto; margin-right: 10px; }
+
+        .logout-btn { color: #ff3b30; margin-top: 10px; }
+        .logout-btn:hover { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
+
+        .sidebar-footer { text-align: center; margin-top: 40px; color: var(--text-dim); font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar" id="navbar">
+    <a href="#" class="nav-brand">Ani<span>Stream</span></a>
+
+    <div class="nav-menu">
+        <a href="#">Katalog</a>
+        <a href="#">Fandub loyihalar</a>
+        <a href="#">Jadval</a>
+    </div>
+
+    <div class="nav-actions">
+        <div class="action-icon">🔍</div>
+        <div class="action-icon">🔔</div>
+        <div class="action-icon profile-btn" onclick="toggleProfileMenu()">👤</div>
+    </div>
+</nav>
+
+<div class="slider-container">
+    <div class="slides-wrapper" id="slidesWrapper">
+        {% for anime in animes|slice:":3" %}
+        <div class="slide">
+             <div class="slide-bg" style="background-image: url('{{ anime.image_url }}');"></div>
+             <div class="slide-overlay"></div>
+
+            <div class="slide-content">
+                <div class="tags">
+                    <span class="tag">YANGI</span>
+                    <span class="tag rating">★ {{ anime.rating }}</span>
+                    <span class="tag">{{ anime.release_year }}</span>
+                </div>
+                <h1 class="slide-title">{{ anime.title }}</h1>
+                <p class="slide-desc">{{ anime.description }}</p>
+                <a href="{% url 'detail' anime.id %}" style="text-decoration: none;">
+                    <button class="btn-main">▶ Hozir ko'rish</button>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="slider-controls" id="sliderDots">
+        {% for anime in animes|slice:":3" %}
+        <div class="dot {% if forloop.first %}active{% endif %}" onclick="goToSlide({{ forloop.counter0 }})"></div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="container">
+    <div class="section-header">
+        <div class="section-title">
+            <h3>Yangi <span>Qo'shilganlar</span></h3>
+        </div>
+        <a href="#" class="view-all">Barchasini ko'rish →</a>
+    </div>
+
+    <div class="cards-carousel">
+        {% for anime in animes %}
+        <a href="{% url 'detail' anime.id %}" class="card-wrapper">
+            <div class="anime-card">
+                <div class="top-badge">★ {{ anime.rating }}</div>
+                <div class="badge-quality">HD</div>
+                <img src="{{ anime.image_url }}" alt="{{ anime.title }}">
+            </div>
+
+            <div class="card-info-bottom">
+                 <h4 class="card-title">{{ anime.title }}</h4>
+                 <div class="card-meta">
+                      <span class="tag-jp">JP</span>
+                      <span>{{ anime.release_year }}</span>
+                 </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+
+</div>
+
+<div class="profile-overlay" id="profileOverlay" onclick="toggleProfileMenu()"></div>
+
+<div class="profile-sidebar" id="profileSidebar">
+    <div class="sidebar-header">
+        <button class="premium-btn">⚡ PREMIUMGA O'TING!</button>
+        <button class="close-btn" onclick="toggleProfileMenu()">✕</button>
+    </div>
+
+    {% if request.user.is_authenticated %}
+    <div class="user-info-section">
+        <div class="avatar-large">{{ request.user.username|make_list|first|upper }}</div>
+        <h3 class="user-name">{{ request.user.username }}</h3>
+        <span class="user-handle">@{{ request.user.username|lower }}</span>
+    </div>
+
+    <div class="menu-section">
+        <h4 class="menu-title">MENING PROFILIM</h4>
+        <a href="#" class="menu-item"><span>📹</span> Jonli Efirlar <span class="arrow">›</span></a>
+        <a href="#" class="menu-item"><span>👤</span> Profilni tahrirlash <span class="arrow">›</span></a>
+        <a href="#" class="menu-item"><span>💳</span> Mening Hisobim <span class="value">0 UZS</span> <span
+                class="arrow">›</span></a>
+        <a href="#" class="menu-item"><span>👑</span> Premium Obuna <span class="value">Yo'q</span> <span
+                class="arrow">›</span></a>
+        <a href="#" class="menu-item"><span>🔖</span> Saqlanganlar <span class="arrow">›</span></a>
+        <a href="#" class="menu-item"><span>🕒</span> Ko'rishlar tarixi <span class="arrow">›</span></a>
+    </div>
+
+    <div class="menu-section">
+        <h4 class="menu-title">YORDAM VA SOZLAMALAR</h4>
+        <a href="#" class="menu-item"><span>❓</span> Yordam Markazi <span class="ai-badge">AI</span> <span
+                class="arrow">›</span></a>
+        <a href="#" class="menu-item"><span>⚙️</span> Ilova Sozlamalari <span class="arrow">›</span></a>
+    </div>
+
+    <form action="{% url 'admin:logout' %}?next=/" method="post" style="display: inline;">
+        {% csrf_token %}
+        <button type="submit" class="menu-item logout-btn"
+                style="background:none; border:none; width:100%; text-align:left; cursor:pointer;">
+            <span>🚪</span> Hisobdan chiqish
+        </button>
+    </form>
+
+    {% else %}
+    <div class="user-info-section" style="padding-top: 20px;">
+        <div class="avatar-large" style="background: #333; box-shadow: none;">?</div>
+        <h3 class="user-name">Mehmon</h3>
+        <p style="color: var(--text-dim); font-size: 0.9rem; margin-top: 10px;">Sayt imkoniyatlaridan to'liq foydalanish
+            uchun tizimga kiring.</p>
+    </div>
+
+    <div class="menu-section" style="margin-top: 30px;">
+        <a href="{% url 'auth_page' %}" class="menu-item"
+           style="justify-content: center; background: var(--accent); color: white; font-weight: 800; border-radius: 12px;">
+            TIZIMGA KIRISH
+        </a>
+        <a href="{% url 'auth_page' %}" class="menu-item"
+           style="justify-content: center; border: 1px solid var(--accent); color: var(--accent); margin-top: 10px; border-radius: 12px;">
+            RO'YHATDAN O'TISH
+        </a>
+    </div>
+    {% endif %}
+
+    <div class="sidebar-footer">
+        ANISTREAM PLATFORM V1.0
+    </div>
+</div>
+
+<script>
+    const wrapper = document.getElementById('slidesWrapper');
+    const dots = document.querySelectorAll('.dot');
+    const slides = document.querySelectorAll('.slide');
+    const totalSlides = slides.length;
+    let currentSlide = 0;
+
+    function toggleProfileMenu() {
+        const sidebar = document.getElementById('profileSidebar');
+        const overlay = document.getElementById('profileOverlay');
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
+    }
+
+    function goToSlide(index) {
+        if (totalSlides === 0) return;
+        currentSlide = index;
+        wrapper.style.transform = `translateX(-${currentSlide * 100}%)`;
+
+        dots.forEach(dot => dot.classList.remove('active'));
+        if (dots[currentSlide]) {
+            dots[currentSlide].classList.add('active');
+        }
+    }
+
+    setInterval(() => {
+        if (totalSlides > 1) {
+            let nextSlide = (currentSlide + 1) % totalSlides;
+            goToSlide(nextSlide);
+        }
+    }, 5000);
+
+    // Parallax Effect qo'shilgan qism
+    window.addEventListener('scroll', () => {
+        const nav = document.getElementById('navbar');
+        let scrollY = window.scrollY;
+
+        if (scrollY > 50) {
+            nav.style.background = 'rgba(15, 15, 19, 0.98)';
+            nav.style.boxShadow = '0 4px 20px rgba(0,0,0,0.5)';
+        } else {
+            nav.style.background = 'linear-gradient(to bottom, rgba(15, 15, 19, 0.9), transparent)';
+            nav.style.boxShadow = 'none';
+        }
+
+        if (scrollY < 800) {
+            const bgs = document.querySelectorAll('.slide-bg');
+            bgs.forEach(bg => {
+                 bg.style.transform = `translateY(${scrollY * 0.4}px) scale(${1 + scrollY * 0.0005})`;
+            });
+        }
+    });
+</script>
+</body>
+</html>

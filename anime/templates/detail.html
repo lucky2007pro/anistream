@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ anime.title }} - AniStream</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-base: #0f0f13;
+            --bg-surface: #1a1a24;
+            --accent: #ff3366;
+            --accent-hover: #ff003c;
+            --text-light: #ffffff;
+            --text-dim: #8a8a9d;
+            --glass-bg: rgba(26, 26, 36, 0.7);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-light); overflow-x: hidden; }
+
+        /* Orqa fon uchun Immersive Blur effekti */
+        .ambient-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: url('{{ anime.image_url }}') center/cover no-repeat;
+            filter: blur(80px) brightness(0.2); z-index: -1; transform: scale(1.2);
+        }
+
+        /* --- Tepagi navigatsiya --- */
+        .top-nav {
+            position: absolute; top: 0; left: 0; width: 100%; padding: 20px 5%;
+            display: flex; justify-content: space-between; align-items: center; z-index: 100;
+        }
+
+        .icon-btn {
+            width: 45px; height: 45px; border-radius: 50%; background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center;
+            color: white; text-decoration: none; font-size: 1.2rem; transition: 0.3s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .icon-btn:hover { background: var(--accent); border-color: var(--accent); transform: scale(1.1); }
+        .right-actions { display: flex; gap: 15px; }
+
+        /* --- Asosiy Banner qismi (TINIQLASHTIRILDI) --- */
+        .hero-wrapper {
+            position: relative; width: 100%; height: 90vh; /* Rasm uzunroq bo'ldi */
+            overflow: hidden;
+        }
+
+        .hero-banner {
+            position: absolute; inset: -5%;
+            background: url('{{ anime.image_url }}') center/cover no-repeat;
+            transition: transform 0.1s ease-out; will-change: transform;
+        }
+
+        .hero-overlay {
+            position: absolute; inset: 0;
+            background: linear-gradient(to top, var(--bg-base) 0%, rgba(15,15,19,0.7) 20%, transparent 70%);
+            z-index: 5;
+        }
+
+        /* --- Ma'lumotlar qismi --- */
+        .content-container {
+            max-width: 1200px; margin: 0 auto; padding: 0 5%;
+            position: relative; top: -250px;
+            z-index: 10;
+        }
+
+        .badges { display: flex; gap: 10px; margin-bottom: 20px; }
+        .badge { padding: 5px 12px; border-radius: 6px; font-size: 0.85rem; font-weight: 800; letter-spacing: 1px; }
+        .badge.free { background: #00c853; color: white; }
+        .badge.rating { background: rgba(255, 193, 7, 0.2); color: #ffc107; border: 1px solid rgba(255, 193, 7, 0.3); }
+
+        .anime-title { font-size: 4rem; font-weight: 900; line-height: 1.1; text-transform: uppercase; margin-bottom: 15px; text-shadow: 0 5px 15px rgba(0,0,0,0.8); }
+        .genres { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+        .genres span { color: var(--text-light); background: rgba(255,255,255,0.1); backdrop-filter: blur(5px); font-size: 0.85rem; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; border: 1px solid rgba(255, 255, 255, 0.2); padding: 4px 12px; border-radius: 50px; }
+
+        .description { border-left: 4px solid var(--accent); padding-left: 20px; color: #d1d1d6; font-size: 1.1rem; line-height: 1.6; max-width: 800px; margin-bottom: 40px; text-shadow: 0 2px 5px rgba(0,0,0,0.5); }
+
+        .main-action-btn { background: white; color: black; padding: 15px 40px; border-radius: 12px; font-size: 1.1rem; font-weight: 800; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: 0.3s; box-shadow: 0 10px 30px rgba(255,255,255,0.2); }
+        .main-action-btn:hover { background: var(--accent); color: white; transform: translateY(-3px); box-shadow: 0 10px 30px rgba(255,51,102,0.4); }
+
+        /* --- Tablar --- */
+        .tabs-wrapper { display: flex; justify-content: center; border-bottom: 1px solid rgba(255,255,255,0.1); margin-bottom: 30px; margin-top: 40px; }
+        .tab { padding: 15px 30px; color: var(--text-dim); font-weight: 600; cursor: pointer; transition: 0.3s; border-bottom: 3px solid transparent; }
+        .tab:hover { color: white; }
+        .tab.active { color: white; border-bottom-color: var(--accent); }
+
+        .tab-content { display: none; animation: fadeIn 0.4s ease; }
+        .tab-content.active-content { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* --- 1. Qismlar (Epizodlar) ro'yxati --- */
+        .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding-bottom: 100px; }
+        .episode-card { background: var(--bg-surface); border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; display: flex; align-items: center; }
+        .episode-card:hover { transform: translateY(-5px); border-color: var(--accent); background: rgba(255,51,102,0.05); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .ep-thumb { width: 120px; height: 80px; background: url('{{ anime.image_url }}') center/cover; position: relative; }
+        .ep-thumb::after { content: '▶'; position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s;}
+        .episode-card:hover .ep-thumb::after { background: rgba(255,51,102,0.4); color: white; }
+        .ep-info { padding: 15px; }
+        .ep-title { font-weight: 800; font-size: 1.1rem; margin-bottom: 5px; }
+        .ep-duration { font-size: 0.85rem; color: var(--text-dim); }
+
+        /* --- 2. Info Tab --- */
+        .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; }
+        .info-card { background: var(--glass-bg); padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.05); }
+        .info-label { color: var(--text-dim); font-size: 0.85rem; text-transform: uppercase; margin-bottom: 5px; font-weight: 600; }
+        .info-value { font-size: 1.2rem; font-weight: 800; color: white; }
+
+        /* --- 3. Chat Tab --- */
+        .chat-container { background: var(--glass-bg); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .chat-input-box { display: flex; gap: 10px; margin-bottom: 20px; }
+        .chat-input-box input { flex: 1; padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(0,0,0,0.5); color: white; font-family: 'Outfit'; font-size: 1rem; outline: none; }
+        .chat-input-box input:focus { border-color: var(--accent); }
+        .send-btn { background: var(--accent); color: white; border: none; padding: 0 25px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: 0.3s; }
+        .send-btn:hover { background: var(--accent-hover); }
+        .comment { border-bottom: 1px solid rgba(255,255,255,0.05); padding: 15px 0; display: flex; gap: 15px; }
+        .comment:last-child { border-bottom: none; }
+        .avatar { width: 40px; height: 40px; background: var(--accent); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; }
+        .comment-text h4 { font-size: 1rem; margin-bottom: 3px; display: flex; align-items: center; gap: 10px; }
+        .comment-time { font-size: 0.75rem; color: var(--text-dim); font-weight: 400; }
+        .comment-text p { color: #d1d1d6; font-size: 0.95rem; }
+
+        /* =========================================
+           MAXSUS VIDEO PLEYER
+           ========================================= */
+        .player-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: #000; z-index: 9999; display: none; flex-direction: column;
+            opacity: 0; transition: opacity 0.3s ease;
+        }
+        .player-overlay.active { display: flex; opacity: 1; }
+
+        .video-container { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: #000; overflow: hidden; }
+        video { width: 100%; height: 100%; object-fit: contain; }
+
+        .player-header {
+            position: absolute; top: 0; left: 0; width: 100%; padding: 25px 40px;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+            z-index: 10; transition: opacity 0.3s;
+        }
+        .player-back { display: flex; align-items: center; gap: 20px; cursor: pointer; }
+        .player-back-icon { width: 45px; height: 45px; border-radius: 50%; background: rgba(255,255,255,0.1); display: flex; justify-content: center; align-items: center; font-size: 1.2rem; backdrop-filter: blur(5px); transition: 0.3s; border: none; color: white; }
+        .player-back-icon:hover { background: rgba(255,255,255,0.2); transform: scale(1.05); }
+        .player-title h2 { font-size: 1.3rem; font-weight: 800; }
+        .player-title p { font-size: 0.75rem; color: var(--text-dim); font-weight: 600; letter-spacing: 1px; margin-top: 2px;}
+
+        .player-settings-btn { background: rgba(255,255,255,0.1); border: none; color: white; width: 45px; height: 45px; border-radius: 50%; font-size: 1.2rem; cursor: pointer; backdrop-filter: blur(5px); transition: 0.3s; }
+        .player-settings-btn:hover { background: rgba(255,255,255,0.2); transform: rotate(90deg); }
+
+        .center-play {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 80px; height: 80px; border-radius: 50%; background: rgba(0,0,0,0.5);
+            border: 2px solid rgba(255,255,255,0.2); backdrop-filter: blur(10px);
+            display: flex; justify-content: center; align-items: center; font-size: 2rem;
+            color: white; cursor: pointer; transition: 0.3s; z-index: 10; padding-left: 5px;
+        }
+        .center-play:hover { background: var(--accent); border-color: var(--accent); transform: translate(-50%, -50%) scale(1.1); }
+
+        .player-controls {
+            position: absolute; bottom: 0; left: 0; width: 100%; padding: 25px 40px;
+            background: linear-gradient(to top, rgba(0,0,0,0.95), transparent);
+            z-index: 10; display: flex; flex-direction: column; gap: 15px; transition: opacity 0.3s;
+        }
+
+        .progress-container { width: 100%; height: 6px; background: rgba(255,255,255,0.2); border-radius: 3px; cursor: pointer; position: relative; }
+        .progress-bar { height: 100%; background: var(--accent); width: 0%; border-radius: 3px; position: relative; transition: width 0.1s linear;}
+        .progress-bar::after { content: ''; position: absolute; right: -6px; top: -5px; width: 16px; height: 16px; background: white; border-radius: 50%; box-shadow: 0 0 10px rgba(255,51,102,0.8); display: none; }
+        .progress-container:hover .progress-bar::after { display: block; }
+
+        .controls-row { display: flex; justify-content: space-between; align-items: center; }
+        .controls-left, .controls-right { display: flex; align-items: center; gap: 25px; }
+        .control-btn { background: none; border: none; color: white; font-size: 1.6rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; }
+        .control-btn:hover { color: var(--accent); transform: scale(1.1); }
+        .time-display { font-size: 0.95rem; font-weight: 600; font-family: monospace; letter-spacing: 1px; color: #ddd; }
+
+        .btn-episodes { font-size: 0.95rem; font-weight: 800; background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; font-family: 'Outfit'; letter-spacing: 1px;}
+        .btn-episodes:hover { background: rgba(255,255,255,0.2); color: white; transform: none;}
+
+        .settings-sidebar { position: absolute; top: 0; right: -350px; width: 300px; height: 100%; background: rgba(10,10,12,0.95); backdrop-filter: blur(15px); border-left: 1px solid var(--glass-border); z-index: 20; padding: 25px; transition: right 0.3s cubic-bezier(0.25, 1, 0.5, 1); display: flex; flex-direction: column; }
+        .settings-sidebar.open { right: 0; }
+        .settings-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--glass-border); padding-bottom: 15px; margin-bottom: 20px; }
+
+        .speed-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .speed-btn { background: rgba(255,255,255,0.05); border: 1px solid transparent; color: white; padding: 12px; border-radius: 8px; font-weight: 800; cursor: pointer; transition: 0.2s; }
+        .speed-btn.active { background: var(--accent); color: white; box-shadow: 0 5px 15px rgba(255,51,102,0.3);}
+
+        .episodes-modal { position: absolute; bottom: -100%; left: 50%; transform: translateX(-50%); width: 95%; max-width: 900px; background: rgba(15,15,19,0.95); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-bottom: none; border-radius: 20px 20px 0 0; z-index: 20; padding: 30px; transition: bottom 0.4s cubic-bezier(0.25, 1, 0.5, 1); max-height: 60vh; overflow-y: auto; }
+        .episodes-modal.open { bottom: 0; }
+        .ep-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .ep-list-item { display: flex; align-items: center; gap: 20px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
+        .ep-list-item:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
+        .ep-list-item.playing { background: rgba(255,51,102,0.1); border-color: var(--accent); }
+        .ep-list-thumb { width: 120px; height: 70px; border-radius: 8px; background: url('{{ anime.image_url }}') center/cover; position: relative; }
+        .ep-list-item.playing .ep-list-thumb::after { content: 'I I I'; position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; color: var(--accent); font-weight: 900; font-size: 1.2rem; letter-spacing: 2px; }
+        .ep-list-info h4 { font-size: 1.1rem; color: white; transition: 0.2s; margin-bottom: 5px;}
+        .ep-list-item.playing .ep-list-info h4 { color: var(--accent); }
+        .ep-list-info span { font-size: 0.75rem; background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 4px; color: var(--text-dim); font-weight: 700; }
+    </style>
+</head>
+<body>
+
+    <div class="ambient-bg"></div>
+
+    <div class="top-nav">
+        <a href="{% url 'home' %}" class="icon-btn">←</a>
+        <div class="right-actions">
+            <a href="#" class="icon-btn">🔗</a>
+            <a href="#" class="icon-btn">🔖</a>
+        </div>
+    </div>
+
+    <div class="hero-wrapper">
+        <div class="hero-banner" id="parallaxBanner"></div>
+        <div class="hero-overlay"></div>
+    </div>
+
+    <div class="content-container">
+        <div class="badges">
+            <span class="badge free">BEPUL</span>
+            <span class="badge rating">★ {{ anime.rating }}</span>
+        </div>
+
+        <h1 class="anime-title">{{ anime.title }}</h1>
+
+        <div class="genres">
+            <span>Action</span>
+            <span>Fantasy</span>
+            <span>{{ anime.release_year }}</span>
+        </div>
+
+        <p class="description">{{ anime.description }}</p>
+
+        <button class="main-action-btn" onclick="playFirstEpisode()">▶ TOMOSHA QILISH</button>
+
+        <div class="tabs-wrapper">
+            <div class="tab active" onclick="openTab('episodes', this)">▶ QISMLAR</div>
+            <div class="tab" onclick="openTab('info', this)">ⓘ INFO</div>
+            <div class="tab" onclick="openTab('chat', this)">💬 CHAT</div>
+        </div>
+
+        <div id="episodes" class="tab-content active-content">
+            <div class="episodes-grid">
+                {% for ep in anime.episodes.all %}
+                <div class="episode-card" onclick="playEpisode('{{ ep.video_url|default_if_none:"" }}', '{% if ep.video_file %}{{ ep.video_file.url }}{% endif %}', '{{ ep.episode_number }}')">
+                    <div class="ep-thumb"></div>
+                    <div class="ep-info">
+                        <div class="ep-title">{{ ep.episode_number }}-qism</div>
+                        <div class="ep-duration">{{ ep.title|default:"Yangi qism" }}</div>
+                    </div>
+                </div>
+                {% empty %}
+                <p style="color: var(--text-dim); text-align: center; width: 100%;">Hali qismlar yuklanmagan. Tez orada qo'shiladi!</p>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div id="info" class="tab-content">
+            <div class="info-grid">
+                <div class="info-card">
+                    <div class="info-label">Studiya</div>
+                    <div class="info-value">A-1 Pictures</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Holati</div>
+                    <div class="info-value" style="color: #00c853;">Davom etmoqda</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Yosh chegarasi</div>
+                    <div class="info-value">16+</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Chiqarilgan yili</div>
+                    <div class="info-value">{{ anime.release_year }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="chat" class="tab-content">
+            <div class="chat-container">
+                <div class="chat-input-box">
+                    <input type="text" placeholder="Fikringizni yozing...">
+                    <button class="send-btn">YUBORISH</button>
+                </div>
+                <div class="comments-list">
+                    <div class="comment">
+                        <div class="avatar">U</div>
+                        <div class="comment-text">
+                            <h4>User_992 <span class="comment-time">2 soat oldin</span></h4>
+                            <p>Bu animening grafikasi shunchaki daxshat! Keyingi qismini kutib qolaman.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="player-overlay" id="customPlayer">
+        <div class="video-container" id="videoContainer">
+            <video id="mainVideo" playsinline></video>
+
+            <div class="player-header" id="playerHeader">
+                <div class="player-back" onclick="closePlayer()">
+                    <button class="player-back-icon">❮</button>
+                    <div class="player-title">
+                        <h2 id="playerTitle">{{ anime.title }}</h2>
+                        <p>STUDIYO: ANISTREAM</p>
+                    </div>
+                </div>
+                <button class="player-settings-btn" onclick="toggleSettings()">⚙️</button>
+            </div>
+
+            <div class="center-play" id="centerPlayBtn" onclick="togglePlay()">▶</div>
+
+            <div class="player-controls" id="playerControls">
+                <div class="progress-container" id="progressContainer" onclick="seekVideo(event)">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+
+                <div class="controls-row">
+                    <div class="controls-left">
+                        <button class="control-btn" id="playPauseBtn" onclick="togglePlay()">▶</button>
+                        <span class="time-display" id="timeDisplay">00:00 / 00:00</span>
+                    </div>
+
+                    <div class="controls-right">
+                        <button class="control-btn btn-episodes" onclick="toggleEpisodes()">📚 QISMLAR</button>
+                        <button class="control-btn" onclick="toggleFullScreen()">⛶</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="settings-sidebar" id="settingsSidebar">
+                <div class="settings-header">
+                    <h3>PLEYER</h3>
+                    <button class="player-settings-btn" style="width: 35px; height:35px; font-size: 0.9rem;" onclick="toggleSettings()">✕</button>
+                </div>
+                <div class="setting-group">
+                    <div class="setting-title">⚡ TEZLIK</div>
+                    <div class="speed-grid">
+                        <button class="speed-btn" onclick="setSpeed(0.5, this)">0.5x</button>
+                        <button class="speed-btn active" onclick="setSpeed(1, this)">1x</button>
+                        <button class="speed-btn" onclick="setSpeed(1.5, this)">1.5x</button>
+                        <button class="speed-btn" onclick="setSpeed(2, this)">2x</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="episodes-modal" id="episodesModal">
+                <div class="ep-modal-header">
+                    <h3>Qismlar ro'yxati <br><span style="font-size: 0.85rem; color: var(--text-dim); font-weight: normal;">"{{ anime.title }}"</span></h3>
+                    <button class="player-settings-btn" style="width: 40px; height:40px; font-size: 1rem;" onclick="toggleEpisodes()">✕</button>
+                </div>
+
+                <div class="ep-list">
+                    {% for ep in anime.episodes.all %}
+                    <div class="ep-list-item" onclick="playEpisode('{{ ep.video_url|default_if_none:"" }}', '{% if ep.video_file %}{{ ep.video_file.url }}{% endif %}', '{{ ep.episode_number }}')">
+                        <div class="ep-list-thumb"></div>
+                        <div class="ep-list-info">
+                            <h4>{{ ep.episode_number }}-qism</h4>
+                            <span>{{ ep.title|default:"Yangi qism" }}</span> <span style="background: var(--accent); color: white; margin-left: 5px;">HD</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // Tablar
+        function openTab(tabId, element) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            element.classList.add('active');
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active-content'));
+            document.getElementById(tabId).classList.add('active-content');
+        }
+
+        // Parallax skroll
+        const banner = document.getElementById('parallaxBanner');
+        window.addEventListener('scroll', () => {
+            let scrollY = window.scrollY;
+            if (scrollY < 800) {
+                banner.style.transform = `translateY(${scrollY * 0.4}px) scale(${1 + scrollY * 0.0005})`;
+            }
+        });
+
+        // Pleyer mantiqi
+        const playerOverlay = document.getElementById('customPlayer');
+        const video = document.getElementById('mainVideo');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const centerPlayBtn = document.getElementById('centerPlayBtn');
+        const progressBar = document.getElementById('progressBar');
+        const timeDisplay = document.getElementById('timeDisplay');
+        const playerTitle = document.getElementById('playerTitle');
+        const settingsSidebar = document.getElementById('settingsSidebar');
+        const episodesModal = document.getElementById('episodesModal');
+
+        // Epizodni o'ynatish (Bazadan olingan ma'lumot bilan ishlash)
+        function playEpisode(url, fileUrl, epNum) {
+            const videoSrc = fileUrl ? fileUrl : url;
+
+            if (!videoSrc) {
+                alert("Kechirasiz, bu qismning videosi hali yuklanmagan!");
+                return;
+            }
+
+            video.src = videoSrc;
+            playerTitle.innerText = `{{ anime.title }} - ${epNum}-qism`;
+
+            playerOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+
+            video.play();
+            playPauseBtn.innerText = '⏸';
+            centerPlayBtn.style.display = 'none';
+        }
+
+        // Asosiy "Tomosha qilish" tugmasi birinchi qismni ochadi
+        function playFirstEpisode() {
+            {% if anime.episodes.first %}
+                playEpisode(
+                    '{{ anime.episodes.first.video_url|default_if_none:"" }}',
+                    '{% if anime.episodes.first.video_file %}{{ anime.episodes.first.video_file.url }}{% endif %}',
+                    '{{ anime.episodes.first.episode_number }}'
+                );
+            {% else %}
+                alert("Kechirasiz, hali bu animening qismlari bazaga qo'shilmagan!");
+            {% endif %}
+        }
+
+        function closePlayer() {
+            playerOverlay.classList.remove('active');
+            video.pause();
+            playPauseBtn.innerText = '▶';
+            centerPlayBtn.style.display = 'flex';
+            document.body.style.overflow = 'auto';
+            settingsSidebar.classList.remove('open');
+            episodesModal.classList.remove('open');
+        }
+
+        function togglePlay() {
+            if (video.paused) {
+                video.play();
+                playPauseBtn.innerText = '⏸';
+                centerPlayBtn.style.display = 'none';
+            } else {
+                video.pause();
+                playPauseBtn.innerText = '▶';
+                centerPlayBtn.style.display = 'flex';
+                centerPlayBtn.innerText = '▶';
+            }
+        }
+        video.addEventListener('click', togglePlay);
+
+        function formatTime(seconds) {
+            let m = Math.floor(seconds / 60);
+            let s = Math.floor(seconds % 60);
+            return (m >= 10 ? m : "0" + m) + ":" + (s >= 10 ? s : "0" + s);
+        }
+
+        video.addEventListener('timeupdate', () => {
+            const percent = (video.currentTime / video.duration) * 100;
+            progressBar.style.width = `${percent}%`;
+            timeDisplay.innerText = `${formatTime(video.currentTime)} / ${formatTime(video.duration || 0)}`;
+        });
+
+        function seekVideo(e) {
+            const rect = document.getElementById('progressContainer').getBoundingClientRect();
+            const pos = (e.clientX - rect.left) / rect.width;
+            video.currentTime = pos * video.duration;
+        }
+
+        function toggleSettings() {
+            settingsSidebar.classList.toggle('open');
+            episodesModal.classList.remove('open');
+        }
+
+        function toggleEpisodes() {
+            episodesModal.classList.toggle('open');
+            settingsSidebar.classList.remove('open');
+        }
+
+        function setSpeed(speed, btn) {
+            video.playbackRate = speed;
+            document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function toggleFullScreen() {
+            const container = document.getElementById('videoContainer');
+            if (!document.fullscreenElement) {
+                container.requestFullscreen().catch(err => alert(err.message));
+            } else {
+                document.exitFullscreen();
+            }
+        }
+    </script>
+</body>
+</html>
