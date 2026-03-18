@@ -14,3 +14,7 @@ python-dotenv==1.0.0
 
 # Pillow (rasm yuklash uchun)
 Pillow==10.2.0
+
+# Cloudinary (Media storage)
+cloudinary==1.41.0
+django-cloudinary-storage==0.3.0
