@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'cloudinary',
 
     # Local apps
-    'anime',
+    'anime.apps.AnimeConfig',
 ]
 
 MIDDLEWARE = [
