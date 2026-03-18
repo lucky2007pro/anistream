@@ -1,7 +1,7 @@
 # Django va asosiy paketlar
 Django==6.0.2
 gunicorn==21.2.0
-psycopg2-binary==2.9.9
+psycopg[binary]>=3.1.18
 
 # Database
 dj-database-url==2.1.0
