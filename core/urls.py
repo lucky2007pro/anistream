@@ -16,18 +16,59 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from anime.views import home_page, anime_detail, auth_view
-# Quyidagi ikkita qatorni qo'shing:
 from django.conf import settings
 from django.conf.urls.static import static
+from anime import views
 
 urlpatterns = [
+    # Admin
     path('admin/', admin.site.urls),
-    path('', home_page, name='home'),
-    path('anime/<int:anime_id>/', anime_detail, name='detail'),
-    path('auth/', auth_view, name='auth_page'),
+
+    # Asosiy sahifalar
+    path('', views.home_page, name='home'),
+    path('catalog/', views.catalog_page, name='catalog'),
+    path('search/', views.search_page, name='search'),
+
+    # Anime
+    path('anime/<int:anime_id>/', views.anime_detail, name='detail'),
+
+    # Janrlar
+    path('genres/', views.genres_page, name='genres'),
+    path('genre/<slug:slug>/', views.genre_detail, name='genre_detail'),
+
+    # Jadval
+    path('schedule/', views.schedule_page, name='schedule'),
+
+    # Auth
+    path('auth/', views.auth_view, name='auth_page'),
+    path('logout/', views.logout_view, name='logout'),
+
+    # User
+    path('profile/', views.profile_page, name='profile'),
+    path('favorites/', views.favorites_page, name='favorites'),
+    path('watchlist/', views.watchlist_page, name='watchlist'),
+    path('history/', views.history_page, name='history'),
+    path('settings/', views.settings_page, name='settings'),
+
+    # Actions
+    path('anime/<int:anime_id>/favorite/', views.add_to_favorites, name='add_favorite'),
+
+    # Yangiliklar
+    path('news/', views.news_list, name='news_list'),
+    path('news/<slug:slug>/', views.news_detail, name='news_detail'),
+
+    # Info pages
+    path('about/', views.about_page, name='about'),
+    path('contact/', views.contact_page, name='contact'),
+    path('faq/', views.faq_page, name='faq'),
+    path('premium/', views.premium_page, name='premium'),
 ]
 
-# Media fayllarni ko'rsatish uchun shu qatorni eng pastga qo'shing:
+# Custom error handlers
+handler404 = 'anime.views.custom_404'
+handler500 = 'anime.views.custom_500'
+
+# Media fayllar
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

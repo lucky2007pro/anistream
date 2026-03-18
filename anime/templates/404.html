@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Sahifa Topilmadi | AniStream</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0f0f13;
+            --bg-surface: #1a1a24;
+            --accent: #ff3366;
+            --accent-hover: #ff003c;
+            --text-light: #ffffff;
+            --text-dim: #8a8a9d;
+            --glass-bg: rgba(26, 26, 36, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-light);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        .error-bg {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(255, 51, 102, 0.1) 0%, rgba(15, 15, 19, 1) 100%);
+            z-index: 0;
+        }
+
+        .error-container {
+            text-align: center;
+            z-index: 10;
+            max-width: 700px;
+            padding: 40px;
+        }
+
+        .error-code {
+            font-size: 12rem;
+            font-weight: 900;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--accent), #ff8a00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 20px;
+            animation: glitch 2s infinite;
+        }
+
+        @keyframes glitch {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-5px); }
+            40% { transform: translateX(5px); }
+            60% { transform: translateX(-5px); }
+            80% { transform: translateX(5px); }
+        }
+
+        .error-emoji {
+            font-size: 8rem;
+            margin-bottom: 30px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .error-title {
+            font-size: 3rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+            color: var(--text-light);
+        }
+
+        .error-message {
+            font-size: 1.3rem;
+            color: var(--text-dim);
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .error-actions {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 18px 40px;
+            border-radius: 12px;
+            font-weight: 800;
+            font-size: 1rem;
+            text-decoration: none;
+            transition: all 0.3s;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(255, 51, 102, 0.5);
+        }
+
+        .btn-secondary {
+            background: var(--bg-surface);
+            color: var(--text-light);
+            border: 2px solid var(--glass-border);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            background: rgba(255, 51, 102, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .error-suggestions {
+            margin-top: 50px;
+            background: var(--bg-surface);
+            border-radius: 16px;
+            padding: 30px;
+            border: 1px solid var(--glass-border);
+        }
+
+        .suggestions-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: var(--text-dim);
+        }
+
+        .suggestions-list {
+            list-style: none;
+            text-align: left;
+        }
+
+        .suggestions-list li {
+            padding: 12px 0;
+            font-size: 1rem;
+            color: var(--text-dim);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .suggestions-list li:last-child {
+            border-bottom: none;
+        }
+
+        .suggestions-list li a {
+            color: var(--accent);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .suggestions-list li a:hover {
+            color: var(--accent-hover);
+        }
+
+        @media (max-width: 768px) {
+            .error-code {
+                font-size: 8rem;
+            }
+            .error-emoji {
+                font-size: 5rem;
+            }
+            .error-title {
+                font-size: 2rem;
+            }
+            .error-message {
+                font-size: 1.1rem;
+            }
+            .error-actions {
+                flex-direction: column;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="error-bg"></div>
+
+<div class="error-container">
+    <div class="error-code">404</div>
+    <div class="error-emoji">😢</div>
+    <h1 class="error-title">Sahifa Topilmadi</h1>
+    <p class="error-message">
+        Kechirasiz, siz qidirayotgan sahifa mavjud emas yoki ko'chirilgan bo'lishi mumkin.
+        Quyidagi havolalar orqali kerakli ma'lumotni toping.
+    </p>
+
+    <div class="error-actions">
+        <a href="/" class="btn btn-primary">Bosh Sahifaga Qaytish</a>
+        <a href="/catalog" class="btn btn-secondary">Anime Qidirish</a>
+    </div>
+
+    <div class="error-suggestions">
+        <div class="suggestions-title">Foydali Havolalar:</div>
+        <ul class="suggestions-list">
+            <li><a href="/catalog">📚 Anime Katalog</a> - Barcha anime seriallar</li>
+            <li><a href="/genres">🎭 Janrlar</a> - Janrlar bo'yicha qidirish</li>
+            <li><a href="/schedule">📅 Jadval</a> - Haftalik jadval</li>
+            <li><a href="/search">🔍 Qidiruv</a> - Anime qidirish</li>
+            <li><a href="/contact">💬 Bog'lanish</a> - Yordam olish</li>
+        </ul>
+    </div>
+</div>
+
+</body>
+</html>

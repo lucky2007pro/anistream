@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premium - AniStream</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0f0f13;
+            --bg-surface: #1a1a24;
+            --accent: #ff3366;
+            --accent-hover: #ff003c;
+            --text-light: #ffffff;
+            --text-dim: #8a8a9d;
+            --glass-bg: rgba(26, 26, 36, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-light); overflow-x: hidden; padding-top: 80px; }
+
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(15, 15, 19, 0.98); backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .nav-brand { font-size: 1.8rem; font-weight: 900; color: var(--text-light); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-brand span { color: var(--accent); }
+        .nav-menu { display: flex; gap: 35px; }
+        .nav-menu a { color: var(--text-light); text-decoration: none; font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; position: relative; transition: color 0.3s; }
+        .nav-menu a:hover { color: var(--accent); }
+        .nav-actions { display: flex; gap: 15px; }
+        .action-icon { background: transparent; border: none; color: var(--text-light); width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background 0.2s ease; font-size: 1.4rem; text-decoration: none; }
+        .action-icon:hover { background: rgba(255, 255, 255, 0.1); }
+        .profile-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); }
+        .profile-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
+
+        .hero-section { text-align: center; padding: 80px 5%; background: linear-gradient(135deg, rgba(255, 51, 102, 0.2) 0%, rgba(255, 138, 0, 0.1) 100%); position: relative; overflow: hidden; }
+        .hero-section::before { content: '👑'; position: absolute; top: 50%; left: 10%; font-size: 15rem; opacity: 0.05; transform: translateY(-50%); }
+        .hero-section::after { content: '⚡'; position: absolute; top: 50%; right: 10%; font-size: 15rem; opacity: 0.05; transform: translateY(-50%); }
+        .premium-badge { display: inline-block; background: linear-gradient(90deg, #ff8a00, #e52e71); color: white; padding: 10px 20px; border-radius: 25px; font-size: 0.9rem; font-weight: 900; margin-bottom: 20px; letter-spacing: 2px; }
+        .hero-title { font-size: 4.5rem; font-weight: 900; margin-bottom: 20px; background: linear-gradient(90deg, var(--accent), #ff8a00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero-subtitle { font-size: 1.4rem; color: var(--text-dim); font-weight: 600; max-width: 700px; margin: 0 auto 40px auto; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 60px 5%; }
+
+        .pricing-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 30px; margin-bottom: 80px; }
+        .pricing-card { background: var(--bg-surface); border-radius: 20px; padding: 40px; border: 2px solid var(--glass-border); transition: all 0.3s; position: relative; }
+        .pricing-card:hover { transform: translateY(-10px); border-color: var(--accent); box-shadow: 0 20px 50px rgba(255, 51, 102, 0.3); }
+        .pricing-card.featured { border-color: var(--accent); background: linear-gradient(135deg, rgba(255, 51, 102, 0.1) 0%, rgba(15, 15, 19, 1) 100%); }
+        .featured-badge { position: absolute; top: -15px; right: 30px; background: var(--accent); color: white; padding: 8px 20px; border-radius: 20px; font-size: 0.75rem; font-weight: 900; letter-spacing: 1px; }
+        .plan-name { font-size: 1.8rem; font-weight: 900; margin-bottom: 10px; }
+        .plan-price { font-size: 3rem; font-weight: 900; color: var(--accent); margin-bottom: 5px; }
+        .plan-price span { font-size: 1.2rem; color: var(--text-dim); font-weight: 600; }
+        .plan-period { color: var(--text-dim); font-size: 0.95rem; font-weight: 600; margin-bottom: 30px; display: block; }
+        .plan-features { list-style: none; margin-bottom: 30px; }
+        .plan-features li { padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 1rem; font-weight: 600; display: flex; align-items: center; gap: 10px; }
+        .plan-features li::before { content: '✓'; color: #00c853; font-weight: 900; font-size: 1.3rem; }
+        .plan-btn { width: 100%; background: var(--accent); color: white; border: none; border-radius: 12px; padding: 18px; font-weight: 900; font-size: 1.1rem; cursor: pointer; transition: all 0.3s; text-transform: uppercase; }
+        .plan-btn:hover { background: var(--accent-hover); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(255, 51, 102, 0.5); }
+
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 25px; margin-bottom: 80px; }
+        .feature-card { background: var(--bg-surface); border-radius: 16px; padding: 30px; border: 1px solid var(--glass-border); text-align: center; transition: all 0.3s; }
+        .feature-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        .feature-icon { font-size: 3.5rem; margin-bottom: 20px; }
+        .feature-title { font-size: 1.3rem; font-weight: 900; margin-bottom: 12px; }
+        .feature-desc { font-size: 1rem; color: var(--text-dim); line-height: 1.6; }
+
+        .section-title { font-size: 2.5rem; font-weight: 900; margin-bottom: 40px; text-align: center; }
+        .section-title span { color: var(--accent); }
+
+        .faq-section { background: var(--bg-surface); border-radius: 20px; padding: 50px; border: 1px solid var(--glass-border); }
+        .faq-list { display: flex; flex-direction: column; gap: 20px; }
+        .faq-item { background: var(--bg-base); border-radius: 12px; padding: 25px; }
+        .faq-question { font-size: 1.2rem; font-weight: 800; margin-bottom: 10px; color: var(--accent); }
+        .faq-answer { font-size: 1rem; color: var(--text-dim); line-height: 1.8; }
+
+        @media (max-width: 768px) {
+            .nav-menu { display: none; }
+            .hero-title { font-size: 2.5rem; }
+            .pricing-cards { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/" class="nav-brand">Ani<span>Stream</span></a>
+    <div class="nav-menu">
+        <a href="/catalog">Katalog</a>
+        <a href="/genres">Janrlar</a>
+        <a href="/schedule">Jadval</a>
+        <a href="/news">Yangiliklar</a>
+    </div>
+    <div class="nav-actions">
+        <a href="/search" class="action-icon">🔍</a>
+        <div class="action-icon">🔔</div>
+        <a href="/profile" class="action-icon profile-btn">👤</a>
+    </div>
+</nav>
+
+<div class="hero-section">
+    <span class="premium-badge">PREMIUM OBUNA</span>
+    <h1 class="hero-title">AniStream Premium</h1>
+    <p class="hero-subtitle">Reklamasiz, yuqori sifatli anime streaming tajribasi. Istalgan anime, istalgan vaqtda, istalgan qurilmada.</p>
+</div>
+
+<div class="container">
+    <h2 class="section-title">O'zingizga <span>Mos Rejani</span> Tanlang</h2>
+
+    <div class="pricing-cards">
+        <div class="pricing-card">
+            <div class="plan-name">Bepul</div>
+            <div class="plan-price">0<span> so'm</span></div>
+            <span class="plan-period">Doim bepul</span>
+            <ul class="plan-features">
+                <li>Asosiy animelarga kirish</li>
+                <li>SD sifat (480p)</li>
+                <li>Reklama bilan ko'rish</li>
+                <li>Bir qurilmada ko'rish</li>
+                <li>Asosiy qo'llab-quvvatlash</li>
+            </ul>
+            <button class="plan-btn">Hozirgi rejangiz</button>
+        </div>
+
+        <div class="pricing-card featured">
+            <span class="featured-badge">ENG MASHHUR</span>
+            <div class="plan-name">Oylik</div>
+            <div class="plan-price">29,000<span> so'm</span></div>
+            <span class="plan-period">Har oy</span>
+            <ul class="plan-features">
+                <li>Barcha animelarga kirish</li>
+                <li>Full HD sifat (1080p)</li>
+                <li>Reklamasiz ko'rish</li>
+                <li>3 qurilmada ko'rish</li>
+                <li>Offline yuklab olish</li>
+                <li>Eksklyuziv kontent</li>
+                <li>24/7 qo'llab-quvvatlash</li>
+            </ul>
+            <button class="plan-btn">7 kun bepul sinab ko'ring</button>
+        </div>
+
+        <div class="pricing-card">
+            <div class="plan-name">Yillik</div>
+            <div class="plan-price">290,000<span> so'm</span></div>
+            <span class="plan-period">Yiliga (2 oy bepul!)</span>
+            <ul class="plan-features">
+                <li>Barcha animelarga kirish</li>
+                <li>4K Ultra HD sifat</li>
+                <li>Reklamasiz ko'rish</li>
+                <li>5 qurilmada ko'rish</li>
+                <li>Offline yuklab olish</li>
+                <li>Eksklyuziv kontent</li>
+                <li>Premium badgelari</li>
+                <li>Erta kirish yangi qismlarga</li>
+                <li>VIP qo'llab-quvvatlash</li>
+            </ul>
+            <button class="plan-btn">Tejang va obuna bo'ling</button>
+        </div>
+    </div>
+
+    <h2 class="section-title">Premium <span>Afzalliklari</span></h2>
+
+    <div class="features-grid">
+        <div class="feature-card">
+            <div class="feature-icon">🚫</div>
+            <h3 class="feature-title">Reklamasiz</h3>
+            <p class="feature-desc">Hech qanday reklama va to'xtovsiz ko'rish tajribasi</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">🎬</div>
+            <h3 class="feature-title">Barcha Kontent</h3>
+            <p class="feature-desc">1200+ anime seriallar va filmlar</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">💎</div>
+            <h3 class="feature-title">4K Sifat</h3>
+            <p class="feature-desc">Ultra HD sifatda tomosha qiling</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">📥</div>
+            <h3 class="feature-title">Offline Rejim</h3>
+            <p class="feature-desc">Yuklab oling va internetsizsiz ko'ring</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">📱</div>
+            <h3 class="feature-title">Ko'p Qurilma</h3>
+            <p class="feature-desc">Bir vaqtning o'zida 5 qurilmada</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">⚡</div>
+            <h3 class="feature-title">Erta Kirish</h3>
+            <p class="feature-desc">Yangi qismlarga birinchi bo'lib kirish</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">🎁</div>
+            <h3 class="feature-title">Eksklyuziv</h3>
+            <p class="feature-desc">Premium foydalanuvchilar uchun maxsus kontent</p>
+        </div>
+
+        <div class="feature-card">
+            <div class="feature-icon">🎯</div>
+            <h3 class="feature-title">Shaxsiy Tavsiyalar</h3>
+            <p class="feature-desc">AI tomonidan maxsus tanlanganlar</p>
+        </div>
+    </div>
+
+    <div class="faq-section">
+        <h2 class="section-title">Ko'p <span>So'raladigan</span> Savollar</h2>
+        <div class="faq-list">
+            <div class="faq-item">
+                <div class="faq-question">Bepul sinov davri qanday ishlaydi?</div>
+                <div class="faq-answer">7 kunlik bepul sinov davrida Premium obunaning barcha imkoniyatlaridan foydalanishingiz mumkin. Agar davr tugashidan oldin bekor qilsangiz, hech qanday to'lov olinmaydi.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Obunani istalgan vaqtda bekor qilish mumkinmi?</div>
+                <div class="faq-answer">Ha, obunani istalgan vaqtda bekor qilishingiz mumkin. To'lov oldindan amalga oshiriladi va davr oxirigacha Premium imkoniyatlaridan foydalana olasiz.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Qanday to'lov usullari mavjud?</div>
+                <div class="faq-answer">Biz Payme, Click, Uzcard va Humo karta orqali to'lovni qabul qilamiz. Barcha to'lovlar xavfsiz va shifrlangan.</div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question">Premium obunani boshqalar bilan bo'lishish mumkinmi?</div>
+                <div class="faq-answer">Oylik obunada 3 qurilma, yillik obunada 5 qurilmada bir vaqtning o'zida ko'rish mumkin. Oilaviy rejimizda har bir foydalanuvchi o'z profilini boshqaradi.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

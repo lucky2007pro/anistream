@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Biz Haqimizda - AniStream</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0f0f13;
+            --bg-surface: #1a1a24;
+            --accent: #ff3366;
+            --accent-hover: #ff003c;
+            --text-light: #ffffff;
+            --text-dim: #8a8a9d;
+            --glass-bg: rgba(26, 26, 36, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-light); overflow-x: hidden; padding-top: 80px; }
+
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(15, 15, 19, 0.98); backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .nav-brand { font-size: 1.8rem; font-weight: 900; color: var(--text-light); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-brand span { color: var(--accent); }
+        .nav-menu { display: flex; gap: 35px; }
+        .nav-menu a { color: var(--text-light); text-decoration: none; font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; position: relative; transition: color 0.3s; }
+        .nav-menu a:hover { color: var(--accent); }
+        .nav-actions { display: flex; gap: 15px; }
+        .action-icon { background: transparent; border: none; color: var(--text-light); width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background 0.2s ease; font-size: 1.4rem; text-decoration: none; }
+        .action-icon:hover { background: rgba(255, 255, 255, 0.1); }
+        .profile-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); }
+        .profile-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
+
+        .hero-section { text-align: center; padding: 80px 5% 60px 5%; background: linear-gradient(135deg, rgba(255, 51, 102, 0.1) 0%, rgba(15, 15, 19, 0) 100%); }
+        .hero-title { font-size: 4rem; font-weight: 900; margin-bottom: 20px; }
+        .hero-title span { color: var(--accent); }
+        .hero-subtitle { font-size: 1.3rem; color: var(--text-dim); font-weight: 600; max-width: 700px; margin: 0 auto 40px auto; line-height: 1.6; }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 60px 5%; }
+        .section { margin-bottom: 80px; }
+        .section-title { font-size: 2.5rem; font-weight: 900; margin-bottom: 30px; text-align: center; }
+        .section-title span { color: var(--accent); }
+
+        .about-content { background: var(--bg-surface); border-radius: 20px; padding: 40px; border: 1px solid var(--glass-border); margin-bottom: 40px; }
+        .about-content p { font-size: 1.1rem; line-height: 1.8; color: #d1d1d6; margin-bottom: 20px; }
+
+        .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 25px; }
+        .feature-card { background: var(--bg-surface); border-radius: 16px; padding: 30px; border: 1px solid var(--glass-border); text-align: center; transition: all 0.3s; }
+        .feature-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 25px rgba(255, 51, 102, 0.2); }
+        .feature-icon { font-size: 3.5rem; margin-bottom: 20px; }
+        .feature-title { font-size: 1.3rem; font-weight: 900; margin-bottom: 12px; }
+        .feature-desc { font-size: 1rem; color: var(--text-dim); line-height: 1.6; }
+
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 25px; margin-bottom: 60px; }
+        .stat-card { background: var(--bg-surface); border-radius: 16px; padding: 30px; border: 1px solid var(--glass-border); text-align: center; }
+        .stat-number { font-size: 3rem; font-weight: 900; color: var(--accent); margin-bottom: 10px; }
+        .stat-label { font-size: 1rem; color: var(--text-dim); font-weight: 700; text-transform: uppercase; }
+
+        .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; }
+        .team-member { background: var(--bg-surface); border-radius: 16px; padding: 30px; border: 1px solid var(--glass-border); text-align: center; transition: all 0.3s; }
+        .team-member:hover { transform: translateY(-5px); border-color: var(--accent); }
+        .team-avatar { width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #ff8a00); margin: 0 auto 20px auto; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 900; }
+        .team-name { font-size: 1.3rem; font-weight: 900; margin-bottom: 5px; }
+        .team-role { color: var(--accent); font-size: 0.9rem; font-weight: 700; margin-bottom: 15px; }
+        .team-bio { font-size: 0.95rem; color: var(--text-dim); line-height: 1.6; }
+
+        @media (max-width: 768px) {
+            .nav-menu { display: none; }
+            .hero-title { font-size: 2.5rem; }
+            .hero-subtitle { font-size: 1.1rem; }
+            .section-title { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/" class="nav-brand">Ani<span>Stream</span></a>
+    <div class="nav-menu">
+        <a href="/catalog">Katalog</a>
+        <a href="/genres">Janrlar</a>
+        <a href="/schedule">Jadval</a>
+        <a href="/news">Yangiliklar</a>
+    </div>
+    <div class="nav-actions">
+        <a href="/search" class="action-icon">🔍</a>
+        <div class="action-icon">🔔</div>
+        <a href="/profile" class="action-icon profile-btn">👤</a>
+    </div>
+</nav>
+
+<div class="hero-section">
+    <h1 class="hero-title">Biz <span>Haqimizda</span></h1>
+    <p class="hero-subtitle">O'zbekistondagi eng yaxshi anime streaming platformasi. Biz anime sevuvchilar uchun yuqori sifatli kontent va ajoyib tajriba taqdim etamiz.</p>
+</div>
+
+<div class="container">
+    <div class="section">
+        <div class="about-content">
+            <p>AniStream 2024-yilda O'zbekistonda anime madaniyatini rivojlantirish va anime sevuvchilarga yuqori sifatli streaming xizmatini taqdim etish maqsadida tashkil etilgan.</p>
+
+            <p>Bizning missiyamiz - har bir anime muxlisiga o'z sevimli seriallarini yuqori sifatda, tez va qulay ko'rish imkoniyatini berish. Biz doimiy ravishda platformamizni yaxshilayotganimiz va yangi funksiyalar qo'shib turamiz.</p>
+
+            <p>AniStream jamoasi professional dasturchilar, dizaynerlar va anime mutaxassislaridan iborat. Biz foydalanuvchilarimizning fikr-mulohazalarini e'tiborga olamiz va platformani ularning ehtiyojlariga moslashtirish ustida ishlaymiz.</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Bizning <span>Afzalliklarimiz</span></h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🎬</div>
+                <h3 class="feature-title">Katta Kutubxona</h3>
+                <p class="feature-desc">1000+ anime seriallar va filmlar yuqori sifatda</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3 class="feature-title">Tez Yuklash</h3>
+                <p class="feature-desc">Maxsus serverlar orqali tezkor streaming</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3 class="feature-title">Responsive Dizayn</h3>
+                <p class="feature-desc">Har qanday qurilmada qulay ko'rish</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🌐</div>
+                <h3 class="feature-title">O'zbek tilida</h3>
+                <p class="feature-desc">To'liq o'zbekcha interfeys va subtitrlar</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔔</div>
+                <h3 class="feature-title">Bildirishnomalar</h3>
+                <p class="feature-desc">Yangi qismlar haqida xabardorlik</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💯</div>
+                <h3 class="feature-title">Bepul Kontent</h3>
+                <p class="feature-desc">Ko'plab anime bepul va reklamasiz</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Bizning <span>Statistika</span></h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number">1200+</div>
+                <div class="stat-label">Anime Seriallar</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">50K+</div>
+                <div class="stat-label">Foydalanuvchilar</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">15K+</div>
+                <div class="stat-label">Epizodlar</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Qo'llab-quvvatlash</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2 class="section-title">Bizning <span>Jamoa</span></h2>
+        <div class="team-grid">
+            <div class="team-member">
+                <div class="team-avatar">A</div>
+                <h3 class="team-name">Azizbek</h3>
+                <p class="team-role">Asoschisi & CEO</p>
+                <p class="team-bio">Anime ishqibozi va texnologiya mutaxassisi</p>
+            </div>
+            <div class="team-member">
+                <div class="team-avatar">S</div>
+                <h3 class="team-name">Sardor</h3>
+                <p class="team-role">Bosh Dasturchi</p>
+                <p class="team-bio">Full-stack developer va anime sevuvchi</p>
+            </div>
+            <div class="team-member">
+                <div class="team-avatar">N</div>
+                <h3 class="team-name">Nodira</h3>
+                <p class="team-role">Dizayner</p>
+                <p class="team-bio">UI/UX dizayner va anime sanati ixlosmandi</p>
+            </div>
+            <div class="team-member">
+                <div class="team-avatar">F</div>
+                <h3 class="team-name">Farrux</h3>
+                <p class="team-role">Kontent Menejeri</p>
+                <p class="team-bio">Anime mutaxassisi va tarjimon</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

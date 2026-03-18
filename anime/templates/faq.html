@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - AniStream</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0f0f13;
+            --bg-surface: #1a1a24;
+            --accent: #ff3366;
+            --accent-hover: #ff003c;
+            --text-light: #ffffff;
+            --text-dim: #8a8a9d;
+            --glass-bg: rgba(26, 26, 36, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-light); overflow-x: hidden; padding-top: 80px; }
+
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(15, 15, 19, 0.98); backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .nav-brand { font-size: 1.8rem; font-weight: 900; color: var(--text-light); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-brand span { color: var(--accent); }
+        .nav-menu { display: flex; gap: 35px; }
+        .nav-menu a { color: var(--text-light); text-decoration: none; font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; position: relative; transition: color 0.3s; }
+        .nav-menu a:hover { color: var(--accent); }
+        .nav-actions { display: flex; gap: 15px; }
+        .action-icon { background: transparent; border: none; color: var(--text-light); width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background 0.2s ease; font-size: 1.4rem; text-decoration: none; }
+        .action-icon:hover { background: rgba(255, 255, 255, 0.1); }
+        .profile-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); }
+        .profile-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
+
+        .container { max-width: 900px; margin: 0 auto; padding: 60px 5%; }
+        .page-header { text-align: center; margin-bottom: 60px; }
+        .page-title { font-size: 3.5rem; font-weight: 900; margin-bottom: 15px; }
+        .page-title span { color: var(--accent); }
+        .page-subtitle { color: var(--text-dim); font-size: 1.2rem; font-weight: 600; }
+
+        .faq-categories { display: flex; gap: 15px; justify-content: center; margin-bottom: 40px; flex-wrap: wrap; }
+        .category-btn { background: var(--bg-surface); border: 1px solid var(--glass-border); color: var(--text-dim); padding: 12px 25px; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.3s; }
+        .category-btn:hover, .category-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+        .faq-list { display: flex; flex-direction: column; gap: 15px; }
+        .faq-item { background: var(--bg-surface); border-radius: 16px; border: 1px solid var(--glass-border); overflow: hidden; transition: all 0.3s; }
+        .faq-item.active { border-color: var(--accent); }
+        .faq-question { padding: 25px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; transition: all 0.3s; }
+        .faq-question:hover { background: rgba(255, 51, 102, 0.05); }
+        .faq-question h3 { font-size: 1.2rem; font-weight: 800; flex: 1; }
+        .faq-icon { font-size: 1.5rem; color: var(--accent); transition: transform 0.3s; }
+        .faq-item.active .faq-icon { transform: rotate(180deg); }
+        .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+        .faq-answer-content { padding: 0 25px 25px 25px; }
+        .faq-answer-content p { font-size: 1.05rem; line-height: 1.8; color: var(--text-dim); }
+        .faq-item.active .faq-answer { max-height: 500px; }
+
+        @media (max-width: 768px) {
+            .nav-menu { display: none; }
+            .page-title { font-size: 2.5rem; }
+            .faq-categories { flex-direction: column; }
+            .category-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/" class="nav-brand">Ani<span>Stream</span></a>
+    <div class="nav-menu">
+        <a href="/catalog">Katalog</a>
+        <a href="/genres">Janrlar</a>
+        <a href="/schedule">Jadval</a>
+        <a href="/news">Yangiliklar</a>
+    </div>
+    <div class="nav-actions">
+        <a href="/search" class="action-icon">🔍</a>
+        <div class="action-icon">🔔</div>
+        <a href="/profile" class="action-icon profile-btn">👤</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">Savol-<span>Javoblar</span></h1>
+        <p class="page-subtitle">Tez-tez so'raladigan savollar va ularning javoblari</p>
+    </div>
+
+    <div class="faq-categories">
+        <button class="category-btn active">Barchasi</button>
+        <button class="category-btn">Hisobim</button>
+        <button class="category-btn">Tomosha qilish</button>
+        <button class="category-btn">Premium</button>
+        <button class="category-btn">Texnik</button>
+    </div>
+
+    <div class="faq-list">
+        <div class="faq-item" onclick="this.classList.toggle('active')">
+            <div class="faq-question">
+                <h3>AniStream bepulmi?</h3>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Ha, AniStream asosiy funksiyalari to'liq bepul. Ko'pgina anime seriallarni hech qanday to'lovsiz tomosha qilishingiz mumkin. Premium obuna qo'shimcha funksiyalar va reklamasiz tajriba uchun mavjud.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" onclick="this.classList.toggle('active')">
+            <div class="faq-question">
+                <h3>Qanday qilib ro'yxatdan o'tish mumkin?</h3>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Ro'yxatdan o'tish juda oson! Yuqori o'ng burchakdagi profil ikonkasini bosing va "Ro'yxatdan o'tish" tugmasini tanlang. Email yoki Google akkaunti orqali ro'yxatdan o'tishingiz mumkin.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" onclick="this.classList.toggle('active')">
+            <div class="faq-question">
+                <h3>Qanday qilib anime qidirishim mumkin?</h3>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Qidiruv ikonkasiga bosing va anime nomini kiriting. Shuningdek, katalog bo'limida turli filtrlar orqali (janr, yil, reyting) qidirishingiz mumkin.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" onclick="this.classList.toggle('active')">
+            <div class="faq-question">
+                <h3>Video sifatini qanday o'zgartirish mumkin?</h3>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Pleyer ochiq bo'lganda, sozlamalar (⚙️) ikonkasiga bosing. U yerda video sifatini tanlashingiz mumkin: 1080p, 720p, 480p yoki avtomatik.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" onclick="this.classList.toggle('active')">
+            <div class="faq-question">
+                <h3>Premium obunaning afzalliklari nima?</h3>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Premium obuna bilan: reklamasiz ko'rish, yuqori sifat (Full HD, 4K), offline yuklab olish, barcha anime seriallarga kirish va eksklyuziv kontent mavjud.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" onclick="this.classList.toggle('active')">
+            <div class="faq-question">
+                <h3>Premium obuna narxi qancha?</h3>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Oylik obuna - 29,000 so'm. Yillik obuna - 290,000 so'm (2 oy bepul!). Birinchi 7 kun bepul sinov davrni taklif qilamiz.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" onclick="this.classList.toggle('active')">
+            <div class="faq-question">
+                <h3>Animeni sevimlilar ro'yxatiga qanday qo'shish mumkin?</h3>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Anime sahifasida yurak (❤️) ikonkasini bosing. Sevimlilar ro'yxatiga qo'shiladi va profilingizdan ko'rishingiz mumkin.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" onclick="this.classList.toggle('active')">
+            <div class="faq-question">
+                <h3>Yangi qismlar qachon chiqadi?</h3>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Har bir anime o'z jadvaliga ega. "Jadval" bo'limida haftalik yangi qismlar jadvali bilan tanishishingiz mumkin. Bildirishnomalarni yoqib qo'ysangiz, yangi qism chiqqanda xabar olasiz.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" onclick="this.classList.toggle('active')">
+            <div class="faq-question">
+                <h3>Mobil ilovangiz bormi?</h3>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Hozircha mobil ilovamiz yo'q, lekin saytimiz to'liq responsive va mobil qurilmalarda mukammal ishlaydi. Yaqin kelajakda Android va iOS ilovalarini chiqarishni rejalashtirmoqdamiz.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" onclick="this.classList.toggle('active')">
+            <div class="faq-question">
+                <h3>Parolni qanday tiklash mumkin?</h3>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Kirish sahifasida "Parolni unutdingizmi?" havolasini bosing. Ro'yxatdan o'tishda ko'rsatgan email manzilingizga parolni tiklash havolasi yuboriladi.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" onclick="this.classList.toggle('active')">
+            <div class="faq-question">
+                <h3>Subtitlar qaysi tillarda mavjud?</h3>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Asosan o'zbek va rus tilida subtitlar mavjud. Ba'zi mashhur animelarda ingliz tili ham bo'lishi mumkin. Subtitlarni pleyer sozlamalaridan yoqish/o'chirish mumkin.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-item" onclick="this.classList.toggle('active')">
+            <div class="faq-question">
+                <h3>Texnik muammo bo'lsa nima qilish kerak?</h3>
+                <span class="faq-icon">▼</span>
+            </div>
+            <div class="faq-answer">
+                <div class="faq-answer-content">
+                    <p>Avval sahifani yangilab ko'ring. Agar muammo davom etsa, brauzer keshini tozalang. Hali ham hal bo'lmasa, bizning qo'llab-quvvatlash xizmatiga murojaat qiling: support@anistream.uz</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

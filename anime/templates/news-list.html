@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yangiliklar - AniStream</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0f0f13;
+            --bg-surface: #1a1a24;
+            --accent: #ff3366;
+            --accent-hover: #ff003c;
+            --text-light: #ffffff;
+            --text-dim: #8a8a9d;
+            --glass-bg: rgba(26, 26, 36, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-light); overflow-x: hidden; padding-top: 80px; }
+
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(15, 15, 19, 0.98); backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .nav-brand { font-size: 1.8rem; font-weight: 900; color: var(--text-light); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-brand span { color: var(--accent); }
+        .nav-menu { display: flex; gap: 35px; }
+        .nav-menu a { color: var(--text-light); text-decoration: none; font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; position: relative; transition: color 0.3s; }
+        .nav-menu a:hover { color: var(--accent); }
+        .nav-menu a::after { content: ''; position: absolute; bottom: -5px; left: 0; width: 0%; height: 2px; background: var(--accent); transition: width 0.3s ease; }
+        .nav-menu a:hover::after { width: 100%; }
+        .nav-menu a.active { color: var(--accent); }
+        .nav-menu a.active::after { width: 100%; }
+        .nav-actions { display: flex; gap: 15px; }
+        .action-icon { background: transparent; border: none; color: var(--text-light); width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background 0.2s ease; font-size: 1.4rem; text-decoration: none; }
+        .action-icon:hover { background: rgba(255, 255, 255, 0.1); }
+        .profile-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); }
+        .profile-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 5%; }
+        .page-header { margin-bottom: 40px; text-align: center; }
+        .page-title { font-size: 3.5rem; font-weight: 900; margin-bottom: 15px; }
+        .page-title span { color: var(--accent); }
+        .page-subtitle { color: var(--text-dim); font-size: 1.2rem; font-weight: 600; }
+
+        .featured-news { background: var(--bg-surface); border-radius: 20px; overflow: hidden; margin-bottom: 50px; border: 1px solid var(--glass-border); position: relative; height: 500px; cursor: pointer; transition: all 0.3s; }
+        .featured-news:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(255, 51, 102, 0.3); }
+        .featured-bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+        .featured-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,15,19,0.95) 0%, rgba(15,15,19,0.6) 50%, transparent 100%); }
+        .featured-content { position: absolute; bottom: 0; left: 0; right: 0; padding: 40px; z-index: 10; }
+        .featured-badge { display: inline-block; background: var(--accent); color: white; padding: 8px 15px; border-radius: 8px; font-size: 0.8rem; font-weight: 900; margin-bottom: 15px; letter-spacing: 1px; }
+        .featured-title { font-size: 2.5rem; font-weight: 900; margin-bottom: 15px; line-height: 1.2; }
+        .featured-desc { font-size: 1.1rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 20px; }
+        .featured-meta { display: flex; gap: 20px; font-size: 0.9rem; color: var(--text-dim); font-weight: 600; }
+
+        .news-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 25px; margin-bottom: 50px; }
+        .news-card { background: var(--bg-surface); border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border); transition: all 0.3s; cursor: pointer; text-decoration: none; color: inherit; display: block; }
+        .news-card:hover { transform: translateY(-5px); border-color: var(--accent); box-shadow: 0 10px 25px rgba(255, 51, 102, 0.2); }
+        .news-thumb { width: 100%; height: 220px; background-size: cover; background-position: center; position: relative; }
+        .news-badge { position: absolute; top: 15px; left: 15px; background: var(--accent); color: white; padding: 6px 12px; border-radius: 6px; font-size: 0.75rem; font-weight: 900; }
+        .news-content { padding: 25px; }
+        .news-title { font-size: 1.3rem; font-weight: 900; margin-bottom: 12px; line-height: 1.3; transition: color 0.3s; }
+        .news-card:hover .news-title { color: var(--accent); }
+        .news-excerpt { font-size: 0.95rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 15px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .news-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-dim); font-weight: 600; }
+
+        @media (max-width: 768px) {
+            .nav-menu { display: none; }
+            .page-title { font-size: 2.5rem; }
+            .featured-news { height: 400px; }
+            .featured-title { font-size: 1.8rem; }
+            .news-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/" class="nav-brand">Ani<span>Stream</span></a>
+    <div class="nav-menu">
+        <a href="/catalog">Katalog</a>
+        <a href="/genres">Janrlar</a>
+        <a href="/schedule">Jadval</a>
+        <a href="/news" class="active">Yangiliklar</a>
+    </div>
+    <div class="nav-actions">
+        <a href="/search" class="action-icon">🔍</a>
+        <div class="action-icon">🔔</div>
+        <a href="/profile" class="action-icon profile-btn">👤</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">Anime <span>Yangiliklari</span></h1>
+        <p class="page-subtitle">Eng so'nggi yangiliklardan xabardor bo'ling</p>
+    </div>
+
+    <a href="/news/1" class="featured-news">
+        <div class="featured-bg" style="background-image: url('https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?q=80&w=2070');"></div>
+        <div class="featured-overlay"></div>
+        <div class="featured-content">
+            <span class="featured-badge">ASOSIY YANGILIK</span>
+            <h2 class="featured-title">Chainsaw Man 2-fasl rasmiy tasdiqlandi!</h2>
+            <p class="featured-desc">MAPPA studiyasi Chainsaw Man 2-fasl ishlab chiqarilishini rasmiy e'lon qildi. Yangi fasl 2024-yil bahorida efirga chiqishi kutilmoqda.</p>
+            <div class="featured-meta">
+                <span>📅 3 kun oldin</span>
+                <span>👁️ 12.5K ko'rildi</span>
+                <span>💬 342 izoh</span>
+            </div>
+        </div>
+    </a>
+
+    <div class="news-grid">
+        <a href="/news/2" class="news-card">
+            <div class="news-thumb" style="background-image: url('https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2070');">
+                <span class="news-badge">YANGI</span>
+            </div>
+            <div class="news-content">
+                <h3 class="news-title">Jujutsu Kaisen yangi film e'lon qilindi</h3>
+                <p class="news-excerpt">Jujutsu Kaisen franchise uchun yangi original film ishlatilib chiqilayotgani ma'lum bo'ldi. Film 2024-yil yozida chiqishi rejalashtirilgan.</p>
+                <div class="news-meta">
+                    <span>📅 1 hafta oldin</span>
+                    <span>👁️ 8.2K</span>
+                </div>
+            </div>
+        </a>
+
+        <a href="/news/3" class="news-card">
+            <div class="news-thumb" style="background-image: url('https://images.unsplash.com/photo-1606571231601-e6c4b0676f71?q=80&w=2070');">
+                <span class="news-badge">TREND</span>
+            </div>
+            <div class="news-content">
+                <h3 class="news-title">Attack on Titan finaliga rekord reytinglar</h3>
+                <p class="news-excerpt">Attack on Titan seriyasining yakuniy qismi tarihdagi eng ko'p ko'rilgan anime epizodlaridan biriga aylandi.</p>
+                <div class="news-meta">
+                    <span>📅 2 hafta oldin</span>
+                    <span>👁️ 15.8K</span>
+                </div>
+            </div>
+        </a>
+
+        <a href="/news/4" class="news-card">
+            <div class="news-thumb" style="background-image: url('https://images.unsplash.com/photo-1618944913480-b67ee16d7b77?q=80&w=2070');">
+                <span class="news-badge">SHARHLAR</span>
+            </div>
+            <div class="news-content">
+                <h3 class="news-title">Demon Slayer movie box office rekordlari</h3>
+                <p class="news-excerpt">Demon Slayer: Kimetsu no Yaiba filmi global box office'da yangi rekordlarga erishdi va $500M ni ortiq oshirdi.</p>
+                <div class="news-meta">
+                    <span>📅 3 hafta oldin</span>
+                    <span>👁️ 6.5K</span>
+                </div>
+            </div>
+        </a>
+
+        <a href="/news/5" class="news-card">
+            <div class="news-thumb" style="background-image: url('https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=2074');">
+                <span class="news-badge">ANONS</span>
+            </div>
+            <div class="news-content">
+                <h3 class="news-title">One Piece 25-yilligiga maxsus anons</h3>
+                <p class="news-excerpt">One Piece 25-yillik yubileyiga bag'ishlangan maxsus loyiha va animatsiya anons qilindi.</p>
+                <div class="news-meta">
+                    <span>📅 1 oy oldin</span>
+                    <span>👁️ 11.3K</span>
+                </div>
+            </div>
+        </a>
+
+        <a href="/news/6" class="news-card">
+            <div class="news-thumb" style="background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1925');">
+                <span class="news-badge">INTERVYU</span>
+            </div>
+            <div class="news-content">
+                <h3 class="news-title">Makoto Shinkai yangi proyekti haqida</h3>
+                <p class="news-excerpt">Mashhur rejissyor Makoto Shinkai o'zining keyingi proyekti va ilhom manbalari haqida gapirdi.</p>
+                <div class="news-meta">
+                    <span>📅 1 oy oldin</span>
+                    <span>👁️ 4.7K</span>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

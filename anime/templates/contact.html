@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bog'lanish - AniStream</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0f0f13;
+            --bg-surface: #1a1a24;
+            --accent: #ff3366;
+            --accent-hover: #ff003c;
+            --text-light: #ffffff;
+            --text-dim: #8a8a9d;
+            --glass-bg: rgba(26, 26, 36, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-light); overflow-x: hidden; padding-top: 80px; }
+
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(15, 15, 19, 0.98); backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .nav-brand { font-size: 1.8rem; font-weight: 900; color: var(--text-light); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-brand span { color: var(--accent); }
+        .nav-menu { display: flex; gap: 35px; }
+        .nav-menu a { color: var(--text-light); text-decoration: none; font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; position: relative; transition: color 0.3s; }
+        .nav-menu a:hover { color: var(--accent); }
+        .nav-actions { display: flex; gap: 15px; }
+        .action-icon { background: transparent; border: none; color: var(--text-light); width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background 0.2s ease; font-size: 1.4rem; text-decoration: none; }
+        .action-icon:hover { background: rgba(255, 255, 255, 0.1); }
+        .profile-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); }
+        .profile-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 60px 5%; }
+        .page-header { text-align: center; margin-bottom: 60px; }
+        .page-title { font-size: 3.5rem; font-weight: 900; margin-bottom: 15px; }
+        .page-title span { color: var(--accent); }
+        .page-subtitle { color: var(--text-dim); font-size: 1.2rem; font-weight: 600; }
+
+        .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; }
+        .contact-form { background: var(--bg-surface); border-radius: 20px; padding: 40px; border: 1px solid var(--glass-border); }
+        .form-title { font-size: 1.8rem; font-weight: 900; margin-bottom: 25px; }
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 0.9rem; font-weight: 700; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .form-input { width: 100%; background: var(--bg-base); border: 1px solid var(--glass-border); border-radius: 10px; padding: 12px 15px; color: var(--text-light); font-size: 1rem; outline: none; transition: border-color 0.3s; }
+        .form-input:focus { border-color: var(--accent); }
+        .form-textarea { resize: vertical; min-height: 150px; }
+        .btn-submit { background: var(--accent); color: white; border: none; border-radius: 10px; padding: 15px 40px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: all 0.3s; width: 100%; text-transform: uppercase; }
+        .btn-submit:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 51, 102, 0.4); }
+
+        .contact-info { display: flex; flex-direction: column; gap: 25px; }
+        .info-card { background: var(--bg-surface); border-radius: 16px; padding: 30px; border: 1px solid var(--glass-border); transition: all 0.3s; }
+        .info-card:hover { transform: translateY(-5px); border-color: var(--accent); }
+        .info-icon { font-size: 2.5rem; margin-bottom: 15px; }
+        .info-title { font-size: 1.3rem; font-weight: 900; margin-bottom: 10px; }
+        .info-text { font-size: 1rem; color: var(--text-dim); line-height: 1.6; }
+        .info-text a { color: var(--accent); text-decoration: none; transition: color 0.3s; }
+        .info-text a:hover { color: var(--accent-hover); }
+
+        .social-links { display: flex; gap: 15px; margin-top: 20px; }
+        .social-btn { background: var(--bg-base); border: 1px solid var(--glass-border); color: var(--text-light); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; transition: all 0.3s; text-decoration: none; }
+        .social-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-3px); }
+
+        @media (max-width: 968px) {
+            .nav-menu { display: none; }
+            .page-title { font-size: 2.5rem; }
+            .contact-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/" class="nav-brand">Ani<span>Stream</span></a>
+    <div class="nav-menu">
+        <a href="/catalog">Katalog</a>
+        <a href="/genres">Janrlar</a>
+        <a href="/schedule">Jadval</a>
+        <a href="/news">Yangiliklar</a>
+    </div>
+    <div class="nav-actions">
+        <a href="/search" class="action-icon">🔍</a>
+        <div class="action-icon">🔔</div>
+        <a href="/profile" class="action-icon profile-btn">👤</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">Biz bilan <span>Bog'laning</span></h1>
+        <p class="page-subtitle">Savollar, takliflar yoki muammolaringiz bo'lsa, biz bilan bog'laning</p>
+    </div>
+
+    <div class="contact-grid">
+        <div class="contact-form">
+            <h2 class="form-title">Xabar Yuborish</h2>
+            <form>
+                <div class="form-group">
+                    <label class="form-label">Ismingiz</label>
+                    <input type="text" class="form-input" placeholder="Ismingizni kiriting" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" placeholder="Email manzilingiz" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Mavzu</label>
+                    <select class="form-input" required>
+                        <option value="">Mavzuni tanlang</option>
+                        <option value="support">Texnik yordam</option>
+                        <option value="content">Kontent haqida</option>
+                        <option value="suggestion">Taklif</option>
+                        <option value="partnership">Hamkorlik</option>
+                        <option value="other">Boshqa</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Xabar</label>
+                    <textarea class="form-input form-textarea" placeholder="Xabaringizni yozing..." required></textarea>
+                </div>
+
+                <button type="submit" class="btn-submit">Yuborish</button>
+            </form>
+        </div>
+
+        <div class="contact-info">
+            <div class="info-card">
+                <div class="info-icon">📧</div>
+                <h3 class="info-title">Email</h3>
+                <p class="info-text">
+                    <a href="mailto:support@anistream.uz">support@anistream.uz</a><br>
+                    <a href="mailto:info@anistream.uz">info@anistream.uz</a>
+                </p>
+            </div>
+
+            <div class="info-card">
+                <div class="info-icon">💬</div>
+                <h3 class="info-title">Telegram</h3>
+                <p class="info-text">
+                    Bizning rasmiy Telegram guruhimizga qo'shiling<br>
+                    <a href="https://t.me/anistream_uz" target="_blank">@anistream_uz</a>
+                </p>
+            </div>
+
+            <div class="info-card">
+                <div class="info-icon">🕐</div>
+                <h3 class="info-title">Ish Vaqti</h3>
+                <p class="info-text">
+                    Dushanba - Yakshanba<br>
+                    09:00 - 22:00 (GMT+5)
+                </p>
+            </div>
+
+            <div class="info-card">
+                <div class="info-icon">🌐</div>
+                <h3 class="info-title">Ijtimoiy Tarmoqlar</h3>
+                <div class="social-links">
+                    <a href="#" class="social-btn" title="Telegram">📱</a>
+                    <a href="#" class="social-btn" title="Instagram">📷</a>
+                    <a href="#" class="social-btn" title="YouTube">📹</a>
+                    <a href="#" class="social-btn" title="Discord">💬</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

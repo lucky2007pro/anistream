@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ko'rish Tarixi - AniStream</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0f0f13;
+            --bg-surface: #1a1a24;
+            --accent: #ff3366;
+            --accent-hover: #ff003c;
+            --text-light: #ffffff;
+            --text-dim: #8a8a9d;
+            --glass-bg: rgba(26, 26, 36, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-light); overflow-x: hidden; padding-top: 80px; }
+
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(15, 15, 19, 0.98); backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .nav-brand { font-size: 1.8rem; font-weight: 900; color: var(--text-light); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-brand span { color: var(--accent); }
+        .nav-menu { display: flex; gap: 35px; }
+        .nav-menu a { color: var(--text-light); text-decoration: none; font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; position: relative; transition: color 0.3s; }
+        .nav-menu a:hover { color: var(--accent); }
+        .nav-actions { display: flex; gap: 15px; }
+        .action-icon { background: transparent; border: none; color: var(--text-light); width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background 0.2s ease; font-size: 1.4rem; text-decoration: none; }
+        .action-icon:hover { background: rgba(255, 255, 255, 0.1); }
+        .profile-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); }
+        .profile-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 5%; }
+        .page-header { margin-bottom: 40px; display: flex; justify-content: space-between; align-items: center; }
+        .page-title { font-size: 3rem; font-weight: 900; }
+        .page-title span { color: var(--accent); }
+        .clear-btn { background: rgba(255, 59, 48, 0.1); color: #ff3b30; border: 1px solid rgba(255, 59, 48, 0.3); border-radius: 10px; padding: 12px 25px; font-weight: 800; font-size: 0.95rem; cursor: pointer; transition: all 0.3s; }
+        .clear-btn:hover { background: #ff3b30; color: white; border-color: #ff3b30; }
+
+        .history-list { display: flex; flex-direction: column; gap: 20px; margin-bottom: 50px; }
+        .history-item { background: var(--bg-surface); border-radius: 16px; overflow: hidden; border: 1px solid var(--glass-border); transition: all 0.3s; display: flex; gap: 20px; padding: 20px; position: relative; }
+        .history-item:hover { border-color: var(--accent); box-shadow: 0 10px 25px rgba(255, 51, 102, 0.2); transform: translateY(-2px); }
+        .history-thumb { width: 140px; height: 200px; border-radius: 12px; background-size: cover; background-position: center; position: relative; flex-shrink: 0; }
+        .play-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; align-items: center; justify-content: center; font-size: 2.5rem; opacity: 0; transition: opacity 0.3s; cursor: pointer; }
+        .history-item:hover .play-overlay { opacity: 1; }
+        .history-info { flex: 1; display: flex; flex-direction: column; gap: 12px; }
+        .history-title { font-size: 1.5rem; font-weight: 900; color: var(--text-light); }
+        .history-title a { color: inherit; text-decoration: none; transition: color 0.3s; }
+        .history-title a:hover { color: var(--accent); }
+        .history-episode { color: var(--accent); font-size: 0.95rem; font-weight: 700; }
+        .history-meta { display: flex; gap: 15px; color: var(--text-dim); font-size: 0.9rem; font-weight: 600; }
+        .history-meta span { display: flex; align-items: center; gap: 5px; }
+        .progress-bar-container { background: rgba(255,255,255,0.1); height: 6px; border-radius: 3px; overflow: hidden; margin-top: auto; }
+        .progress-bar-fill { background: var(--accent); height: 100%; border-radius: 3px; transition: width 0.3s; }
+        .progress-text { font-size: 0.85rem; color: var(--text-dim); font-weight: 700; margin-top: 5px; }
+        .delete-btn { position: absolute; top: 20px; right: 20px; background: rgba(0,0,0,0.6); border: none; color: white; width: 35px; height: 35px; border-radius: 50%; cursor: pointer; font-size: 1.1rem; transition: all 0.3s; }
+        .delete-btn:hover { background: #ff3b30; transform: scale(1.1); }
+
+        @media (max-width: 768px) {
+            .nav-menu { display: none; }
+            .page-header { flex-direction: column; align-items: flex-start; gap: 20px; }
+            .page-title { font-size: 2rem; }
+            .history-item { flex-direction: column; }
+            .history-thumb { width: 100%; height: 250px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/" class="nav-brand">Ani<span>Stream</span></a>
+    <div class="nav-menu">
+        <a href="/catalog">Katalog</a>
+        <a href="/genres">Janrlar</a>
+        <a href="/schedule">Jadval</a>
+        <a href="/news">Yangiliklar</a>
+    </div>
+    <div class="nav-actions">
+        <a href="/search" class="action-icon">🔍</a>
+        <div class="action-icon">🔔</div>
+        <a href="/profile" class="action-icon profile-btn">👤</a>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">Ko'rish <span>Tarixi</span></h1>
+        <button class="clear-btn">BARCHASINI O'CHIRISH</button>
+    </div>
+
+    <div class="history-list">
+        <div class="history-item">
+            <button class="delete-btn">✕</button>
+            <div class="history-thumb" style="background-image: url('https://cdn.myanimelist.net/images/anime/1208/94745.jpg');">
+                <div class="play-overlay">▶</div>
+            </div>
+            <div class="history-info">
+                <h3 class="history-title"><a href="/detail/1">Kimetsu no Yaiba</a></h3>
+                <div class="history-episode">12-qism: Tanjiro va Zenitsu</div>
+                <div class="history-meta">
+                    <span>🕒 2 soat oldin</span>
+                    <span>⭐ 8.9</span>
+                    <span>📅 2019</span>
+                </div>
+                <div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width: 65%;"></div>
+                    </div>
+                    <div class="progress-text">65% ko'rildi (15:32 / 23:45)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-item">
+            <button class="delete-btn">✕</button>
+            <div class="history-thumb" style="background-image: url('https://cdn.myanimelist.net/images/anime/1337/99013.jpg');">
+                <div class="play-overlay">▶</div>
+            </div>
+            <div class="history-info">
+                <h3 class="history-title"><a href="/detail/2">Shingeki no Kyojin</a></h3>
+                <div class="history-episode">8-qism: Qasos</div>
+                <div class="history-meta">
+                    <span>🕒 5 soat oldin</span>
+                    <span>⭐ 9.2</span>
+                    <span>📅 2013</span>
+                </div>
+                <div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width: 100%;"></div>
+                    </div>
+                    <div class="progress-text">100% ko'rildi (24:00 / 24:00)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-item">
+            <button class="delete-btn">✕</button>
+            <div class="history-thumb" style="background-image: url('https://cdn.myanimelist.net/images/anime/1286/99889.jpg');">
+                <div class="play-overlay">▶</div>
+            </div>
+            <div class="history-info">
+                <h3 class="history-title"><a href="/detail/3">Jujutsu Kaisen</a></h3>
+                <div class="history-episode">15-qism: Kyoto Event</div>
+                <div class="history-meta">
+                    <span>🕒 1 kun oldin</span>
+                    <span>⭐ 8.7</span>
+                    <span>📅 2020</span>
+                </div>
+                <div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width: 42%;"></div>
+                    </div>
+                    <div class="progress-text">42% ko'rildi (10:05 / 23:50)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="history-item">
+            <button class="delete-btn">✕</button>
+            <div class="history-thumb" style="background-image: url('https://cdn.myanimelist.net/images/anime/1988/117775.jpg');">
+                <div class="play-overlay">▶</div>
+            </div>
+            <div class="history-info">
+                <h3 class="history-title"><a href="/detail/4">Spy x Family</a></h3>
+                <div class="history-episode">22-qism: Oilaviy sayohat</div>
+                <div class="history-meta">
+                    <span>🕒 2 kun oldin</span>
+                    <span>⭐ 9.1</span>
+                    <span>📅 2022</span>
+                </div>
+                <div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" style="width: 88%;"></div>
+                    </div>
+                    <div class="progress-text">88% ko'rildi (20:15 / 23:00)</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

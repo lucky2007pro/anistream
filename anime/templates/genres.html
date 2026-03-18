@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Janrlar - AniStream</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-base: #0f0f13;
+            --bg-surface: #1a1a24;
+            --accent: #ff3366;
+            --accent-hover: #ff003c;
+            --text-light: #ffffff;
+            --text-dim: #8a8a9d;
+            --glass-bg: rgba(26, 26, 36, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-light);
+            overflow-x: hidden;
+            padding-top: 80px;
+        }
+
+        /* ----- NAVBAR ----- */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(15, 15, 19, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+
+        .nav-brand {
+            font-size: 1.8rem;
+            font-weight: 900;
+            color: var(--text-light);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-brand span {
+            color: var(--accent);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 35px;
+        }
+
+        .nav-menu a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .nav-menu a:hover {
+            color: var(--accent);
+        }
+
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0%;
+            height: 2px;
+            background: var(--accent);
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover::after {
+            width: 100%;
+        }
+
+        .nav-menu a.active {
+            color: var(--accent);
+        }
+
+        .nav-menu a.active::after {
+            width: 100%;
+        }
+
+        .nav-actions {
+            display: flex;
+            gap: 15px;
+        }
+
+        .action-icon {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            font-size: 1.4rem;
+            text-decoration: none;
+        }
+
+        .action-icon:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .profile-btn {
+           background: var(--glass-bg);
+           border: 1px solid var(--glass-border);
+        }
+        .profile-btn:hover {
+             background: var(--accent);
+             border-color: var(--accent);
+             transform: translateY(-2px);
+        }
+
+        /* ----- CONTAINER ----- */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 40px 5%;
+        }
+
+        /* ----- PAGE HEADER ----- */
+        .page-header {
+            margin-bottom: 50px;
+            text-align: center;
+        }
+
+        .page-title {
+            font-size: 3.5rem;
+            font-weight: 900;
+            margin-bottom: 15px;
+        }
+
+        .page-title span {
+            color: var(--accent);
+        }
+
+        .page-subtitle {
+            color: var(--text-dim);
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* ----- GENRES GRID ----- */
+        .genres-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .genre-card {
+            position: relative;
+            height: 180px;
+            border-radius: 16px;
+            overflow: hidden;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            border: 2px solid transparent;
+            transition: all 0.4s ease;
+        }
+
+        .genre-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg,
+                rgba(255, 51, 102, 0.8) 0%,
+                rgba(138, 35, 135, 0.8) 50%,
+                rgba(15, 15, 19, 0.9) 100%);
+            transition: all 0.4s ease;
+        }
+
+        .genre-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--accent);
+            box-shadow: 0 15px 40px rgba(255, 51, 102, 0.4);
+        }
+
+        .genre-card:hover::before {
+            background: linear-gradient(135deg,
+                var(--accent) 0%,
+                rgba(255, 51, 102, 0.9) 100%);
+        }
+
+        .genre-bg {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.2;
+            transition: all 0.4s ease;
+        }
+
+        .genre-card:hover .genre-bg {
+            transform: scale(1.1);
+            opacity: 0.3;
+        }
+
+        .genre-content {
+            position: relative;
+            z-index: 10;
+            padding: 25px;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .genre-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .genre-name {
+            font-size: 1.8rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 5px;
+        }
+
+        .genre-count {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* ----- GENRE COLORS ----- */
+        .genre-card:nth-child(1)::before {
+            background: linear-gradient(135deg, #ff3366 0%, #ff8a00 100%);
+        }
+        .genre-card:nth-child(2)::before {
+            background: linear-gradient(135deg, #8e2de2 0%, #4a00e0 100%);
+        }
+        .genre-card:nth-child(3)::before {
+            background: linear-gradient(135deg, #00c853 0%, #00bfa5 100%);
+        }
+        .genre-card:nth-child(4)::before {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+        }
+        .genre-card:nth-child(5)::before {
+            background: linear-gradient(135deg, #ffc107 0%, #ff9800 100%);
+        }
+        .genre-card:nth-child(6)::before {
+            background: linear-gradient(135deg, #00bcd4 0%, #2196f3 100%);
+        }
+        .genre-card:nth-child(7)::before {
+            background: linear-gradient(135deg, #673ab7 0%, #512da8 100%);
+        }
+        .genre-card:nth-child(8)::before {
+            background: linear-gradient(135deg, #e91e63 0%, #c2185b 100%);
+        }
+        .genre-card:nth-child(9)::before {
+            background: linear-gradient(135deg, #009688 0%, #00796b 100%);
+        }
+        .genre-card:nth-child(10)::before {
+            background: linear-gradient(135deg, #ff5722 0%, #f44336 100%);
+        }
+        .genre-card:nth-child(11)::before {
+            background: linear-gradient(135deg, #3f51b5 0%, #303f9f 100%);
+        }
+        .genre-card:nth-child(12)::before {
+            background: linear-gradient(135deg, #795548 0%, #5d4037 100%);
+        }
+
+        /* ----- RESPONSIVE ----- */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .page-title {
+                font-size: 2.5rem;
+            }
+
+            .genres-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 15px;
+            }
+
+            .genre-card {
+                height: 150px;
+            }
+
+            .genre-name {
+                font-size: 1.4rem;
+            }
+
+            .genre-icon {
+                font-size: 2.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/" class="nav-brand">Ani<span>Stream</span></a>
+
+    <div class="nav-menu">
+        <a href="/catalog">Katalog</a>
+        <a href="/genres" class="active">Janrlar</a>
+        <a href="/schedule">Jadval</a>
+        <a href="/news">Yangiliklar</a>
+    </div>
+
+    <div class="nav-actions">
+        <a href="/search" class="action-icon">🔍</a>
+        <div class="action-icon">🔔</div>
+        <div class="action-icon profile-btn">👤</div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="page-header">
+        <h1 class="page-title">Anime <span>Janrlari</span></h1>
+        <p class="page-subtitle">O'zingizga yoqqan janrni tanlang va kashf eting</p>
+    </div>
+
+    <div class="genres-grid">
+        <a href="/catalog?genre=action" class="genre-card">
+            <div class="genre-bg" style="background-image: url('https://images.unsplash.com/photo-1509347528160-9a9e33742cdb?q=80&w=2070');"></div>
+            <div class="genre-content">
+                <div class="genre-icon">⚔️</div>
+                <div>
+                    <div class="genre-name">Action</div>
+                    <div class="genre-count">586 ta anime</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="/catalog?genre=adventure" class="genre-card">
+            <div class="genre-bg" style="background-image: url('https://images.unsplash.com/photo-1506905925346-21bda4d32df4?q=80&w=2070');"></div>
+            <div class="genre-content">
+                <div class="genre-icon">🗺️</div>
+                <div>
+                    <div class="genre-name">Adventure</div>
+                    <div class="genre-count">412 ta anime</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="/catalog?genre=comedy" class="genre-card">
+            <div class="genre-bg" style="background-image: url('https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?q=80&w=2070');"></div>
+            <div class="genre-content">
+                <div class="genre-icon">😂</div>
+                <div>
+                    <div class="genre-name">Comedy</div>
+                    <div class="genre-count">324 ta anime</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="/catalog?genre=drama" class="genre-card">
+            <div class="genre-bg" style="background-image: url('https://images.unsplash.com/photo-1478720568477-152d9b164e26?q=80&w=2070');"></div>
+            <div class="genre-content">
+                <div class="genre-icon">🎭</div>
+                <div>
+                    <div class="genre-name">Drama</div>
+                    <div class="genre-count">498 ta anime</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="/catalog?genre=fantasy" class="genre-card">
+            <div class="genre-bg" style="background-image: url('https://images.unsplash.com/photo-1518588786481-04e45f2e45f7?q=80&w=2070');"></div>
+            <div class="genre-content">
+                <div class="genre-icon">🔮</div>
+                <div>
+                    <div class="genre-name">Fantasy</div>
+                    <div class="genre-count">672 ta anime</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="/catalog?genre=romance" class="genre-card">
+            <div class="genre-bg" style="background-image: url('https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=2069');"></div>
+            <div class="genre-content">
+                <div class="genre-icon">💕</div>
+                <div>
+                    <div class="genre-name">Romance</div>
+                    <div class="genre-count">389 ta anime</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="/catalog?genre=scifi" class="genre-card">
+            <div class="genre-bg" style="background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072');"></div>
+            <div class="genre-content">
+                <div class="genre-icon">🚀</div>
+                <div>
+                    <div class="genre-name">Sci-Fi</div>
+                    <div class="genre-count">234 ta anime</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="/catalog?genre=horror" class="genre-card">
+            <div class="genre-bg" style="background-image: url('https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=2047');"></div>
+            <div class="genre-content">
+                <div class="genre-icon">👻</div>
+                <div>
+                    <div class="genre-name">Horror</div>
+                    <div class="genre-count">156 ta anime</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="/catalog?genre=mystery" class="genre-card">
+            <div class="genre-bg" style="background-image: url('https://images.unsplash.com/photo-1516339901601-2e1b62dc0c45?q=80&w=2071');"></div>
+            <div class="genre-content">
+                <div class="genre-icon">🔍</div>
+                <div>
+                    <div class="genre-name">Mystery</div>
+                    <div class="genre-count">287 ta anime</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="/catalog?genre=sports" class="genre-card">
+            <div class="genre-bg" style="background-image: url('https://images.unsplash.com/photo-1461896836934-ffe607ba8211?q=80&w=2070');"></div>
+            <div class="genre-content">
+                <div class="genre-icon">⚽</div>
+                <div>
+                    <div class="genre-name">Sports</div>
+                    <div class="genre-count">198 ta anime</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="/catalog?genre=supernatural" class="genre-card">
+            <div class="genre-bg" style="background-image: url('https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=2070');"></div>
+            <div class="genre-content">
+                <div class="genre-icon">✨</div>
+                <div>
+                    <div class="genre-name">Supernatural</div>
+                    <div class="genre-count">421 ta anime</div>
+                </div>
+            </div>
+        </a>
+
+        <a href="/catalog?genre=slice-of-life" class="genre-card">
+            <div class="genre-bg" style="background-image: url('https://images.unsplash.com/photo-1506126613408-eca07ce68773?q=80&w=2099');"></div>
+            <div class="genre-content">
+                <div class="genre-icon">☕</div>
+                <div>
+                    <div class="genre-name">Slice of Life</div>
+                    <div class="genre-count">312 ta anime</div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil - AniStream</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-base: #0f0f13;
+            --bg-surface: #1a1a24;
+            --accent: #ff3366;
+            --accent-hover: #ff003c;
+            --text-light: #ffffff;
+            --text-dim: #8a8a9d;
+            --glass-bg: rgba(26, 26, 36, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-light); overflow-x: hidden; padding-top: 80px; }
+
+        .navbar { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(15, 15, 19, 0.98); backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
+        .nav-brand { font-size: 1.8rem; font-weight: 900; color: var(--text-light); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-brand span { color: var(--accent); }
+        .nav-menu { display: flex; gap: 35px; }
+        .nav-menu a { color: var(--text-light); text-decoration: none; font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; position: relative; transition: color 0.3s; }
+        .nav-menu a:hover { color: var(--accent); }
+        .nav-actions { display: flex; gap: 15px; }
+        .action-icon { background: transparent; border: none; color: var(--text-light); width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background 0.2s ease; font-size: 1.4rem; text-decoration: none; }
+        .action-icon:hover { background: rgba(255, 255, 255, 0.1); }
+        .profile-btn { background: var(--accent); border: 1px solid var(--accent); }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px 5%; }
+        .profile-header { background: var(--bg-surface); border-radius: 20px; padding: 40px; margin-bottom: 30px; border: 1px solid var(--glass-border); display: flex; align-items: center; gap: 30px; }
+        .avatar-large { width: 120px; height: 120px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), #ff8a00); display: flex; align-items: center; justify-content: center; font-size: 3rem; font-weight: 900; box-shadow: 0 10px 30px rgba(255, 51, 102, 0.4); }
+        .profile-info h1 { font-size: 2.5rem; font-weight: 900; margin-bottom: 5px; }
+        .profile-handle { color: var(--accent); font-size: 1.1rem; font-weight: 600; margin-bottom: 15px; display: block; }
+        .profile-stats { display: flex; gap: 30px; margin-top: 20px; }
+        .stat-item { text-align: center; }
+        .stat-number { font-size: 2rem; font-weight: 900; color: var(--accent); }
+        .stat-label { font-size: 0.85rem; color: var(--text-dim); font-weight: 700; text-transform: uppercase; }
+
+        .content-grid { display: grid; grid-template-columns: 250px 1fr; gap: 30px; }
+        .sidebar-menu { background: var(--bg-surface); border-radius: 16px; padding: 20px; border: 1px solid var(--glass-border); height: fit-content; }
+        .menu-item { display: flex; align-items: center; gap: 12px; padding: 15px; color: var(--text-dim); text-decoration: none; font-weight: 700; font-size: 1rem; border-radius: 10px; transition: all 0.3s; margin-bottom: 5px; }
+        .menu-item:hover, .menu-item.active { background: rgba(255, 51, 102, 0.1); color: var(--accent); }
+        .menu-item span:first-child { font-size: 1.3rem; }
+
+        .main-content { background: var(--bg-surface); border-radius: 16px; padding: 30px; border: 1px solid var(--glass-border); }
+        .section-title { font-size: 1.8rem; font-weight: 900; margin-bottom: 25px; }
+        .section-title span { color: var(--accent); }
+
+        .form-group { margin-bottom: 20px; }
+        .form-label { display: block; font-size: 0.9rem; font-weight: 700; color: var(--text-dim); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+        .form-input { width: 100%; background: var(--bg-base); border: 1px solid var(--glass-border); border-radius: 10px; padding: 12px 15px; color: var(--text-light); font-size: 1rem; outline: none; transition: border-color 0.3s; }
+        .form-input:focus { border-color: var(--accent); }
+        .form-textarea { resize: vertical; min-height: 100px; }
+
+        .btn-primary { background: var(--accent); color: white; border: none; border-radius: 10px; padding: 12px 30px; font-weight: 800; font-size: 1rem; cursor: pointer; transition: all 0.3s; }
+        .btn-primary:hover { background: var(--accent-hover); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(255, 51, 102, 0.4); }
+        .btn-secondary { background: var(--bg-base); color: var(--text-light); border: 1px solid var(--glass-border); }
+        .btn-secondary:hover { border-color: var(--accent); background: rgba(255, 51, 102, 0.1); transform: none; box-shadow: none; }
+
+        @media (max-width: 968px) {
+            .content-grid { grid-template-columns: 1fr; }
+            .profile-header { flex-direction: column; text-align: center; }
+            .nav-menu { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/" class="nav-brand">Ani<span>Stream</span></a>
+    <div class="nav-menu">
+        <a href="/catalog">Katalog</a>
+        <a href="/genres">Janrlar</a>
+        <a href="/schedule">Jadval</a>
+        <a href="/news">Yangiliklar</a>
+    </div>
+    <div class="nav-actions">
+        <a href="/search" class="action-icon">🔍</a>
+        <div class="action-icon">🔔</div>
+        <div class="action-icon profile-btn">👤</div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="profile-header">
+        <div class="avatar-large">U</div>
+        <div class="profile-info">
+            <h1>Username</h1>
+            <span class="profile-handle">@username</span>
+            <div class="profile-stats">
+                <div class="stat-item">
+                    <div class="stat-number">142</div>
+                    <div class="stat-label">Ko'rilgan</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">28</div>
+                    <div class="stat-label">Sevimli</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">56</div>
+                    <div class="stat-label">Ro'yxat</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="content-grid">
+        <div class="sidebar-menu">
+            <a href="#" class="menu-item active"><span>👤</span> Profil</a>
+            <a href="/favorites" class="menu-item"><span>❤️</span> Sevimlilar</a>
+            <a href="/history" class="menu-item"><span>🕒</span> Tarix</a>
+            <a href="/settings" class="menu-item"><span>⚙️</span> Sozlamalar</a>
+            <a href="#" class="menu-item"><span>👑</span> Premium</a>
+            <a href="#" class="menu-item" style="color: #ff3b30;"><span>🚪</span> Chiqish</a>
+        </div>
+
+        <div class="main-content">
+            <h2 class="section-title">Profil <span>Tahrirlash</span></h2>
+
+            <form>
+                <div class="form-group">
+                    <label class="form-label">Foydalanuvchi nomi</label>
+                    <input type="text" class="form-input" value="username" placeholder="Foydalanuvchi nomi">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-input" value="user@example.com" placeholder="Email manzilingiz">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Bio</label>
+                    <textarea class="form-input form-textarea" placeholder="O'zingiz haqingizda yozing...">Anime ishqibozi va manga o'quvchisi</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Tug'ilgan yil</label>
+                    <input type="date" class="form-input">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Sevimli janr</label>
+                    <select class="form-input">
+                        <option>Action</option>
+                        <option>Adventure</option>
+                        <option>Comedy</option>
+                        <option>Drama</option>
+                        <option>Fantasy</option>
+                        <option>Romance</option>
+                    </select>
+                </div>
+
+                <div style="display: flex; gap: 15px; margin-top: 30px;">
+                    <button type="submit" class="btn-primary">Saqlash</button>
+                    <button type="button" class="btn-primary btn-secondary">Bekor qilish</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
