@@ -12,7 +12,6 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 import os
 from pathlib import Path
 import dj_database_url
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,9 +21,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-3stjy_8w_4-1$67wt@hvzi$3nu@elz^n$33frr(zbf=p31el3&')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+# Environment
+# - development (default): qulay lokal dev sozlamalar
+# - production: qat'iy security sozlamalar
+ENVIRONMENT = os.environ.get('ENVIRONMENT', 'development').lower()
 
+# SECURITY WARNING: don't run with debug turned on in production!
+if 'DEBUG' in os.environ:
+    DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+else:
+    DEBUG = ENVIRONMENT != 'production'
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # Application definition
@@ -152,7 +158,7 @@ else:
 # ==========================================
 # SECURITY SOZLAMALARI (Production uchun)
 # ==========================================
-if not DEBUG:
+if ENVIRONMENT == 'production' and not DEBUG:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True

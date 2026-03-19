@@ -102,6 +102,25 @@
         <a href="{% url 'home' %}" class="close-btn">✕</a>
         <div class="auth-logo">Ani<span>Stream</span></div>
 
+        {% if messages %}
+            <div style="margin: 0 0 18px 0;">
+                {% for message in messages %}
+                    <div style="
+                        padding: 12px 14px;
+                        border-radius: 12px;
+                        margin-bottom: 10px;
+                        font-weight: 700;
+                        font-size: 0.9rem;
+                        border: 1px solid var(--border-color);
+                        background: rgba(0,0,0,0.35);
+                        color: {% if message.tags == 'success' %}#6ef2b2{% elif message.tags == 'error' %}#ff6b8b{% else %}#ffffff{% endif %};
+                    ">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
         <div class="auth-tabs">
             <div class="auth-tab active" onclick="switchTab('login')">KIRISH</div>
             <div class="auth-tab" onclick="switchTab('register')">RO'YXATDAN O'TISH</div>
