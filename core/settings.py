@@ -25,6 +25,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-3stjy_8w_4-1$67wt@hvz
 # - development (default): qulay lokal dev sozlamalar
 # - production: qat'iy security sozlamalar
 ENVIRONMENT = os.environ.get('ENVIRONMENT', 'development').lower()
+USE_HTTPS = os.environ.get('USE_HTTPS', 'false').lower() in ('1', 'true', 'yes')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 if 'DEBUG' in os.environ:
@@ -158,7 +159,7 @@ else:
 # ==========================================
 # SECURITY SOZLAMALARI (Production uchun)
 # ==========================================
-if ENVIRONMENT == 'production' and not DEBUG:
+if ENVIRONMENT == 'production' and not DEBUG and USE_HTTPS:
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
@@ -168,6 +169,11 @@ if ENVIRONMENT == 'production' and not DEBUG:
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_HSTS_PRELOAD = True
+
+# `login_required` noto‘g‘ri default login sahifaga redirect qilmasligi uchun.
+LOGIN_URL = 'auth_page'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
