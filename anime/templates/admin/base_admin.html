@@ -345,9 +345,73 @@
             font-size: 0.85rem;
             outline: none;
         }
+
+        /* ===== RESPONSIVE: ADMIN ===== */
+        .admin-hamburger {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1100;
+            background: var(--accent);
+            border: none;
+            color: white;
+            width: 42px;
+            height: 42px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(255,51,102,0.4);
+            transition: 0.2s;
+        }
+        .admin-hamburger:hover { transform: scale(1.05); }
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.7);
+            z-index: 990;
+            backdrop-filter: blur(3px);
+        }
+        .sidebar-overlay.show { display: block; }
+
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .admin-hamburger { display: flex; align-items: center; justify-content: center; }
+            .sidebar {
+                position: fixed;
+                left: -280px;
+                top: 0;
+                height: 100vh;
+                z-index: 1000;
+                transition: left 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+                overflow-y: auto;
+            }
+            .sidebar.open { left: 0; }
+            .main { padding: 15px 15px 15px 15px; }
+            .topbar { padding-top: 55px; flex-wrap: wrap; gap: 10px; }
+            .breadcrumbs { font-size: 0.8rem; }
+
+            .form-grid { grid-template-columns: 1fr !important; }
+            table { font-size: 0.8rem; }
+            th, td { padding: 6px 8px; }
+            .card { padding: 15px; }
+            .stats-row { grid-template-columns: 1fr 1fr !important; }
+        }
+        @media (max-width: 480px) {
+            .topbar { padding-top: 60px; }
+            .top-actions { flex-wrap: wrap; }
+            .stats-row { grid-template-columns: 1fr !important; }
+            table th:nth-child(3), table td:nth-child(3),
+            table th:nth-child(4), table td:nth-child(4) { display: none; }
+        }
+
     </style>
 </head>
 <body>
+
+<button class="admin-hamburger" onclick="toggleAdminSidebar()" aria-label="Menu">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleAdminSidebar()"></div>
 <aside class="sidebar">
     <div>
         <div class="brand">Ani<span>Stream</span></div>
@@ -409,6 +473,19 @@
         {% block content %}{% endblock %}
     </div>
 </main>
+
+<script>
+function toggleAdminSidebar() {
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (sidebar && overlay) {
+        sidebar.classList.toggle('open');
+        overlay.classList.toggle('show');
+        document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+    }
+}
+</script>
+
 </body>
 </html>
 

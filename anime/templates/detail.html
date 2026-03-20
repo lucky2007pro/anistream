@@ -201,6 +201,172 @@
         .ep-list-info h4 { font-size: 1.1rem; color: white; transition: 0.2s; margin-bottom: 5px;}
         .ep-list-item.playing .ep-list-info h4 { color: var(--accent); }
         .ep-list-info span { font-size: 0.75rem; background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 4px; color: var(--text-dim); font-weight: 700; }
+
+        /* ===== HAMBURGER MENU ===== */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            padding: 5px;
+            z-index: 10001;
+        }
+        .hamburger span {
+            display: block;
+            width: 25px;
+            height: 2px;
+            background: #fff;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        .hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.active span:nth-child(2) { opacity: 0; }
+        .hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .mobile-nav-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15,15,19,0.98);
+            z-index: 10000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 0;
+        }
+        .mobile-nav-overlay.open { display: flex; }
+        .mobile-nav-overlay a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.4rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 18px 40px;
+            width: 100%;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: color 0.2s, background 0.2s;
+        }
+        .mobile-nav-overlay a:hover { color: #ff3366; background: rgba(255,51,102,0.05); }
+        .mobile-nav-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+
+        /* ===== HAMBURGER MENU ===== */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            padding: 5px;
+            z-index: 10001;
+        }
+        .hamburger span {
+            display: block;
+            width: 25px;
+            height: 2px;
+            background: #fff;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        .hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.active span:nth-child(2) { opacity: 0; }
+        .hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .mobile-nav-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15,15,19,0.98);
+            z-index: 10000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 0;
+        }
+        .mobile-nav-overlay.open { display: flex; }
+        .mobile-nav-overlay a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.4rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 18px 40px;
+            width: 100%;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: color 0.2s, background 0.2s;
+        }
+        .mobile-nav-overlay a:hover { color: #ff3366; background: rgba(255,51,102,0.05); }
+        .mobile-nav-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+
+        /* ===== RESPONSIVE: DETAIL ===== */
+        @media (max-width: 1024px) {
+            .anime-title { font-size: 3rem; }
+            .content-container { top: -180px; }
+        }
+        @media (max-width: 768px) {
+            .top-nav { padding: 15px 4%; }
+            .hero-wrapper { height: 45vh; }
+            .content-container { top: -120px; padding: 0 4%; }
+            .anime-title { font-size: 2rem; }
+            .description { font-size: 0.95rem; }
+            .main-action-btn { padding: 12px 25px; font-size: 0.95rem; }
+
+            .tabs-wrapper { overflow-x: auto; justify-content: flex-start; padding: 0 4%; }
+            .tabs-wrapper::-webkit-scrollbar { display: none; }
+            .tab { padding: 12px 15px; font-size: 0.85rem; white-space: nowrap; flex-shrink: 0; }
+
+            .episodes-grid { grid-template-columns: 1fr; gap: 12px; }
+            .ep-thumb { width: 100px; height: 68px; }
+            .info-grid { grid-template-columns: 1fr 1fr; }
+
+            /* Video player mobile */
+            .player-header { padding: 15px 20px; }
+            .player-title h2 { font-size: 1rem; }
+            .player-controls { padding: 15px 20px; }
+            .controls-left, .controls-right { gap: 15px; }
+            .control-btn { font-size: 1.3rem; }
+            .center-play { width: 65px; height: 65px; font-size: 1.7rem; }
+            .btn-episodes { padding: 8px 12px; font-size: 0.8rem; }
+            .ep-list-thumb { width: 90px; height: 56px; }
+            .settings-sidebar { width: 100%; right: -100%; }
+        }
+        @media (max-width: 480px) {
+            .anime-title { font-size: 1.5rem; }
+            .content-container { top: -100px; }
+            .hero-wrapper { height: 38vh; }
+            .badges { gap: 6px; }
+            .genres span { font-size: 0.75rem; padding: 3px 8px; }
+            .player-header { padding: 12px 15px; }
+            .player-controls { padding: 12px 15px; }
+            .controls-left, .controls-right { gap: 10px; }
+            .time-display { font-size: 0.8rem; }
+            .center-play { width: 55px; height: 55px; font-size: 1.4rem; }
+        }
+
     </style>
 </head>
 <body>
@@ -503,5 +669,18 @@
             }
         }
     </script>
+
+<script>
+    function toggleMobileNav() {
+        const overlay = document.getElementById('mobileNavOverlay');
+        const btn = document.getElementById('hamburgerBtn');
+        if (overlay && btn) {
+            overlay.classList.toggle('open');
+            btn.classList.toggle('active');
+            document.body.style.overflow = overlay.classList.contains('open') ? 'hidden' : '';
+        }
+    }
+</script>
+
 </body>
 </html>

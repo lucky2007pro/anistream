@@ -497,6 +497,165 @@
         .logout-btn:hover { background: rgba(255, 59, 48, 0.1); color: #ff3b30; }
 
         .sidebar-footer { text-align: center; margin-top: 40px; color: var(--text-dim); font-size: 0.75rem; font-weight: 700; letter-spacing: 2px; }
+
+        /* ===== HAMBURGER MENU ===== */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            padding: 5px;
+            z-index: 10001;
+        }
+        .hamburger span {
+            display: block;
+            width: 25px;
+            height: 2px;
+            background: #fff;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        .hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.active span:nth-child(2) { opacity: 0; }
+        .hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .mobile-nav-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15,15,19,0.98);
+            z-index: 10000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 0;
+        }
+        .mobile-nav-overlay.open { display: flex; }
+        .mobile-nav-overlay a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.4rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 18px 40px;
+            width: 100%;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: color 0.2s, background 0.2s;
+        }
+        .mobile-nav-overlay a:hover { color: #ff3366; background: rgba(255,51,102,0.05); }
+        .mobile-nav-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+
+        /* ===== HAMBURGER MENU ===== */
+        .hamburger {
+            display: none;
+            flex-direction: column;
+            gap: 5px;
+            cursor: pointer;
+            background: transparent;
+            border: none;
+            padding: 5px;
+            z-index: 10001;
+        }
+        .hamburger span {
+            display: block;
+            width: 25px;
+            height: 2px;
+            background: #fff;
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        .hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.active span:nth-child(2) { opacity: 0; }
+        .hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        .mobile-nav-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15,15,19,0.98);
+            z-index: 10000;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 0;
+        }
+        .mobile-nav-overlay.open { display: flex; }
+        .mobile-nav-overlay a {
+            color: #fff;
+            text-decoration: none;
+            font-size: 1.4rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            padding: 18px 40px;
+            width: 100%;
+            text-align: center;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: color 0.2s, background 0.2s;
+        }
+        .mobile-nav-overlay a:hover { color: #ff3366; background: rgba(255,51,102,0.05); }
+        .mobile-nav-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+        }
+
+        /* ===== RESPONSIVE: INDEX ===== */
+        @media (max-width: 1024px) {
+            .slide-title { font-size: 3rem; }
+            .card-wrapper { width: 190px; }
+            .anime-card { height: 270px; }
+        }
+        @media (max-width: 768px) {
+            .navbar { padding: 12px 4%; }
+            .nav-menu { display: none; }
+            .hamburger { display: flex; }
+            .nav-brand { font-size: 1.4rem; }
+            .nav-actions .action-icon:not(.profile-btn) { display: none; }
+
+            .slider-container { height: 60vh; }
+            .slide { padding: 4% 4% 12% 4%; }
+            .slide-title { font-size: 2.2rem; }
+            .slide-desc { font-size: 0.9rem; -webkit-line-clamp: 2; }
+            .btn-main { padding: 12px 22px; font-size: 0.9rem; }
+            .tags { flex-wrap: wrap; gap: 6px; }
+
+            .card-wrapper { width: 155px; }
+            .anime-card { height: 220px; }
+            .section-title h3 { font-size: 1.3rem; }
+            .section-header { margin: 25px 0 15px 0; }
+
+            .profile-sidebar { width: 100%; right: -100%; border-left: none; }
+            .profile-sidebar.active { right: 0; }
+        }
+        @media (max-width: 480px) {
+            .slide-title { font-size: 1.7rem; }
+            .slider-container { height: 55vh; }
+            .card-wrapper { width: 135px; }
+            .anime-card { height: 190px; }
+            .card-title { font-size: 0.85rem; }
+            .nav-brand { font-size: 1.2rem; }
+            .slider-controls { bottom: 15px; }
+        }
+
     </style>
 </head>
 <body>
@@ -707,5 +866,18 @@
         }
     });
 </script>
+
+<script>
+    function toggleMobileNav() {
+        const overlay = document.getElementById('mobileNavOverlay');
+        const btn = document.getElementById('hamburgerBtn');
+        if (overlay && btn) {
+            overlay.classList.toggle('open');
+            btn.classList.toggle('active');
+            document.body.style.overflow = overlay.classList.contains('open') ? 'hidden' : '';
+        }
+    }
+</script>
+
 </body>
 </html>
