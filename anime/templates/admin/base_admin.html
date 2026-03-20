@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - AniStream</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-main: #050510;
+            --bg-sidebar: #0c0c18;
+            --bg-card: rgba(19, 19, 35, 0.85);
+            --border-soft: rgba(255, 255, 255, 0.06);
+            --accent: #ff3366;
+            --accent-soft: rgba(255, 51, 102, 0.2);
+            --text-main: #ffffff;
+            --text-muted: #8a8aa5;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background: radial-gradient(circle at top left, #2b2240, #050510 60%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: linear-gradient(180deg, rgba(15, 15, 30, 0.98), rgba(5, 5, 16, 0.98));
+            border-right: 1px solid var(--border-soft);
+            padding: 24px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .brand {
+            font-size: 1.5rem;
+            font-weight: 900;
+            letter-spacing: 1px;
+        }
+
+        .brand span {
+            color: var(--accent);
+        }
+
+        .sidebar-section-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            margin-bottom: 6px;
+        }
+
+        .nav-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 9px 10px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+
+        .nav-link span.icon {
+            width: 22px;
+            text-align: center;
+        }
+
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.04);
+            color: var(--text-main);
+        }
+
+        .nav-link.active {
+            background: var(--accent-soft);
+            color: var(--text-main);
+            border: 1px solid var(--accent);
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .main {
+            flex: 1;
+            padding: 20px 26px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .topbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .breadcrumbs {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .top-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            font-size: 0.85rem;
+        }
+
+        .chip {
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid var(--border-soft);
+            background: rgba(0,0,0,0.3);
+            color: var(--text-muted);
+        }
+
+        .btn-outline {
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--border-soft);
+            background: transparent;
+            color: var(--text-main);
+            text-decoration: none;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .content {
+            margin-top: 6px;
+        }
+
+        .card {
+            background: var(--bg-card);
+            border-radius: 18px;
+            border: 1px solid var(--border-soft);
+            padding: 18px 20px;
+            box-shadow: 0 18px 40px rgba(0,0,0,0.55);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .card-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 8px 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.03);
+            text-align: left;
+        }
+
+        th {
+            color: var(--text-muted);
+            font-weight: 600;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        tr:hover td {
+            background: rgba(255,255,255,0.02);
+        }
+
+        .tag-soft {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            background: rgba(255,255,255,0.05);
+            color: var(--text-muted);
+        }
+
+        .btn-primary {
+            padding: 9px 14px;
+            border-radius: 999px;
+            border: none;
+            background: var(--accent);
+            color: white;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 10px 25px rgba(255,51,102,0.4);
+            transition: 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #ff003c;
+            transform: translateY(-1px);
+        }
+
+        .btn-small {
+            padding: 5px 9px;
+            font-size: 0.8rem;
+            border-radius: 999px;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-ghost {
+            background: rgba(255,255,255,0.04);
+            color: var(--text-main);
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+
+        .btn-danger {
+            background: rgba(255,59,48,0.1);
+            color: #ff6b6b;
+            border: 1px solid rgba(255,59,48,0.4);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px 18px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .form-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            background: rgba(5,5,18,0.8);
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 9px 10px;
+            color: var(--text-main);
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--accent);
+        }
+
+        .errorlist {
+            margin-top: 4px;
+            list-style: none;
+            font-size: 0.8rem;
+            color: #ff6b8b;
+        }
+
+        .messages {
+            margin-bottom: 10px;
+        }
+
+        .message {
+            padding: 8px 10px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+        }
+
+        .message.success {
+            background: rgba(46, 204, 113, 0.16);
+            border: 1px solid rgba(46, 204, 113, 0.4);
+            color: #7bed9f;
+        }
+
+        .message.error {
+            background: rgba(255, 71, 87, 0.16);
+            border: 1px solid rgba(255, 71, 87, 0.4);
+            color: #ff6b81;
+        }
+
+        .message.info {
+            background: rgba(9, 132, 227, 0.16);
+            border: 1px solid rgba(9, 132, 227, 0.4);
+            color: #74b9ff;
+        }
+
+        .search-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .search-row input[type="text"] {
+            flex: 1;
+            background: rgba(5,5,18,0.8);
+            border-radius: 999px;
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 8px 12px;
+            color: var(--text-main);
+            font-size: 0.85rem;
+            outline: none;
+        }
+    </style>
+</head>
+<body>
+<aside class="sidebar">
+    <div>
+        <div class="brand">Ani<span>Stream</span></div>
+        <div style="margin-top: 4px; font-size: 0.8rem; color: var(--text-muted);">Admin panel</div>
+    </div>
+
+    <div>
+        <div class="sidebar-section-title">UMUMIY</div>
+        <ul class="nav-list">
+            <li><a href="{% url 'admin_dashboard' %}" class="nav-link{% if request.resolver_match.url_name == 'admin_dashboard' %} active{% endif %}">
+                <span class="icon">📊</span> <span>Dashboard</span>
+            </a></li>
+        </ul>
+    </div>
+
+    <div>
+        <div class="sidebar-section-title">KONTENT</div>
+        <ul class="nav-list">
+            <li><a href="{% url 'admin_genre_list' %}" class="nav-link{% if request.resolver_match.url_name == 'admin_genre_list' or request.resolver_match.url_name == 'admin_genre_create' or request.resolver_match.url_name == 'admin_genre_edit' %} active{% endif %}">
+                <span class="icon">🏷️</span> <span>Janrlar</span>
+            </a></li>
+            <li><a href="{% url 'admin_anime_list' %}" class="nav-link{% if request.resolver_match.url_name == 'admin_anime_list' or request.resolver_match.url_name == 'admin_anime_create' or request.resolver_match.url_name == 'admin_anime_edit' %} active{% endif %}">
+                <span class="icon">🎬</span> <span>Animelar</span>
+            </a></li>
+            <li><a href="{% url 'admin_episode_list' %}" class="nav-link{% if request.resolver_match.url_name == 'admin_episode_list' or request.resolver_match.url_name == 'admin_episode_create' or request.resolver_match.url_name == 'admin_episode_edit' %} active{% endif %}">
+                <span class="icon">📺</span> <span>Qismlar</span>
+            </a></li>
+            <li><a href="{% url 'admin_news_admin_list' %}" class="nav-link{% if request.resolver_match.url_name == 'admin_news_admin_list' or request.resolver_match.url_name == 'admin_news_create' or request.resolver_match.url_name == 'admin_news_edit' %} active{% endif %}">
+                <span class="icon">📰</span> <span>Yangiliklar</span>
+            </a></li>
+        </ul>
+    </div>
+
+    <div class="sidebar-footer">
+        <div>👤 {{ request.user.username }}</div>
+        <div style="margin-top: 4px;"><a href="{% url 'home' %}" style="color: var(--text-muted); text-decoration: none;">← Saytga qaytish</a></div>
+    </div>
+</aside>
+
+<main class="main">
+    <div class="topbar">
+        <div class="breadcrumbs">
+            Admin / {% block breadcrumb %}{% endblock %}
+        </div>
+        <div class="top-actions">
+            <div class="chip">Staff: {{ request.user.is_staff|yesno:"ha,yo'q" }}</div>
+        </div>
+    </div>
+
+    <div class="content">
+        {% if messages %}
+            <div class="messages">
+                {% for message in messages %}
+                    <div class="message {{ message.tags|default:'' }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+</main>
+</body>
+</html>
+

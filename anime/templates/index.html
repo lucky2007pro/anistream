@@ -604,6 +604,16 @@
         <a href="#" class="menu-item"><span>🕒</span> Ko'rishlar tarixi <span class="arrow">›</span></a>
     </div>
 
+    {% if request.user.is_staff %}
+    <div class="menu-section">
+        <h4 class="menu-title">ADMIN PANEL</h4>
+        <a href="{% url 'admin_dashboard' %}" class="menu-item"
+           style="background: var(--accent); color:white; border-radius: 12px; justify-content: center;">
+            ⚙️ Admin dashboard
+        </a>
+    </div>
+    {% endif %}
+
     <div class="menu-section">
         <h4 class="menu-title">YORDAM VA SOZLAMALAR</h4>
         <a href="#" class="menu-item"><span>❓</span> Yordam Markazi <span class="ai-badge">AI</span> <span

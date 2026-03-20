@@ -1,0 +1,25 @@
+{% extends "admin/base_admin.html" %}
+
+{% block breadcrumb %}O'chirishni tasdiqlash{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <div class="card-title">O'chirishni tasdiqlash</div>
+            <div class="card-subtitle">Bu amalni qaytarib bo'lmaydi</div>
+        </div>
+    </div>
+
+    <p style="margin-bottom: 14px;">
+        {{ object_type }} <strong>{{ object }}</strong> ni haqiqatan ham o‘chirmoqchimisiz?
+    </p>
+
+    <form method="post" style="display:flex; gap:10px;">
+        {% csrf_token %}
+        <button type="submit" class="btn-primary">Ha, o'chirish</button>
+        <a href="{% url cancel_url %}" class="btn-outline">Bekor qilish</a>
+    </form>
+</div>
+{% endblock %}
+

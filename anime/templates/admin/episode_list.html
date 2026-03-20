@@ -1,0 +1,56 @@
+{% extends "admin/base_admin.html" %}
+
+{% block breadcrumb %}Qismlar{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <div class="card-title">Epizodlar ro'yxati</div>
+            <div class="card-subtitle">Anime qismlarini boshqarish</div>
+        </div>
+        <a href="{% url 'admin_episode_create' %}" class="btn-primary">+ Yangi qism</a>
+    </div>
+
+    <form method="get" class="search-row" style="margin-bottom: 10px;">
+        <input type="text" name="q" placeholder="Qidirish (anime nomi yoki qism nomi)..."
+               value="{{ query|default:'' }}">
+        <button type="submit" class="btn-outline">Qidirish</button>
+    </form>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Anime</th>
+            <th>Qism</th>
+            <th>Sarlavha</th>
+            <th>Harakatlar</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for ep in page_obj %}
+            <tr>
+                <td>{{ ep.anime.title }}</td>
+                <td>#{{ ep.episode_number }}</td>
+                <td>{{ ep.title|default:"-" }}</td>
+                <td>
+                    <a href="{% url 'admin_episode_edit' ep.pk %}" class="btn-small btn-ghost">Tahrirlash</a>
+                    <form action="{% url 'admin_episode_delete' ep.pk %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-small btn-danger"
+                                onclick="return confirm('Ushbu qismni o‘chirmoqchimisiz?');">
+                            O'chirish
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="4">Hali qismlar qo'shilmagan.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+

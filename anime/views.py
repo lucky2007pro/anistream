@@ -2,17 +2,38 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponseForbidden
 from django.contrib import messages
 from django.db.models import Prefetch, Q, Count
 from django.core.paginator import Paginator
 from .models import (
-    Anime, Episode, Genre, UserProfile,
-    WatchHistory, Comment, NewsPost
+    Anime,
+    Episode,
+    Genre,
+    UserProfile,
+    WatchHistory,
+    Comment,
+    NewsPost,
 )
+from .forms import GenreForm, AnimeForm, EpisodeForm, NewsPostForm
 import logging
 
 logger = logging.getLogger(__name__)
 
+
+def staff_required(view_func):
+    """
+    Faqat staff/superuser foydalanuvchilar uchun ruxsat beruvchi dekorator.
+    Login bo'lmaganlar auth sahifaga, oddiy userlar 403 sahifaga qaytariladi.
+    """
+
+    @login_required
+    def _wrapped_view(request, *args, **kwargs):
+        if not request.user.is_staff and not request.user.is_superuser:
+            return HttpResponseForbidden("Sizda bu sahifaga kirish huquqi yo'q.")
+        return view_func(request, *args, **kwargs)
+
+    return _wrapped_view
 
 def home_page(request):
     """Asosiy sahifa - Anime katalog"""
@@ -366,3 +387,342 @@ def logout_view(request):
     logout(request)
     messages.info(request, "Tizimdan chiqdingiz")
     return redirect('home')
+
+
+# ==============================
+# Custom admin dashboard views
+# ==============================
+
+
+@staff_required
+def admin_dashboard(request):
+    """Asosiy admin panel - statistikalar va oxirgi obyektlar"""
+    genre_count = Genre.objects.count()
+    anime_count = Anime.objects.count()
+    episode_count = Episode.objects.count()
+    news_count = NewsPost.objects.count()
+
+    latest_animes = Anime.objects.order_by("-created_at")[:5]
+    latest_news = NewsPost.objects.order_by("-created_at")[:5]
+
+    context = {
+        "genre_count": genre_count,
+        "anime_count": anime_count,
+        "episode_count": episode_count,
+        "news_count": news_count,
+        "latest_animes": latest_animes,
+        "latest_news": latest_news,
+    }
+    return render(request, "admin/dashboard.html", context)
+
+
+# --------- Genre admin ----------
+
+
+@staff_required
+def admin_genre_list(request):
+    query = request.GET.get("q", "").strip()
+    genres = Genre.objects.all().order_by("name")
+    if query:
+        genres = genres.filter(Q(name__icontains=query) | Q(slug__icontains=query))
+
+    paginator = Paginator(genres, 20)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "admin/genre_list.html",
+        {"page_obj": page_obj, "query": query},
+    )
+
+
+@staff_required
+def admin_genre_create(request):
+    if request.method == "POST":
+        form = GenreForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Janr muvaffaqiyatli qo'shildi.")
+            return redirect("admin_genre_list")
+    else:
+        form = GenreForm()
+
+    return render(
+        request,
+        "admin/genre_form.html",
+        {"form": form, "title": "Yangi janr qo'shish"},
+    )
+
+
+@staff_required
+def admin_genre_edit(request, pk):
+    genre = get_object_or_404(Genre, pk=pk)
+
+    if request.method == "POST":
+        form = GenreForm(request.POST, instance=genre)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Janr yangilandi.")
+            return redirect("admin_genre_list")
+    else:
+        form = GenreForm(instance=genre)
+
+    return render(
+        request,
+        "admin/genre_form.html",
+        {"form": form, "title": "Janrni tahrirlash"},
+    )
+
+
+@staff_required
+def admin_genre_delete(request, pk):
+    genre = get_object_or_404(Genre, pk=pk)
+    if request.method == "POST":
+        genre.delete()
+        messages.success(request, "Janr o'chirildi.")
+        return redirect("admin_genre_list")
+
+    return render(
+        request,
+        "admin/confirm_delete.html",
+        {"object": genre, "object_type": "Janr", "cancel_url": "admin_genre_list"},
+    )
+
+
+# --------- Anime admin ----------
+
+
+@staff_required
+def admin_anime_list(request):
+    query = request.GET.get("q", "").strip()
+    animes = Anime.objects.all().order_by("-created_at")
+    if query:
+        animes = animes.filter(
+            Q(title__icontains=query)
+            | Q(description__icontains=query)
+            | Q(studio__icontains=query)
+        )
+
+    paginator = Paginator(animes, 20)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "admin/anime_list.html",
+        {"page_obj": page_obj, "query": query},
+    )
+
+
+@staff_required
+def admin_anime_create(request):
+    if request.method == "POST":
+        form = AnimeForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Anime muvaffaqiyatli qo'shildi.")
+            return redirect("admin_anime_list")
+    else:
+        form = AnimeForm()
+
+    return render(
+        request,
+        "admin/anime_form.html",
+        {"form": form, "title": "Yangi anime qo'shish"},
+    )
+
+
+@staff_required
+def admin_anime_edit(request, pk):
+    anime = get_object_or_404(Anime, pk=pk)
+
+    if request.method == "POST":
+        form = AnimeForm(request.POST, instance=anime)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Anime yangilandi.")
+            return redirect("admin_anime_list")
+    else:
+        form = AnimeForm(instance=anime)
+
+    return render(
+        request,
+        "admin/anime_form.html",
+        {"form": form, "title": "Anime tahrirlash"},
+    )
+
+
+@staff_required
+def admin_anime_delete(request, pk):
+    anime = get_object_or_404(Anime, pk=pk)
+    if request.method == "POST":
+        anime.delete()
+        messages.success(request, "Anime o'chirildi.")
+        return redirect("admin_anime_list")
+
+    return render(
+        request,
+        "admin/confirm_delete.html",
+        {"object": anime, "object_type": "Anime", "cancel_url": "admin_anime_list"},
+    )
+
+
+# --------- Episode admin ----------
+
+
+@staff_required
+def admin_episode_list(request):
+    query = request.GET.get("q", "").strip()
+    episodes = (
+        Episode.objects.select_related("anime")
+        .all()
+        .order_by("anime__title", "episode_number")
+    )
+    if query:
+        episodes = episodes.filter(
+            Q(anime__title__icontains=query) | Q(title__icontains=query)
+        )
+
+    paginator = Paginator(episodes, 25)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "admin/episode_list.html",
+        {"page_obj": page_obj, "query": query},
+    )
+
+
+@staff_required
+def admin_episode_create(request):
+    if request.method == "POST":
+        form = EpisodeForm(request.POST, request.FILES)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Qism muvaffaqiyatli qo'shildi.")
+            return redirect("admin_episode_list")
+    else:
+        form = EpisodeForm()
+
+    return render(
+        request,
+        "admin/episode_form.html",
+        {"form": form, "title": "Yangi qism qo'shish"},
+    )
+
+
+@staff_required
+def admin_episode_edit(request, pk):
+    episode = get_object_or_404(Episode, pk=pk)
+
+    if request.method == "POST":
+        form = EpisodeForm(request.POST, request.FILES, instance=episode)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Qism yangilandi.")
+            return redirect("admin_episode_list")
+    else:
+        form = EpisodeForm(instance=episode)
+
+    return render(
+        request,
+        "admin/episode_form.html",
+        {"form": form, "title": "Qismni tahrirlash"},
+    )
+
+
+@staff_required
+def admin_episode_delete(request, pk):
+    episode = get_object_or_404(Episode, pk=pk)
+    if request.method == "POST":
+        episode.delete()
+        messages.success(request, "Qism o'chirildi.")
+        return redirect("admin_episode_list")
+
+    return render(
+        request,
+        "admin/confirm_delete.html",
+        {"object": episode, "object_type": "Qism", "cancel_url": "admin_episode_list"},
+    )
+
+
+# --------- News admin ----------
+
+
+@staff_required
+def admin_news_list(request):
+    query = request.GET.get("q", "").strip()
+    news = NewsPost.objects.select_related("author").all().order_by("-created_at")
+    if query:
+        news = news.filter(
+            Q(title__icontains=query)
+            | Q(content__icontains=query)
+            | Q(tags__icontains=query)
+        )
+
+    paginator = Paginator(news, 20)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "admin/news_list_admin.html",
+        {"page_obj": page_obj, "query": query},
+    )
+
+
+@staff_required
+def admin_news_create(request):
+    if request.method == "POST":
+        form = NewsPostForm(request.POST)
+        if form.is_valid():
+            news = form.save(commit=False)
+            news.author = request.user
+            news.save()
+            messages.success(request, "Yangilik muvaffaqiyatli qo'shildi.")
+            return redirect("admin_news_admin_list")
+    else:
+        form = NewsPostForm()
+
+    return render(
+        request,
+        "admin/news_form.html",
+        {"form": form, "title": "Yangi yangilik qo'shish"},
+    )
+
+
+@staff_required
+def admin_news_edit(request, pk):
+    news = get_object_or_404(NewsPost, pk=pk)
+
+    if request.method == "POST":
+        form = NewsPostForm(request.POST, instance=news)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Yangilik yangilandi.")
+            return redirect("admin_news_admin_list")
+    else:
+        form = NewsPostForm(instance=news)
+
+    return render(
+        request,
+        "admin/news_form.html",
+        {"form": form, "title": "Yangilikni tahrirlash"},
+    )
+
+
+@staff_required
+def admin_news_delete(request, pk):
+    news = get_object_or_404(NewsPost, pk=pk)
+    if request.method == "POST":
+        news.delete()
+        messages.success(request, "Yangilik o'chirildi.")
+        return redirect("admin_news_admin_list")
+
+    return render(
+        request,
+        "admin/confirm_delete.html",
+        {"object": news, "object_type": "Yangilik", "cancel_url": "admin_news_admin_list"},
+    )

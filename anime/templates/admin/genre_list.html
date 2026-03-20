@@ -1,0 +1,54 @@
+{% extends "admin/base_admin.html" %}
+
+{% block breadcrumb %}Janrlar{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div>
+            <div class="card-title">Janrlar ro'yxati</div>
+            <div class="card-subtitle">Anime janrlarini boshqarish</div>
+        </div>
+        <a href="{% url 'admin_genre_create' %}" class="btn-primary">+ Yangi janr</a>
+    </div>
+
+    <form method="get" class="search-row" style="margin-bottom: 10px;">
+        <input type="text" name="q" placeholder="Qidirish (nom yoki slug)..."
+               value="{{ query|default:'' }}">
+        <button type="submit" class="btn-outline">Qidirish</button>
+    </form>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Nom</th>
+            <th>Slug</th>
+            <th>Harakatlar</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for genre in page_obj %}
+            <tr>
+                <td>{{ genre.name }}</td>
+                <td><span class="tag-soft">{{ genre.slug }}</span></td>
+                <td>
+                    <a href="{% url 'admin_genre_edit' genre.pk %}" class="btn-small btn-ghost">Tahrirlash</a>
+                    <form action="{% url 'admin_genre_delete' genre.pk %}" method="post" style="display:inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-small btn-danger"
+                                onclick="return confirm('Janrni o‘chirmoqchimisiz?');">
+                            O'chirish
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        {% empty %}
+            <tr>
+                <td colspan="3">Hali janrlar qo'shilmagan.</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+

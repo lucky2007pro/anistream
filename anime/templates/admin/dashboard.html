@@ -1,0 +1,101 @@
+{% extends "admin/base_admin.html" %}
+
+{% block breadcrumb %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 18px;">
+    <div class="card-header">
+        <div>
+            <div class="card-title">Umumiy ko'rsatkichlar</div>
+            <div class="card-subtitle">Kontent holatini tezkor ko'rish</div>
+        </div>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
+        <div class="card" style="padding: 14px 16px;">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px;">Anime</div>
+            <div style="font-size: 1.8rem; font-weight: 900; margin-top: 4px;">{{ anime_count }}</div>
+            <div class="card-subtitle">Jami anime</div>
+        </div>
+        <div class="card" style="padding: 14px 16px;">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px;">Qismlar</div>
+            <div style="font-size: 1.8rem; font-weight: 900; margin-top: 4px;">{{ episode_count }}</div>
+            <div class="card-subtitle">Jami epizodlar</div>
+        </div>
+        <div class="card" style="padding: 14px 16px;">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px;">Janrlar</div>
+            <div style="font-size: 1.8rem; font-weight: 900; margin-top: 4px;">{{ genre_count }}</div>
+            <div class="card-subtitle">Faol janrlar</div>
+        </div>
+        <div class="card" style="padding: 14px 16px;">
+            <div style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); letter-spacing: 1px;">Yangiliklar</div>
+            <div style="font-size: 1.8rem; font-weight: 900; margin-top: 4px;">{{ news_count }}</div>
+            <div class="card-subtitle">Blog va xabarlar</div>
+        </div>
+    </div>
+</div>
+
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px;">
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-title">Oxirgi qo'shilgan anime</div>
+                <div class="card-subtitle">So'nggi 5 ta yozuv</div>
+            </div>
+            <a href="{% url 'admin_anime_list' %}" class="btn-outline">Barchasi →</a>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Yil</th>
+                <th>Reyting</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for anime in latest_animes %}
+                <tr>
+                    <td>{{ anime.title }}</td>
+                    <td>{{ anime.release_year }}</td>
+                    <td>★ {{ anime.rating }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">Hali anime qo'shilmagan.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <div class="card-title">Oxirgi yangiliklar</div>
+                <div class="card-subtitle">So'nggi 5 ta post</div>
+            </div>
+            <a href="{% url 'admin_news_admin_list' %}" class="btn-outline">Barchasi →</a>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th>Sarlavha</th>
+                <th>Sana</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for item in latest_news %}
+                <tr>
+                    <td>{{ item.title }}</td>
+                    <td>{{ item.created_at|date:"Y-m-d" }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="2">Yangiliklar hali yo'q.</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+

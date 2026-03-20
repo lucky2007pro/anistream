@@ -21,7 +21,31 @@ from django.conf.urls.static import static
 from anime import views
 
 urlpatterns = [
-    # Admin
+    # Custom content admin dashboard (faqat staff uchun)
+    path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
+
+    # Custom content admin (URL nomlari Django admin'dan oldin turishi kerak)
+    path('admin/genres/', views.admin_genre_list, name='admin_genre_list'),
+    path('admin/genres/create/', views.admin_genre_create, name='admin_genre_create'),
+    path('admin/genres/<int:pk>/edit/', views.admin_genre_edit, name='admin_genre_edit'),
+    path('admin/genres/<int:pk>/delete/', views.admin_genre_delete, name='admin_genre_delete'),
+
+    path('admin/animes/', views.admin_anime_list, name='admin_anime_list'),
+    path('admin/animes/create/', views.admin_anime_create, name='admin_anime_create'),
+    path('admin/animes/<int:pk>/edit/', views.admin_anime_edit, name='admin_anime_edit'),
+    path('admin/animes/<int:pk>/delete/', views.admin_anime_delete, name='admin_anime_delete'),
+
+    path('admin/episodes/', views.admin_episode_list, name='admin_episode_list'),
+    path('admin/episodes/create/', views.admin_episode_create, name='admin_episode_create'),
+    path('admin/episodes/<int:pk>/edit/', views.admin_episode_edit, name='admin_episode_edit'),
+    path('admin/episodes/<int:pk>/delete/', views.admin_episode_delete, name='admin_episode_delete'),
+
+    path('admin/news/', views.admin_news_list, name='admin_news_admin_list'),
+    path('admin/news/create/', views.admin_news_create, name='admin_news_create'),
+    path('admin/news/<int:pk>/edit/', views.admin_news_edit, name='admin_news_edit'),
+    path('admin/news/<int:pk>/delete/', views.admin_news_delete, name='admin_news_delete'),
+
+    # Django default admin (umumiy /admin/ prefiksidan keyin)
     path('admin/', admin.site.urls),
 
     # Asosiy sahifalar

@@ -8,7 +8,10 @@ https://docs.djangoproject.com/en/6.0/howto/deployment/wsgi/
 """
 
 import os
+from dotenv import load_dotenv
 
+# Shu qator .env fayldagi ma'lumotlarni tizimga yuklaydi
+load_dotenv()
 from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'core.settings')
