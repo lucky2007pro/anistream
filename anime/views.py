@@ -80,6 +80,10 @@ def auth_view(request):
                     email=email,
                     password=password
                 )
+
+                # SHU QATORNI QO'SHISH KERAK:
+                user.backend = 'django.contrib.auth.backends.ModelBackend'
+
                 login(request, user)
                 messages.success(request, f"Xush kelibsiz, {username}!")
                 logger.info(f"New user registered: {username}")
