@@ -45,6 +45,11 @@ class EpisodeForm(forms.ModelForm):
         required=False,
         label="Saqlashdan keyin Telegram kanalga yuklash"
     )
+    delete_local_after_upload = forms.BooleanField(
+        required=False,
+        initial=True,
+        label="Telegram'ga yuklangach local video faylni o'chirish"
+    )
 
     class Meta:
         model = Episode
@@ -72,6 +77,9 @@ class EpisodeForm(forms.ModelForm):
 
         if cleaned_data.get("upload_to_telegram") and not video_file:
             raise forms.ValidationError("Telegram'ga yuklash uchun video fayl tanlang.")
+
+        if cleaned_data.get("delete_local_after_upload") and not cleaned_data.get("upload_to_telegram"):
+            raise forms.ValidationError("Local faylni o'chirish uchun Telegram upload ham yoqilgan bo'lishi kerak.")
 
         return cleaned_data
 

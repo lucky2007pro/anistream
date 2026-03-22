@@ -179,6 +179,9 @@ Admin panelga kirish: `http://your-domain.com/admin/`
 
 Admin episode formasida `Saqlashdan keyin Telegram kanalga yuklash` ni belgilasangiz, local `video_file` bot orqali kanalga yuboriladi va `telegram_file_id` bazaga saqlanadi.
 
+- Istasangiz `Telegram'ga yuklangach local video faylni o'chirish` ni yoqib, storage joyni tejashingiz mumkin.
+- Upload progress server loglarda `%` ko'rinishida chiqadi.
+
 - Botni private kanalga admin qiling.
 - `TELEGRAM_CHANNEL_ID` private kanal ID bo'lishi kerak (`-100...`).
 - Pleyer Telegram saqlangan qism uchun `episodes/<id>/stream/` endpoint orqali avtomatik oqim ochadi.
@@ -187,6 +190,12 @@ CLI orqali ham yuklash mumkin:
 
 ```bash
 python manage.py upload_episode_to_telegram 15
+```
+
+Local faylni avtomatik o'chirish bilan:
+
+```bash
+python manage.py upload_episode_to_telegram 15 --delete-local
 ```
 
 ## 🎨 Customization

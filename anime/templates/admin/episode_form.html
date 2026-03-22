@@ -70,6 +70,14 @@
             {{ form.upload_to_telegram.errors }}
         </div>
 
+        <div class="form-group" style="margin-top: 10px;">
+            <label for="id_delete_local_after_upload" style="display:flex; align-items:center; gap:8px;">
+                {{ form.delete_local_after_upload }}
+                <span>Telegram'ga yuklangach local video faylni o'chirish</span>
+            </label>
+            {{ form.delete_local_after_upload.errors }}
+        </div>
+
         {% if form.non_field_errors %}
             <ul class="errorlist">
                 {% for error in form.non_field_errors %}

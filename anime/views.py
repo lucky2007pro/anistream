@@ -669,8 +669,17 @@ def admin_episode_create(request):
             episode = form.save()
 
             if form.cleaned_data.get("upload_to_telegram"):
+                def _progress(uploaded, total):
+                    if total > 0:
+                        percent = int((uploaded * 100) / total)
+                        logger.info("Episode upload progress (create): %s%% | episode_id=%s", percent, episode.id)
+
                 try:
-                    upload_episode_to_telegram(episode)
+                    upload_episode_to_telegram(
+                        episode,
+                        delete_local_file=form.cleaned_data.get("delete_local_after_upload", False),
+                        progress_callback=_progress,
+                    )
                     messages.success(request, "Video Telegram kanalga ham yuklandi.")
                 except TelegramStorageError as exc:
                     messages.warning(request, f"Episode saqlandi, lekin Telegram upload bo'lmadi: {exc}")
@@ -697,8 +706,17 @@ def admin_episode_edit(request, pk):
             episode = form.save()
 
             if form.cleaned_data.get("upload_to_telegram"):
+                def _progress(uploaded, total):
+                    if total > 0:
+                        percent = int((uploaded * 100) / total)
+                        logger.info("Episode upload progress (edit): %s%% | episode_id=%s", percent, episode.id)
+
                 try:
-                    upload_episode_to_telegram(episode)
+                    upload_episode_to_telegram(
+                        episode,
+                        delete_local_file=form.cleaned_data.get("delete_local_after_upload", False),
+                        progress_callback=_progress,
+                    )
                     messages.success(request, "Video Telegram kanalga ham yuklandi.")
                 except TelegramStorageError as exc:
                     messages.warning(request, f"Episode yangilandi, lekin Telegram upload bo'lmadi: {exc}")
