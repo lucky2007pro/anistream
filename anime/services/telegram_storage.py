@@ -138,11 +138,21 @@ def get_telegram_file_url(file_id):
         timeout=30,
     )
 
+    try:
+        payload = response.json()
+    except ValueError:
+        payload = {}
+
     if response.status_code != 200:
+        description = payload.get("description") if isinstance(payload, dict) else None
+        if description:
+            raise TelegramStorageError(f"getFile so'rovi xato: {response.status_code} ({description})")
         raise TelegramStorageError(f"getFile so'rovi xato: {response.status_code}")
 
-    payload = response.json()
     if not payload.get("ok"):
+        description = payload.get("description")
+        if description:
+            raise TelegramStorageError(f"getFile javobi xato: {description}")
         raise TelegramStorageError(f"getFile javobi xato: {payload}")
 
     file_path = payload.get("result", {}).get("file_path")
