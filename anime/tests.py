@@ -83,11 +83,11 @@ class EpisodeStreamTests(TestCase):
 
 	@patch("anime.views.requests.get")
 	@patch("anime.views.get_telegram_file_url")
-	def test_episode_stream_upstream_failure_redirects(self, mock_get_file_url, mock_requests_get):
+	def test_episode_stream_upstream_failure_returns_error(self, mock_get_file_url, mock_requests_get):
 		mock_get_file_url.return_value = "https://telegram.local/file.mp4"
 		mock_requests_get.return_value = _MockTelegramResponse(status_code=500)
 
 		response = self.client.get(reverse("episode_stream", args=[self.episode.id]))
 
-		self.assertEqual(response.status_code, 302)
-		self.assertIn(reverse("detail", args=[self.anime.id]), response.url)
+		self.assertEqual(response.status_code, 502)
+		self.assertIn("TELEGRAM_UPSTREAM_ERROR", response.content.decode())

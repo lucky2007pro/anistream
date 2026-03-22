@@ -704,6 +704,49 @@
             }
         }
 
+        async function diagnoseStreamError(videoUrl) {
+            if (!videoUrl || !videoUrl.includes('/episodes/')) {
+                return getVideoErrorMessage();
+            }
+
+            try {
+                const response = await fetch(videoUrl, {
+                    method: 'GET',
+                    headers: { Range: 'bytes=0-1' },
+                    cache: 'no-store',
+                });
+
+                if (response.status === 404) {
+                    return "Video topilmadi. Telegramdagi fayl o'chgan bo'lishi mumkin.";
+                }
+                if (response.status === 403) {
+                    return "Video manbasiga ruxsat yo'q. Bot/kanaI sozlamasini tekshiring.";
+                }
+                if (response.status === 416) {
+                    return "Video stream range xatosi. Qayta urinib ko'ring.";
+                }
+                if (!response.ok) {
+                    const text = await response.text();
+                    if (text.includes('TELEGRAM_NETWORK_ERROR')) {
+                        return "Telegram bilan aloqa uzilgan. Keyinroq qayta urinib ko'ring.";
+                    }
+                    if (text.includes('TELEGRAM_STREAM_ERROR')) {
+                        return "Telegram file_id noto'g'ri yoki muddati o'tgan.";
+                    }
+                    return "Video manbasi topilmadi yoki serverda xatolik bor.";
+                }
+
+                const contentType = (response.headers.get('Content-Type') || '').toLowerCase();
+                if (contentType && !contentType.startsWith('video/') && !contentType.includes('octet-stream')) {
+                    return "Video formati brauzer tomonidan qo'llab-quvvatlanmaydi.";
+                }
+            } catch (error) {
+                return "Tarmoq xatosi: serverdan javob kelmadi.";
+            }
+
+            return getVideoErrorMessage();
+        }
+
         // Epizodni o'ynatish (Bazadan olingan ma'lumot bilan ishlash)
         function playEpisode(videoSrc, epNum) {
 
@@ -781,7 +824,10 @@
         video.addEventListener('stalled', () => showPlayerStatus("Tarmoq sekin. Video kutilyapti...", true));
         video.addEventListener('canplay', hidePlayerStatus);
         video.addEventListener('playing', hidePlayerStatus);
-        video.addEventListener('error', () => showPlayerStatus(getVideoErrorMessage(), false));
+        video.addEventListener('error', async () => {
+            const detailedMessage = await diagnoseStreamError(video.currentSrc || video.src);
+            showPlayerStatus(detailedMessage, false);
+        });
         video.addEventListener('ended', () => {
             playPauseBtn.innerText = '▶';
             centerPlayBtn.style.display = 'flex';

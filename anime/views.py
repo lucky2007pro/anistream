@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
+from django.http import HttpResponse
 from django.http import HttpResponseForbidden
 from django.http import HttpResponseBadRequest
 from django.http import StreamingHttpResponse
@@ -84,8 +85,11 @@ def episode_stream(request, episode_id):
     try:
         file_url = get_telegram_file_url(episode.telegram_file_id)
     except TelegramStorageError as exc:
-        messages.error(request, f"Telegram stream xatosi: {exc}")
-        return redirect('detail', anime_id=episode.anime.id)
+        return HttpResponse(
+            f"TELEGRAM_STREAM_ERROR: {exc}",
+            status=502,
+            content_type='text/plain; charset=utf-8',
+        )
 
     outbound_headers = {}
     range_header = request.headers.get('Range') or request.META.get('HTTP_RANGE')
@@ -99,13 +103,19 @@ def episode_stream(request, episode_id):
             stream=True,
             timeout=90,
         )
-    except requests.RequestException:
-        messages.error(request, "Telegram bilan ulanishda xatolik yuz berdi.")
-        return redirect('detail', anime_id=episode.anime.id)
+    except requests.RequestException as exc:
+        return HttpResponse(
+            f"TELEGRAM_NETWORK_ERROR: {exc}",
+            status=502,
+            content_type='text/plain; charset=utf-8',
+        )
 
     if tg_response.status_code not in (200, 206):
-        messages.error(request, "Telegram'dan video olishda xatolik yuz berdi.")
-        return redirect('detail', anime_id=episode.anime.id)
+        return HttpResponse(
+            f"TELEGRAM_UPSTREAM_ERROR: {tg_response.status_code}",
+            status=tg_response.status_code if tg_response.status_code in (400, 401, 403, 404, 416) else 502,
+            content_type='text/plain; charset=utf-8',
+        )
 
     stream = StreamingHttpResponse(
         tg_response.iter_content(chunk_size=1024 * 1024),
