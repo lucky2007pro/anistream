@@ -41,6 +41,11 @@ class AnimeForm(forms.ModelForm):
 
 
 class EpisodeForm(forms.ModelForm):
+    upload_to_telegram = forms.BooleanField(
+        required=False,
+        label="Saqlashdan keyin Telegram kanalga yuklash"
+    )
+
     class Meta:
         model = Episode
         fields = [
@@ -49,6 +54,8 @@ class EpisodeForm(forms.ModelForm):
             "title",
             "video_file",
             "video_url",
+            "telegram_file_id",
+            "telegram_channel_post_url",
         ]
 
     def clean(self):
@@ -57,9 +64,14 @@ class EpisodeForm(forms.ModelForm):
         video_url = cleaned_data.get("video_url")
 
         if not video_file and not video_url:
-            raise forms.ValidationError(
-                "Kamida bitta maydonni to'ldiring: video fayl yoki video URL."
-            )
+            telegram_file_id = cleaned_data.get("telegram_file_id")
+            if not telegram_file_id:
+                raise forms.ValidationError(
+                    "Kamida bitta maydonni to'ldiring: video fayl, video URL yoki Telegram file_id."
+                )
+
+        if cleaned_data.get("upload_to_telegram") and not video_file:
+            raise forms.ValidationError("Telegram'ga yuklash uchun video fayl tanlang.")
 
         return cleaned_data
 

@@ -2,6 +2,7 @@ from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
+from django.urls import reverse
 
 
 class Genre(models.Model):
@@ -142,6 +143,9 @@ class Episode(models.Model):
         verbose_name="Video silkasi (URL)",
         help_text="Tashqi video silkasi"
     )
+    telegram_file_id = models.CharField(max_length=255, blank=True, null=True)
+    telegram_message_id = models.BigIntegerField(blank=True, null=True)
+    telegram_channel_post_url = models.URLField(max_length=500, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -158,10 +162,19 @@ class Episode(models.Model):
         return f"{self.anime.title} - {self.episode_number}-qism"
 
     def clean(self):
-        if not self.video_file and not self.video_url:
-            raise ValidationError("Video fayl yoki URL manzilidan birini kiriting")
+        if not self.video_file and not self.video_url and not self.telegram_file_id:
+            raise ValidationError("Video fayl, URL yoki Telegram file_id dan birini kiriting")
         if self.episode_number < 1:
             raise ValidationError("Qism raqami 1 dan kichik bo'lishi mumkin emas")
+
+    def get_video_source(self):
+        if self.video_file:
+            return self.video_file.url
+        if self.video_url:
+            return self.video_url
+        if self.telegram_file_id:
+            return reverse('episode_stream', args=[self.id])
+        return ""
 
 
 class UserProfile(models.Model):

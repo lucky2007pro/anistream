@@ -479,7 +479,7 @@
         <div id="episodes" class="tab-content active-content">
             <div class="episodes-grid">
                 {% for ep in anime.episodes.all %}
-                <div class="episode-card" onclick="playEpisode('{{ ep.video_url|default_if_none:"" }}', '{% if ep.video_file %}{{ ep.video_file.url }}{% endif %}', '{{ ep.episode_number }}')">
+                <div class="episode-card" onclick="playEpisode('{{ ep.get_video_source|escapejs }}', '{{ ep.episode_number }}')">
                     <div class="ep-thumb"></div>
                     <div class="ep-info">
                         <div class="ep-title">{{ ep.episode_number }}-qism</div>
@@ -592,7 +592,7 @@
 
                 <div class="ep-list">
                     {% for ep in anime.episodes.all %}
-                    <div class="ep-list-item" onclick="playEpisode('{{ ep.video_url|default_if_none:"" }}', '{% if ep.video_file %}{{ ep.video_file.url }}{% endif %}', '{{ ep.episode_number }}')">
+                    <div class="ep-list-item" onclick="playEpisode('{{ ep.get_video_source|escapejs }}', '{{ ep.episode_number }}')">
                         <div class="ep-list-thumb"></div>
                         <div class="ep-list-info">
                             <h4>{{ ep.episode_number }}-qism</h4>
@@ -636,8 +636,7 @@
         const episodesModal = document.getElementById('episodesModal');
 
         // Epizodni o'ynatish (Bazadan olingan ma'lumot bilan ishlash)
-        function playEpisode(url, fileUrl, epNum) {
-            const videoSrc = fileUrl ? fileUrl : url;
+        function playEpisode(videoSrc, epNum) {
 
             if (!videoSrc) {
                 alert("Kechirasiz, bu qismning videosi hali yuklanmagan!");
@@ -659,8 +658,7 @@
         function playFirstEpisode() {
             {% if anime.episodes.first %}
                 playEpisode(
-                    '{{ anime.episodes.first.video_url|default_if_none:"" }}',
-                    '{% if anime.episodes.first.video_file %}{{ anime.episodes.first.video_file.url }}{% endif %}',
+                    '{{ anime.episodes.first.get_video_source|escapejs }}',
                     '{{ anime.episodes.first.episode_number }}'
                 );
             {% else %}

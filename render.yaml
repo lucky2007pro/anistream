@@ -13,6 +13,16 @@ services:
         value: 3.12.0
     autoDeploy: true
 
+  - type: worker
+    name: anistream-telegram-bot
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "python telegram_bridge_bot.py"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+    autoDeploy: true
+
 databases:
   - name: anistream-db
     databaseName: anistream

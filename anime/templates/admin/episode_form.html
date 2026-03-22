@@ -7,7 +7,7 @@
     <div class="card-header">
         <div>
             <div class="card-title">{{ title }}</div>
-            <div class="card-subtitle">Video fayl yoki video URL dan birini to'ldiring</div>
+            <div class="card-subtitle">Video fayl, video URL yoki Telegram file_id dan birini to'ldiring</div>
         </div>
     </div>
 
@@ -42,6 +42,32 @@
                 {{ form.video_url }}
                 {{ form.video_url.errors }}
             </div>
+        </div>
+
+        <div class="form-grid" style="margin-top: 10px;">
+            <div class="form-group">
+                <label for="id_telegram_file_id">Telegram file_id</label>
+                {{ form.telegram_file_id }}
+                {{ form.telegram_file_id.errors }}
+            </div>
+            <div class="form-group">
+                <label for="id_telegram_channel_post_url">Telegram post URL</label>
+                {{ form.telegram_channel_post_url }}
+                {{ form.telegram_channel_post_url.errors }}
+                {% if form.instance.telegram_channel_post_url %}
+                <div style="margin-top: 8px; font-size: 0.9rem;">
+                    <a href="{{ form.instance.telegram_channel_post_url }}" target="_blank" rel="noopener noreferrer">Postni ochish</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="form-group" style="margin-top: 10px;">
+            <label for="id_upload_to_telegram" style="display:flex; align-items:center; gap:8px;">
+                {{ form.upload_to_telegram }}
+                <span>Saqlashdan keyin videoni bot orqali kanalga yuklash</span>
+            </label>
+            {{ form.upload_to_telegram.errors }}
         </div>
 
         {% if form.non_field_errors %}

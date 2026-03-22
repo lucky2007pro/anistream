@@ -53,6 +53,12 @@ pip install -r requirements.txt
 SECRET_KEY=your-secret-key-here
 DEBUG=True
 ALLOWED_HOSTS=localhost,127.0.0.1
+CSRF_TRUSTED_ORIGINS=http://127.0.0.1:8000,http://localhost:8000
+
+# Telegram storage (ixtiyoriy)
+TELEGRAM_BOT_TOKEN=123456:ABC-DEF...
+TELEGRAM_CHANNEL_ID=-1001234567890
+TELEGRAM_CHANNEL_USERNAME=your_channel_username
 ```
 
 ### 5. Database migrate qiling
@@ -168,6 +174,20 @@ Admin panelga kirish: `http://your-domain.com/admin/`
 2. Anime tanlang
 3. Episode raqami kiriting
 4. Video yuklang yoki URL kiriting
+
+## Telegram orqali video saqlash
+
+Admin episode formasida `Saqlashdan keyin Telegram kanalga yuklash` ni belgilasangiz, local `video_file` bot orqali kanalga yuboriladi va `telegram_file_id` bazaga saqlanadi.
+
+- Botni private kanalga admin qiling.
+- `TELEGRAM_CHANNEL_ID` private kanal ID bo'lishi kerak (`-100...`).
+- Pleyer Telegram saqlangan qism uchun `episodes/<id>/stream/` endpoint orqali avtomatik oqim ochadi.
+
+CLI orqali ham yuklash mumkin:
+
+```bash
+python manage.py upload_episode_to_telegram 15
+```
 
 ## 🎨 Customization
 

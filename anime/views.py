@@ -3,6 +3,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden
+from django.http import HttpResponseBadRequest
+from django.http import StreamingHttpResponse
 from django.contrib import messages
 from django.db.models import Prefetch, Q, Count
 from django.core.paginator import Paginator
@@ -16,7 +18,13 @@ from .models import (
     NewsPost,
 )
 from .forms import GenreForm, AnimeForm, EpisodeForm, NewsPostForm
+from .services.telegram_storage import (
+    TelegramStorageError,
+    get_telegram_file_url,
+    upload_episode_to_telegram,
+)
 import logging
+import requests
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +72,33 @@ def anime_detail(request, anime_id):
         logger.error(f"Anime detail error: {e}")
         messages.error(request, "Anime topilmadi.")
         return redirect('home')
+
+
+def episode_stream(request, episode_id):
+    """Telegram file_id bor episode uchun real file URL ga redirect qiladi."""
+    episode = get_object_or_404(Episode, id=episode_id)
+
+    if not episode.telegram_file_id:
+        return HttpResponseBadRequest("Bu qismda Telegram file_id mavjud emas.")
+
+    try:
+        file_url = get_telegram_file_url(episode.telegram_file_id)
+    except TelegramStorageError as exc:
+        messages.error(request, f"Telegram stream xatosi: {exc}")
+        return redirect('detail', anime_id=episode.anime.id)
+
+    tg_response = requests.get(file_url, stream=True, timeout=90)
+    if tg_response.status_code != 200:
+        messages.error(request, "Telegram'dan video olishda xatolik yuz berdi.")
+        return redirect('detail', anime_id=episode.anime.id)
+
+    stream = StreamingHttpResponse(
+        tg_response.iter_content(chunk_size=1024 * 1024),
+        content_type=tg_response.headers.get('Content-Type', 'application/octet-stream'),
+    )
+    stream['Content-Disposition'] = f'inline; filename="episode-{episode.id}.mp4"'
+    stream['Cache-Control'] = 'private, max-age=300'
+    return stream
 
 
 def auth_view(request):
@@ -631,7 +666,15 @@ def admin_episode_create(request):
     if request.method == "POST":
         form = EpisodeForm(request.POST, request.FILES)
         if form.is_valid():
-            form.save()
+            episode = form.save()
+
+            if form.cleaned_data.get("upload_to_telegram"):
+                try:
+                    upload_episode_to_telegram(episode)
+                    messages.success(request, "Video Telegram kanalga ham yuklandi.")
+                except TelegramStorageError as exc:
+                    messages.warning(request, f"Episode saqlandi, lekin Telegram upload bo'lmadi: {exc}")
+
             messages.success(request, "Qism muvaffaqiyatli qo'shildi.")
             return redirect("admin_episode_list")
     else:
@@ -651,7 +694,15 @@ def admin_episode_edit(request, pk):
     if request.method == "POST":
         form = EpisodeForm(request.POST, request.FILES, instance=episode)
         if form.is_valid():
-            form.save()
+            episode = form.save()
+
+            if form.cleaned_data.get("upload_to_telegram"):
+                try:
+                    upload_episode_to_telegram(episode)
+                    messages.success(request, "Video Telegram kanalga ham yuklandi.")
+                except TelegramStorageError as exc:
+                    messages.warning(request, f"Episode yangilandi, lekin Telegram upload bo'lmadi: {exc}")
+
             messages.success(request, "Qism yangilandi.")
             return redirect("admin_episode_list")
     else:

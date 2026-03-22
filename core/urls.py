@@ -55,6 +55,7 @@ urlpatterns = [
 
     # Anime
     path('anime/<int:anime_id>/', views.anime_detail, name='detail'),
+    path('episodes/<int:episode_id>/stream/', views.episode_stream, name='episode_stream'),
 
     # Janrlar
     path('genres/', views.genres_page, name='genres'),
