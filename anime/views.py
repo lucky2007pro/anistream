@@ -24,6 +24,8 @@ from .services.telegram_storage import (
     get_telegram_file_url,
     upload_episode_to_telegram,
 )
+from asgiref.sync import async_to_sync
+from .services.telegram_streamer import get_telegram_stream_response
 import logging
 import requests
 
@@ -79,6 +81,15 @@ def episode_stream(request, episode_id):
     """Telegram file'ni brauzerga stream qiladi (Range/seek qo'llab-quvvatlanadi)."""
     episode = get_object_or_404(Episode, id=episode_id)
 
+    # 1. MTProto orqali stream qilish (telethon) - cheklovsiz va tezroq
+    try:
+        mtproto_response = async_to_sync(get_telegram_stream_response)(request, episode)
+        if mtproto_response:
+            return mtproto_response
+    except Exception as e:
+        logger.error(f"MTProto stream error (fallback to HTTP): {e}")
+
+    # 2. HTTP Bot API orqali stream (faqat <20MB fayllar uchun ishlaydi)
     if not episode.telegram_file_id:
         return HttpResponseBadRequest("Bu qismda Telegram file_id mavjud emas.")
 

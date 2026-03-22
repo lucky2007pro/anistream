@@ -731,6 +731,9 @@
                         return "Telegram bilan aloqa uzilgan. Keyinroq qayta urinib ko'ring.";
                     }
                     if (text.includes('TELEGRAM_STREAM_ERROR')) {
+                        if (text.toLowerCase().includes('file is too big')) {
+                            return "Telegram Bot API bu videoni bera olmaydi (fayl juda katta). Katta videolarni S3/Cloudinary kabi storageda saqlang.";
+                        }
                         return "Telegram file_id noto'g'ri yoki muddati o'tgan.";
                     }
                     return "Video manbasi topilmadi yoki serverda xatolik bor.";

@@ -33,7 +33,12 @@ API_BASE = f"https://api.telegram.org/bot{BOT_TOKEN}"
 def load_state():
     if STATE_FILE.exists():
         return json.loads(STATE_FILE.read_text(encoding="utf-8"))
-    return {"offset": 0, "last_channel_file_id": "", "last_channel_message_id": None}
+    return {
+        "offset": 0,
+        "last_channel_file_id": "",
+        "last_channel_message_id": None,
+        "last_channel_seen_update": "",
+    }
 
 
 def save_state(state):
@@ -56,6 +61,13 @@ def send_message(chat_id, text):
 
 def send_document(chat_id, file_id, caption=""):
     return tg_call("sendDocument", {"chat_id": chat_id, "document": file_id, "caption": caption})
+
+
+def safe_send_message(chat_id, text):
+    try:
+        send_message(chat_id, text)
+    except Exception:
+        pass
 
 
 def get_updates(offset):
@@ -102,6 +114,44 @@ def channel_post_url(message_id):
     return "(private kanal: public link yo'q)"
 
 
+def build_diag_text():
+    state = load_state()
+    lines = []
+
+    try:
+        me = tg_call("getMe")
+        bot_id = me.get("id")
+        lines.append(f"Bot: @{me.get('username', 'unknown')} (id={bot_id})")
+    except Exception as exc:
+        return f"DIAG ERROR: getMe ishlamadi: {exc}"
+
+    lines.append(f"CHANNEL_ID env: {CHANNEL_ID}")
+    lines.append(f"CHANNEL_USERNAME env: @{CHANNEL_USERNAME if CHANNEL_USERNAME else '(berilmagan)'}")
+
+    try:
+        chat = tg_call("getChat", {"chat_id": CHANNEL_ID})
+        lines.append(
+            "Target chat: "
+            f"id={chat.get('id')} | type={chat.get('type')} | title={chat.get('title', '-') } | "
+            f"username=@{chat.get('username') if chat.get('username') else '-'}"
+        )
+
+        try:
+            member = tg_call("getChatMember", {"chat_id": CHANNEL_ID, "user_id": bot_id})
+            lines.append(f"Bot channel status: {member.get('status')}")
+        except Exception as exc:
+            lines.append(f"Bot channel status xato: {exc}")
+    except Exception as exc:
+        lines.append(f"getChat xato: {exc}")
+
+    lines.append(f"State file: {STATE_FILE}")
+    lines.append(f"Last file_id: {state.get('last_channel_file_id') or 'topilmadi'}")
+    lines.append(f"Last message_id: {state.get('last_channel_message_id') or 'topilmadi'}")
+    lines.append(f"Last channel update seen: {state.get('last_channel_seen_update') or 'topilmadi'}")
+
+    return "\n".join(lines)
+
+
 def handle_private_message(msg):
     chat_id = msg["chat"]["id"]
     user = msg.get("from", {})
@@ -119,8 +169,13 @@ def handle_private_message(msg):
             "Buyruqlar:\n"
             "- /last : kanaldagi oxirgi media file_id\n"
             "- /where : bot qaysi kanalga qarayotgani\n"
+            "- /diag : kanal/bot ulanish diagnostikasi\n"
             "- /help : yordam",
         )
+        return
+
+    if text == "/diag":
+        send_message(chat_id, build_diag_text())
         return
 
     if text == "/where":
@@ -148,7 +203,16 @@ def handle_private_message(msg):
         return
 
     caption = f"Uploaded by bot: {file_name}"
-    posted = send_document(CHANNEL_ID, file_id, caption=caption)
+    try:
+        posted = send_document(CHANNEL_ID, file_id, caption=caption)
+    except Exception as exc:
+        send_message(
+            chat_id,
+            "Kanalga yuborishda xato bo'ldi. CHANNEL_ID/bot admin huquqini tekshiring.\n"
+            f"Xato: {exc}",
+        )
+        return
+
     posted_doc = posted.get("document") or posted.get("video") or {}
     channel_file_id = posted_doc.get("file_id", file_id)
     message_id = posted.get("message_id")
@@ -172,30 +236,31 @@ def handle_channel_post(msg):
         return
 
     file_id, _ = extract_media(msg)
+    state = load_state()
+    state["last_channel_seen_update"] = (
+        f"message_id={msg.get('message_id')} keys={','.join(sorted(msg.keys()))}"
+    )
+
     if not file_id:
+        save_state(state)
         return
 
     message_id = msg.get("message_id")
-    state = load_state()
     state["last_channel_file_id"] = file_id
     state["last_channel_message_id"] = message_id
     save_state(state)
 
     for admin_id in ADMIN_IDS:
-        try:
-            send_message(
-                admin_id,
-                "Kanalga yangi media tushdi.\n"
-                f"file_id: {file_id}\n"
-                f"post: {channel_post_url(message_id)}",
-            )
-        except Exception:
-            pass
+        safe_send_message(
+            admin_id,
+            "Kanalga yangi media tushdi.\n"
+            f"file_id: {file_id}\n"
+            f"post: {channel_post_url(message_id)}",
+        )
 
 
 def main():
-    state = load_state()
-    offset = int(state.get("offset", 0))
+    offset = int(load_state().get("offset", 0))
 
     print("Telegram bridge bot ishga tushdi...")
 
@@ -204,8 +269,11 @@ def main():
             updates = get_updates(offset)
             for update in updates:
                 offset = update["update_id"] + 1
-                state["offset"] = offset
-                save_state(state)
+                # Har safar eng so'nggi state'ni o'qib, faqat offsetni yangilab yozamiz.
+                # Aks holda boshqa joyda saqlangan last_channel_file_id ustidan yozilib ketadi.
+                current_state = load_state()
+                current_state["offset"] = offset
+                save_state(current_state)
 
                 if update.get("message"):
                     msg = update["message"]
@@ -214,6 +282,10 @@ def main():
 
                 if update.get("channel_post"):
                     ch_msg = update["channel_post"]
+                    handle_channel_post(ch_msg)
+
+                if update.get("edited_channel_post"):
+                    ch_msg = update["edited_channel_post"]
                     handle_channel_post(ch_msg)
 
         except KeyboardInterrupt:
