@@ -204,6 +204,36 @@
         .video-container { position: relative; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; background: #000; overflow: hidden; }
         video { width: 100%; height: 100%; object-fit: contain; }
 
+        .player-status-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 15;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            background: rgba(0, 0, 0, 0.45);
+            backdrop-filter: blur(2px);
+            text-align: center;
+            padding: 18px;
+        }
+        .player-status-overlay.hidden { display: none; }
+        .player-spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+        }
+        .player-spinner.hidden { display: none; }
+        .player-status-text { font-size: 0.95rem; color: #f0f0f0; max-width: 520px; }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
         .player-header {
             position: absolute; top: 0; left: 0; width: 100%; padding: 25px 40px;
             display: flex; justify-content: space-between; align-items: flex-start;
@@ -536,6 +566,10 @@
     <div class="player-overlay" id="customPlayer">
         <div class="video-container" id="videoContainer">
             <video id="mainVideo" playsinline></video>
+            <div id="playerStatusOverlay" class="player-status-overlay hidden">
+                <div id="playerSpinner" class="player-spinner"></div>
+                <div id="playerStatusText" class="player-status-text">Video yuklanmoqda...</div>
+            </div>
 
             <div class="player-header" id="playerHeader">
                 <div class="player-back" onclick="closePlayer()">
@@ -634,24 +668,68 @@
         const playerTitle = document.getElementById('playerTitle');
         const settingsSidebar = document.getElementById('settingsSidebar');
         const episodesModal = document.getElementById('episodesModal');
+        const playerStatusOverlay = document.getElementById('playerStatusOverlay');
+        const playerSpinner = document.getElementById('playerSpinner');
+        const playerStatusText = document.getElementById('playerStatusText');
+
+        function showPlayerStatus(text, showSpinner = true) {
+            playerStatusText.textContent = text;
+            playerStatusOverlay.classList.remove('hidden');
+            playerSpinner.classList.toggle('hidden', !showSpinner);
+        }
+
+        function hidePlayerStatus() {
+            playerStatusOverlay.classList.add('hidden');
+        }
+
+        function getVideoErrorMessage() {
+            if (!navigator.onLine) {
+                return "Internet aloqasi yo'q. Tarmoqni tekshirib qayta urinib ko'ring.";
+            }
+            if (!video.error) {
+                return "Video ijro etib bo'lmadi. Qayta urinib ko'ring.";
+            }
+            switch (video.error.code) {
+                case MediaError.MEDIA_ERR_ABORTED:
+                    return "Video yuklash to'xtatildi.";
+                case MediaError.MEDIA_ERR_NETWORK:
+                    return "Tarmoq xatosi sabab video yuklanmadi.";
+                case MediaError.MEDIA_ERR_DECODE:
+                    return "Video fayl formatini o'qib bo'lmadi.";
+                case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
+                    return "Video manbasi qo'llab-quvvatlanmaydi yoki topilmadi.";
+                default:
+                    return "Noma'lum xatolik yuz berdi.";
+            }
+        }
 
         // Epizodni o'ynatish (Bazadan olingan ma'lumot bilan ishlash)
         function playEpisode(videoSrc, epNum) {
 
             if (!videoSrc) {
-                alert("Kechirasiz, bu qismning videosi hali yuklanmagan!");
+                showPlayerStatus("Bu qism uchun video manbasi topilmadi.", false);
+                playerOverlay.classList.add('active');
+                document.body.style.overflow = 'hidden';
                 return;
             }
 
             video.src = videoSrc;
+            video.load();
             playerTitle.innerText = `{{ anime.title }} - ${epNum}-qism`;
 
             playerOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
 
-            video.play();
-            playPauseBtn.innerText = '⏸';
-            centerPlayBtn.style.display = 'none';
+            showPlayerStatus("Video yuklanmoqda...", true);
+
+            video.play().then(() => {
+                playPauseBtn.innerText = '⏸';
+                centerPlayBtn.style.display = 'none';
+            }).catch(() => {
+                showPlayerStatus("Video avtomatik boshlanmadi. Markazdagi tugma orqali ishga tushiring.", false);
+                playPauseBtn.innerText = '▶';
+                centerPlayBtn.style.display = 'flex';
+            });
         }
 
         // Asosiy "Tomosha qilish" tugmasi birinchi qismni ochadi
@@ -669,18 +747,25 @@
         function closePlayer() {
             playerOverlay.classList.remove('active');
             video.pause();
+            video.removeAttribute('src');
+            video.load();
             playPauseBtn.innerText = '▶';
             centerPlayBtn.style.display = 'flex';
             document.body.style.overflow = 'auto';
             settingsSidebar.classList.remove('open');
             episodesModal.classList.remove('open');
+            hidePlayerStatus();
         }
 
         function togglePlay() {
             if (video.paused) {
-                video.play();
-                playPauseBtn.innerText = '⏸';
-                centerPlayBtn.style.display = 'none';
+                showPlayerStatus("Ijro uchun tayyorlanmoqda...", true);
+                video.play().then(() => {
+                    playPauseBtn.innerText = '⏸';
+                    centerPlayBtn.style.display = 'none';
+                }).catch(() => {
+                    showPlayerStatus(getVideoErrorMessage(), false);
+                });
             } else {
                 video.pause();
                 playPauseBtn.innerText = '▶';
@@ -689,6 +774,29 @@
             }
         }
         video.addEventListener('click', togglePlay);
+
+        video.addEventListener('loadstart', () => showPlayerStatus("Video yuklanmoqda...", true));
+        video.addEventListener('waiting', () => showPlayerStatus("Buffering...", true));
+        video.addEventListener('stalled', () => showPlayerStatus("Tarmoq sekin. Video kutilyapti...", true));
+        video.addEventListener('canplay', hidePlayerStatus);
+        video.addEventListener('playing', hidePlayerStatus);
+        video.addEventListener('error', () => showPlayerStatus(getVideoErrorMessage(), false));
+        video.addEventListener('ended', () => {
+            playPauseBtn.innerText = '▶';
+            centerPlayBtn.style.display = 'flex';
+        });
+
+        window.addEventListener('offline', () => {
+            if (playerOverlay.classList.contains('active')) {
+                showPlayerStatus("Internet uzildi. Ulanishni tekshiring.", false);
+            }
+        });
+
+        window.addEventListener('online', () => {
+            if (playerOverlay.classList.contains('active') && video.paused) {
+                showPlayerStatus("Internet tiklandi. Qayta play bosing.", false);
+            }
+        });
 
         function formatTime(seconds) {
             let m = Math.floor(seconds / 60);

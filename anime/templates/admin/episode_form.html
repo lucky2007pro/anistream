@@ -11,7 +11,7 @@
         </div>
     </div>
 
-    <form method="post" enctype="multipart/form-data">
+    <form id="episodeForm" method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-grid">
             <div class="form-group">
@@ -86,11 +86,104 @@
             </ul>
         {% endif %}
 
+        <div id="uploadProgressWrap" style="display:none; margin-top: 14px;">
+            <div style="display:flex; justify-content:space-between; font-size:0.85rem; color: var(--text-muted); margin-bottom:6px;">
+                <span id="uploadProgressLabel">Yuklanmoqda...</span>
+                <span id="uploadProgressPercent">0%</span>
+            </div>
+            <div style="width:100%; height:10px; border-radius:999px; background: rgba(255,255,255,0.08); overflow:hidden;">
+                <div id="uploadProgressBar" style="width:0%; height:100%; background: linear-gradient(90deg, #ff3366, #ff7aa0); transition: width .2s ease;"></div>
+            </div>
+        </div>
+
         <div style="margin-top: 16px; display:flex; gap:10px;">
-            <button type="submit" class="btn-primary">Saqlash</button>
+            <button id="submitEpisodeBtn" type="submit" class="btn-primary">Saqlash</button>
             <a href="{% url 'admin_episode_list' %}" class="btn-outline">Bekor qilish</a>
         </div>
     </form>
 </div>
+
+<script>
+(() => {
+    const form = document.getElementById('episodeForm');
+    const submitBtn = document.getElementById('submitEpisodeBtn');
+    const progressWrap = document.getElementById('uploadProgressWrap');
+    const progressBar = document.getElementById('uploadProgressBar');
+    const progressPercent = document.getElementById('uploadProgressPercent');
+    const progressLabel = document.getElementById('uploadProgressLabel');
+    if (!form || !submitBtn || !progressWrap || !progressBar || !progressPercent || !progressLabel) {
+        return;
+    }
+
+    let inFlight = false;
+
+    form.addEventListener('submit', function (event) {
+        const videoInput = document.getElementById('id_video_file');
+        const hasFile = videoInput && videoInput.files && videoInput.files.length > 0;
+
+        // Fayl bo'lmasa oddiy submit qoldiramiz.
+        if (!hasFile || inFlight) {
+            return;
+        }
+
+        event.preventDefault();
+        inFlight = true;
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Yuklanmoqda...';
+        progressWrap.style.display = 'block';
+        progressLabel.textContent = 'Serverga yuklanmoqda...';
+        progressPercent.textContent = '0%';
+        progressBar.style.width = '0%';
+
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', form.action || window.location.href, true);
+
+        xhr.upload.onprogress = function (e) {
+            if (!e.lengthComputable) {
+                return;
+            }
+            const percent = Math.min(100, Math.round((e.loaded / e.total) * 100));
+            progressBar.style.width = percent + '%';
+            progressPercent.textContent = percent + '%';
+
+            if (percent >= 100) {
+                progressLabel.textContent = 'Server tekshirmoqda / Telegramga yubormoqda...';
+            }
+        };
+
+        xhr.onload = function () {
+            if (xhr.status >= 200 && xhr.status < 400) {
+                // Agar create/edit sahifasida qolgan bo'lsa, bu odatda validation xatosi.
+                const finalUrl = (xhr.responseURL || '').toLowerCase();
+                const stillOnForm = finalUrl.includes('/admin/episodes/create/') || finalUrl.includes('/edit/');
+                if (stillOnForm) {
+                    document.open();
+                    document.write(xhr.responseText);
+                    document.close();
+                    return;
+                }
+
+                window.location.href = '{% url 'admin_episode_list' %}';
+                return;
+            }
+
+            progressLabel.textContent = 'Xatolik yuz berdi. Qayta urinib ko\'ring.';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Saqlash';
+            inFlight = false;
+        };
+
+        xhr.onerror = function () {
+            progressLabel.textContent = 'Tarmoq xatosi. Internetni tekshiring.';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Saqlash';
+            inFlight = false;
+        };
+
+        xhr.send(new FormData(form));
+    });
+})();
+</script>
 {% endblock %}
 

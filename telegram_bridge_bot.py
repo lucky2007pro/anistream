@@ -69,7 +69,25 @@ def extract_media(msg):
     if msg.get("video"):
         media = msg["video"]
         return media.get("file_id"), "video.mp4"
+    if msg.get("animation"):
+        media = msg["animation"]
+        return media.get("file_id"), "animation.mp4"
+    if msg.get("video_note"):
+        media = msg["video_note"]
+        return media.get("file_id"), "video_note.mp4"
     return "", ""
+
+
+def is_target_channel(chat):
+    chat_id = str(chat.get("id", ""))
+    if chat_id == str(CHANNEL_ID):
+        return True
+
+    chat_username = (chat.get("username") or "").strip().lstrip("@")
+    if CHANNEL_USERNAME and chat_username and chat_username.lower() == CHANNEL_USERNAME.lower():
+        return True
+
+    return False
 
 
 def is_allowed_user(user_id):
@@ -100,7 +118,16 @@ def handle_private_message(msg):
             "Video yoki hujjat yuboring: bot uni kanalga joylaydi va file_id qaytaradi.\n"
             "Buyruqlar:\n"
             "- /last : kanaldagi oxirgi media file_id\n"
+            "- /where : bot qaysi kanalga qarayotgani\n"
             "- /help : yordam",
+        )
+        return
+
+    if text == "/where":
+        send_message(
+            chat_id,
+            f"CHANNEL_ID: {CHANNEL_ID}\n"
+            f"CHANNEL_USERNAME: @{CHANNEL_USERNAME if CHANNEL_USERNAME else '(berilmagan)'}",
         )
         return
 
@@ -140,6 +167,10 @@ def handle_private_message(msg):
 
 
 def handle_channel_post(msg):
+    chat = msg.get("chat", {})
+    if not is_target_channel(chat):
+        return
+
     file_id, _ = extract_media(msg)
     if not file_id:
         return
@@ -183,8 +214,7 @@ def main():
 
                 if update.get("channel_post"):
                     ch_msg = update["channel_post"]
-                    if str(ch_msg.get("chat", {}).get("id")) == str(CHANNEL_ID):
-                        handle_channel_post(ch_msg)
+                    handle_channel_post(ch_msg)
 
         except KeyboardInterrupt:
             print("To'xtatildi")

@@ -75,7 +75,7 @@ def anime_detail(request, anime_id):
 
 
 def episode_stream(request, episode_id):
-    """Telegram file_id bor episode uchun real file URL ga redirect qiladi."""
+    """Telegram file'ni brauzerga stream qiladi (Range/seek qo'llab-quvvatlanadi)."""
     episode = get_object_or_404(Episode, id=episode_id)
 
     if not episode.telegram_file_id:
@@ -87,15 +87,42 @@ def episode_stream(request, episode_id):
         messages.error(request, f"Telegram stream xatosi: {exc}")
         return redirect('detail', anime_id=episode.anime.id)
 
-    tg_response = requests.get(file_url, stream=True, timeout=90)
-    if tg_response.status_code != 200:
+    outbound_headers = {}
+    range_header = request.headers.get('Range') or request.META.get('HTTP_RANGE')
+    if range_header:
+        outbound_headers['Range'] = range_header
+
+    try:
+        tg_response = requests.get(
+            file_url,
+            headers=outbound_headers,
+            stream=True,
+            timeout=90,
+        )
+    except requests.RequestException:
+        messages.error(request, "Telegram bilan ulanishda xatolik yuz berdi.")
+        return redirect('detail', anime_id=episode.anime.id)
+
+    if tg_response.status_code not in (200, 206):
         messages.error(request, "Telegram'dan video olishda xatolik yuz berdi.")
         return redirect('detail', anime_id=episode.anime.id)
 
     stream = StreamingHttpResponse(
         tg_response.iter_content(chunk_size=1024 * 1024),
         content_type=tg_response.headers.get('Content-Type', 'application/octet-stream'),
+        status=tg_response.status_code,
     )
+
+    # Seek/replay stabil ishlashi uchun upstream range headerlarini uzatamiz.
+    if tg_response.headers.get('Content-Range'):
+        stream['Content-Range'] = tg_response.headers['Content-Range']
+    if tg_response.headers.get('Content-Length'):
+        stream['Content-Length'] = tg_response.headers['Content-Length']
+    if tg_response.headers.get('Accept-Ranges'):
+        stream['Accept-Ranges'] = tg_response.headers['Accept-Ranges']
+    else:
+        stream['Accept-Ranges'] = 'bytes'
+
     stream['Content-Disposition'] = f'inline; filename="episode-{episode.id}.mp4"'
     stream['Cache-Control'] = 'private, max-age=300'
     return stream
