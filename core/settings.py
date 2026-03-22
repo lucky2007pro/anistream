@@ -32,7 +32,23 @@ if 'DEBUG' in os.environ:
     DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 else:
     DEBUG = ENVIRONMENT != 'production'
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+
+def _split_csv_env(var_name, default_value):
+    """Comma-separated env qiymatini tozalab list ko'rinishiga o'tkazadi."""
+    raw_value = os.environ.get(var_name, default_value)
+    return [item.strip() for item in raw_value.split(',') if item.strip()]
+
+
+ALLOWED_HOSTS = _split_csv_env(
+    'ALLOWED_HOSTS',
+    'anistream-694e.onrender.com,anistream.dev,www.anistream.dev,127.0.0.1,localhost'
+)
+
+CSRF_TRUSTED_ORIGINS = _split_csv_env(
+    'CSRF_TRUSTED_ORIGINS',
+    'https://anistream.dev,https://www.anistream.dev,https://anistream-694e.onrender.com'
+)
 
 # Application definition
 
