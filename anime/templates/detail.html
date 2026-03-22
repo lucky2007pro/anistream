@@ -4,6 +4,72 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ anime.title }} - AniStream</title>
+
+    <!-- ===== SEO META TAGS ===== -->
+    <meta name="description" content="{{ anime.description|truncatechars:160 }}">
+    <meta name="keywords" content="{{ anime.title }}, anime ko'rish, {{ anime.release_year }}">
+    <meta name="author" content="AniStream">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Uzbek">
+    <meta name="revisit-after" content="7 days">
+    <link rel="canonical" href="https://anistream.uz/anime/{{ anime.id }}">
+
+    <!-- Open Graph (Facebook, Telegram, WhatsApp preview) -->
+    <meta property="og:type" content="video.tv_show">
+    <meta property="og:title" content="{{ anime.title }} - AniStream">
+    <meta property="og:description" content="{{ anime.description|truncatechars:160 }}">
+    <meta property="og:image" content="{{ anime.image_url }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="https://anistream.uz/anime/{{ anime.id }}">
+    <meta property="og:site_name" content="AniStream">
+    <meta property="og:locale" content="uz_UZ">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ anime.title }} - AniStream">
+    <meta name="twitter:description" content="{{ anime.description|truncatechars:160 }}">
+    <meta name="twitter:image" content="{{ anime.image_url }}">
+    <meta name="twitter:site" content="@anistream_uz">
+
+    <!-- PWA / Mobile -->
+    <meta name="theme-color" content="#ff3366">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AniStream">
+    <link rel="apple-touch-icon" href="/static/icons/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/icons/favicon-16x16.png">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta property="video:release_date" content="{{ anime.release_year }}">
+    <meta property="video:tag" content="anime">
+    <meta name="rating" content="{{ anime.rating }}">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TVSeries",
+      "name": "{{ anime.title }}",
+      "description": "{{ anime.description|truncatechars:200 }}",
+      "image": "{{ anime.image_url }}",
+      "startDate": "{{ anime.release_year }}",
+      "genre": "Anime",
+      "inLanguage": "uz",
+      "url": "https://anistream.uz/anime/{{ anime.id }}",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "{{ anime.rating }}",
+        "bestRating": "10",
+        "ratingCount": "1"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "AniStream",
+        "url": "https://anistream.uz"
+      }
+    }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">

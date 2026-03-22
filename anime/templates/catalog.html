@@ -3,7 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anime Katalog - AniStream</title>
+    <title>Anime Katalog - Barcha Animelar | AniStream</title>
+
+    <!-- ===== SEO META TAGS ===== -->
+    <meta name="description" content="AniStream'ning to'liq anime katalogi. Janr, yil va reytingga qarab filtrlang. Sevimli animengizni toping va ko'ring.">
+    <meta name="keywords" content="anime katalog, anime ro'yxati, barcha anime, anime filter, anime janr">
+    <meta name="author" content="AniStream">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Uzbek">
+    <meta name="revisit-after" content="7 days">
+    <link rel="canonical" href="https://anistream.uz/catalog">
+
+    <!-- Open Graph (Facebook, Telegram, WhatsApp preview) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Anime Katalog - Barcha Animelar | AniStream">
+    <meta property="og:description" content="AniStream'ning to'liq anime katalogi. Janr, yil va reytingga qarab filtrlang. Sevimli animengizni toping va ko'ring.">
+    <meta property="og:image" content="https://anistream.uz/static/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="https://anistream.uz/catalog">
+    <meta property="og:site_name" content="AniStream">
+    <meta property="og:locale" content="uz_UZ">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Anime Katalog - Barcha Animelar | AniStream">
+    <meta name="twitter:description" content="AniStream'ning to'liq anime katalogi. Janr, yil va reytingga qarab filtrlang. Sevimli animengizni toping va ko'ring.">
+    <meta name="twitter:image" content="https://anistream.uz/static/og-image.jpg">
+    <meta name="twitter:site" content="@anistream_uz">
+
+    <!-- PWA / Mobile -->
+    <meta name="theme-color" content="#ff3366">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AniStream">
+    <link rel="apple-touch-icon" href="/static/icons/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/icons/favicon-16x16.png">
+    <link rel="manifest" href="/static/manifest.json">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "ItemList",
+      "name": "Anime Katalog",
+      "description": "AniStream'ning to'liq anime katalogi",
+      "url": "https://anistream.uz/catalog"
+    }
+    </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -546,7 +594,7 @@
             .nav-menu { display: none !important; }
             .hamburger { display: flex !important; }
             .nav-brand { font-size: 1.4rem; }
-            .nav-actions .action-icon:not(.profile-btn):not([href="/search"]) { display: none; }
+            .nav-actions .action-icon:not(.profile-btn):not(.search-icon) { display: none; }
             .container { padding: 0 4%; }
 
             .page-header { padding: 80px 4% 30px; text-align: center; }
@@ -613,19 +661,19 @@
 <body>
 
 <nav class="navbar">
-    <a href="/" class="nav-brand">Ani<span>Stream</span></a>
+    <a href="{% url 'home' %}" class="nav-brand">Ani<span>Stream</span></a>
 
     <div class="nav-menu">
-        <a href="/catalog" class="active">Katalog</a>
-        <a href="/genres">Janrlar</a>
-        <a href="/schedule">Jadval</a>
-        <a href="/news">Yangiliklar</a>
+        <a href="{% url 'catalog' %}" class="active">Katalog</a>
+        <a href="{% url 'genres' %}">Janrlar</a>
+        <a href="{% url 'schedule' %}">Jadval</a>
+        <a href="{% url 'news_list' %}">Yangiliklar</a>
     </div>
 
     <div class="nav-actions">
-        <a href="/search" class="action-icon">🔍</a>
+        <a href="{% url 'search' %}" class="action-icon search-icon">🔍</a>
         <div class="action-icon">🔔</div>
-        <div class="action-icon profile-btn">👤</div>
+        <a href="{% if request.user.is_authenticated %}{% url 'profile' %}{% else %}{% url 'auth_page' %}{% endif %}" class="action-icon profile-btn">👤</a>
     </div>
 </nav>
 
@@ -635,52 +683,47 @@
         <p class="page-subtitle">Barcha anime seriallarni topish va ko'rish</p>
     </div>
 
-    <div class="filter-bar">
+    <form class="filter-bar" method="get" action="{% url 'catalog' %}">
         <div class="search-box">
-            <input type="text" class="search-input" placeholder="Anime nomini kiriting...">
-            <button class="search-btn">QIDIRISH</button>
+            <input type="text" name="q" value="{{ search_query }}" class="search-input" placeholder="Anime nomini kiriting...">
+            <button type="submit" class="search-btn">QIDIRISH</button>
         </div>
 
         <div class="filters-grid">
-            <select class="filter-select">
+            <select name="genre" class="filter-select">
                 <option value="">Janr tanlang</option>
-                <option value="action">Action</option>
-                <option value="adventure">Adventure</option>
-                <option value="comedy">Comedy</option>
-                <option value="drama">Drama</option>
-                <option value="fantasy">Fantasy</option>
-                <option value="romance">Romance</option>
-                <option value="scifi">Sci-Fi</option>
+                {% for genre in genres %}
+                <option value="{{ genre.slug }}" {% if selected_genre == genre.slug %}selected{% endif %}>{{ genre.name }}</option>
+                {% endfor %}
             </select>
 
-            <select class="filter-select">
-                <option value="">Yil</option>
-                <option value="2024">2024</option>
-                <option value="2023">2023</option>
-                <option value="2022">2022</option>
-                <option value="2021">2021</option>
-                <option value="2020">2020</option>
+            <select name="type" class="filter-select">
+                <option value="">Turi</option>
+                <option value="tv" {% if selected_type == 'tv' %}selected{% endif %}>TV</option>
+                <option value="movie" {% if selected_type == 'movie' %}selected{% endif %}>Film</option>
+                <option value="ova" {% if selected_type == 'ova' %}selected{% endif %}>OVA</option>
+                <option value="special" {% if selected_type == 'special' %}selected{% endif %}>Maxsus</option>
             </select>
 
-            <select class="filter-select">
+            <select name="status" class="filter-select">
                 <option value="">Holati</option>
-                <option value="ongoing">Davom etmoqda</option>
-                <option value="completed">Tugallangan</option>
-                <option value="upcoming">Tez kunda</option>
+                <option value="ongoing" {% if selected_status == 'ongoing' %}selected{% endif %}>Davom etmoqda</option>
+                <option value="completed" {% if selected_status == 'completed' %}selected{% endif %}>Tugallangan</option>
+                <option value="upcoming" {% if selected_status == 'upcoming' %}selected{% endif %}>Tez kunda</option>
             </select>
 
-            <select class="filter-select">
+            <select name="sort" class="filter-select">
                 <option value="">Saralash</option>
-                <option value="popular">Ommabop</option>
-                <option value="rating">Reyting</option>
-                <option value="latest">Eng yangi</option>
-                <option value="az">A-Z</option>
+                <option value="-created_at" {% if selected_sort == '-created_at' %}selected{% endif %}>Eng yangi</option>
+                <option value="rating" {% if selected_sort == 'rating' %}selected{% endif %}>Reyting (pastdan yuqori)</option>
+                <option value="-rating" {% if selected_sort == '-rating' %}selected{% endif %}>Reyting (yuqoridan past)</option>
+                <option value="title" {% if selected_sort == 'title' %}selected{% endif %}>A-Z</option>
             </select>
         </div>
-    </div>
+    </form>
 
     <div class="results-info">
-        <div class="results-count">Topildi: <span>248</span> ta anime</div>
+        <div class="results-count">Topildi: <span>{{ page_obj.paginator.count }}</span> ta anime</div>
         <div class="view-toggle">
             <button class="toggle-btn active">⊞</button>
             <button class="toggle-btn">☰</button>
@@ -688,136 +731,40 @@
     </div>
 
     <div class="anime-grid">
-        <!-- Sample cards (Django template will replace this) -->
-        <a href="/detail/1" class="card-wrapper">
+        {% for anime in page_obj %}
+        <a href="{% url 'detail' anime.id %}" class="card-wrapper">
             <div class="anime-card">
-                <div class="top-badge">★ 8.9</div>
+                <div class="top-badge">★ {{ anime.rating|floatformat:1 }}</div>
                 <div class="badge-quality">HD</div>
-                <img src="https://cdn.myanimelist.net/images/anime/1208/94745.jpg" alt="Anime">
+                <img src="{{ anime.image_url }}" alt="{{ anime.title }}">
             </div>
             <div class="card-info-bottom">
-                <h4 class="card-title">Kimetsu no Yaiba</h4>
+                <h4 class="card-title">{{ anime.title }}</h4>
                 <div class="card-meta">
                     <span class="tag-jp">JP</span>
-                    <span>2019</span>
+                    <span>{{ anime.release_year }}</span>
                 </div>
             </div>
         </a>
-
-        <a href="/detail/2" class="card-wrapper">
-            <div class="anime-card">
-                <div class="top-badge">★ 9.2</div>
-                <div class="badge-quality">HD</div>
-                <img src="https://cdn.myanimelist.net/images/anime/1337/99013.jpg" alt="Anime">
-            </div>
-            <div class="card-info-bottom">
-                <h4 class="card-title">Shingeki no Kyojin</h4>
-                <div class="card-meta">
-                    <span class="tag-jp">JP</span>
-                    <span>2013</span>
-                </div>
-            </div>
-        </a>
-
-        <a href="/detail/3" class="card-wrapper">
-            <div class="anime-card">
-                <div class="top-badge">★ 8.7</div>
-                <div class="badge-quality">HD</div>
-                <img src="https://cdn.myanimelist.net/images/anime/1286/99889.jpg" alt="Anime">
-            </div>
-            <div class="card-info-bottom">
-                <h4 class="card-title">Jujutsu Kaisen</h4>
-                <div class="card-meta">
-                    <span class="tag-jp">JP</span>
-                    <span>2020</span>
-                </div>
-            </div>
-        </a>
-
-        <a href="/detail/4" class="card-wrapper">
-            <div class="anime-card">
-                <div class="top-badge">★ 9.0</div>
-                <div class="badge-quality">HD</div>
-                <img src="https://cdn.myanimelist.net/images/anime/1223/96541.jpg" alt="Anime">
-            </div>
-            <div class="card-info-bottom">
-                <h4 class="card-title">Boku no Hero Academia</h4>
-                <div class="card-meta">
-                    <span class="tag-jp">JP</span>
-                    <span>2016</span>
-                </div>
-            </div>
-        </a>
-
-        <a href="/detail/5" class="card-wrapper">
-            <div class="anime-card">
-                <div class="top-badge">★ 8.8</div>
-                <div class="badge-quality">HD</div>
-                <img src="https://cdn.myanimelist.net/images/anime/1695/111486.jpg" alt="Anime">
-            </div>
-            <div class="card-info-bottom">
-                <h4 class="card-title">Tokyo Revengers</h4>
-                <div class="card-meta">
-                    <span class="tag-jp">JP</span>
-                    <span>2021</span>
-                </div>
-            </div>
-        </a>
-
-        <a href="/detail/6" class="card-wrapper">
-            <div class="anime-card">
-                <div class="top-badge">★ 9.1</div>
-                <div class="badge-quality">HD</div>
-                <img src="https://cdn.myanimelist.net/images/anime/1988/117775.jpg" alt="Anime">
-            </div>
-            <div class="card-info-bottom">
-                <h4 class="card-title">Spy x Family</h4>
-                <div class="card-meta">
-                    <span class="tag-jp">JP</span>
-                    <span>2022</span>
-                </div>
-            </div>
-        </a>
-
-        <a href="/detail/7" class="card-wrapper">
-            <div class="anime-card">
-                <div class="top-badge">★ 8.5</div>
-                <div class="badge-quality">HD</div>
-                <img src="https://cdn.myanimelist.net/images/anime/1081/119718.jpg" alt="Anime">
-            </div>
-            <div class="card-info-bottom">
-                <h4 class="card-title">Chainsaw Man</h4>
-                <div class="card-meta">
-                    <span class="tag-jp">JP</span>
-                    <span>2022</span>
-                </div>
-            </div>
-        </a>
-
-        <a href="/detail/8" class="card-wrapper">
-            <div class="anime-card">
-                <div class="top-badge">★ 8.9</div>
-                <div class="badge-quality">HD</div>
-                <img src="https://cdn.myanimelist.net/images/anime/1614/108563.jpg" alt="Anime">
-            </div>
-            <div class="card-info-bottom">
-                <h4 class="card-title">One Punch Man</h4>
-                <div class="card-meta">
-                    <span class="tag-jp">JP</span>
-                    <span>2015</span>
-                </div>
-            </div>
-        </a>
+        {% empty %}
+        <p class="page-subtitle">Siz tanlagan filtrlar bo'yicha anime topilmadi.</p>
+        {% endfor %}
     </div>
 
     <div class="pagination">
-        <button class="page-btn disabled">❮</button>
-        <button class="page-btn active">1</button>
-        <button class="page-btn">2</button>
-        <button class="page-btn">3</button>
-        <button class="page-btn">4</button>
-        <button class="page-btn">5</button>
-        <button class="page-btn">❯</button>
+        {% if page_obj.has_previous %}
+        <a class="page-btn" href="?q={{ search_query }}&genre={{ selected_genre }}&type={{ selected_type }}&status={{ selected_status }}&sort={{ selected_sort }}&page={{ page_obj.previous_page_number }}">❮</a>
+        {% else %}
+        <span class="page-btn disabled">❮</span>
+        {% endif %}
+
+        <span class="page-btn active">{{ page_obj.number }}</span>
+
+        {% if page_obj.has_next %}
+        <a class="page-btn" href="?q={{ search_query }}&genre={{ selected_genre }}&type={{ selected_type }}&status={{ selected_status }}&sort={{ selected_sort }}&page={{ page_obj.next_page_number }}">❯</a>
+        {% else %}
+        <span class="page-btn disabled">❯</span>
+        {% endif %}
     </div>
 </div>
 

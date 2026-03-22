@@ -1,9 +1,75 @@
 <!DOCTYPE html>
+{% load static %}
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yangilik - AniStream</title>
+    <title>{{ news.title }} | AniStream</title>
+
+    <!-- ===== SEO META TAGS ===== -->
+    <meta name="description" content="{{ news.content|truncatechars:160 }}">
+    <meta name="keywords" content="{{ news.title }}, anime yangilik">
+    <meta name="author" content="AniStream">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Uzbek">
+    <meta name="revisit-after" content="7 days">
+    <link rel="canonical" href="https://anistream.uz{% url 'news_detail' news.slug %}">
+
+    <!-- Open Graph (Facebook, Telegram, WhatsApp preview) -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="{{ news.title }} | AniStream">
+    <meta property="og:description" content="{{ news.content|truncatechars:160 }}">
+    <meta property="og:image" content="{{ news.image_url|default:'https://anistream.uz/static/og-image.jpg' }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="https://anistream.uz{% url 'news_detail' news.slug %}">
+    <meta property="og:site_name" content="AniStream">
+    <meta property="og:locale" content="uz_UZ">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ news.title }} | AniStream">
+    <meta name="twitter:description" content="{{ news.content|truncatechars:160 }}">
+    <meta name="twitter:image" content="{{ news.image_url|default:'https://anistream.uz/static/og-image.jpg' }}">
+    <meta name="twitter:site" content="@anistream_uz">
+
+    <!-- PWA / Mobile -->
+    <meta name="theme-color" content="#ff3366">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AniStream">
+    <link rel="apple-touch-icon" href="{% static 'icons/apple-icon-180x180.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'icons/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'icons/favicon-16x16.png' %}">
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta property="article:published_time" content="{{ news.created_at|date:'c' }}">
+    <meta property="article:author" content="AniStream">
+    <meta property="article:section" content="Anime">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "NewsArticle",
+      "headline": "{{ news.title }}",
+      "description": "{{ news.content|truncatechars:160 }}",
+      "image": "{{ news.image_url|default:'https://anistream.uz/static/og-image.jpg' }}",
+      "datePublished": "{{ news.created_at|date:'c' }}",
+      "dateModified": "{{ news.updated_at|default:news.created_at|date:'c' }}",
+      "author": {
+        "@type": "Organization",
+        "name": "AniStream"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "AniStream",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://anistream.uz/static/logo.png"
+        }
+      }
+    }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -136,7 +202,7 @@
             .nav-menu { display: none !important; }
             .hamburger { display: flex !important; }
             .nav-brand { font-size: 1.4rem; }
-            .nav-actions .action-icon:not(.profile-btn):not([href="/search"]) { display: none; }
+            .nav-actions .action-icon:not(.profile-btn):not(.search-icon) { display: none; }
             .container { padding: 0 4%; }
 
             .page-header { padding: 80px 4% 30px; text-align: center; }
@@ -203,54 +269,37 @@
 <body>
 
 <nav class="navbar">
-    <a href="/" class="nav-brand">Ani<span>Stream</span></a>
+    <a href="{% url 'home' %}" class="nav-brand">Ani<span>Stream</span></a>
     <div class="nav-menu">
-        <a href="/catalog">Katalog</a>
-        <a href="/genres">Janrlar</a>
-        <a href="/schedule">Jadval</a>
-        <a href="/news">Yangiliklar</a>
+        <a href="{% url 'catalog' %}">Katalog</a>
+        <a href="{% url 'genres' %}">Janrlar</a>
+        <a href="{% url 'schedule' %}">Jadval</a>
+        <a href="{% url 'news_list' %}">Yangiliklar</a>
     </div>
     <div class="nav-actions">
-        <a href="/search" class="action-icon">🔍</a>
+        <a href="{% url 'search' %}" class="action-icon search-icon">🔍</a>
         <div class="action-icon">🔔</div>
-        <a href="/profile" class="action-icon profile-btn">👤</a>
+        <a href="{% if request.user.is_authenticated %}{% url 'profile' %}{% else %}{% url 'auth_page' %}{% endif %}" class="action-icon profile-btn">👤</a>
     </div>
 </nav>
 
 <div class="article-hero">
-    <div class="article-hero-bg" style="background-image: url('https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?q=80&w=2070');"></div>
+    <div class="article-hero-bg" style="background-image: url('{{ news.image_url|default:'https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?q=80&w=2070' }}');"></div>
     <div class="article-hero-overlay"></div>
     <div class="article-hero-content">
         <span class="article-badge">ASOSIY YANGILIK</span>
-        <h1 class="article-title">Chainsaw Man 2-fasl rasmiy tasdiqlandi!</h1>
+        <h1 class="article-title">{{ news.title }}</h1>
         <div class="article-meta">
-            <span>📅 3 kun oldin</span>
-            <span>✍️ Admin</span>
-            <span>👁️ 12.5K ko'rildi</span>
-            <span>💬 342 izoh</span>
+            <span>📅 {{ news.created_at|date:'d M Y' }}</span>
+            <span>✍️ {{ news.author.username }}</span>
+            <span>👁️ {{ news.views }} ko'rildi</span>
         </div>
     </div>
 </div>
 
 <div class="container">
     <div class="article-content">
-        <p>MAPPA studiyasi Chainsaw Man 2-fasl ishlab chiqarilishini rasmiy e'lon qildi. Yangi fasl 2024-yil bahorida efirga chiqishi kutilmoqda va manga hikoyasining keyingi qismlarini qamrab oladi.</p>
-
-        <p>Birinchi fasl 2022-yil kuzida efirga chiqqan va butun dunyo bo'ylab anime muxlislari tomonidan katta e'tirof topgan edi. Seriya Tatsuki Fujimoto tomonidan yaratilgan manga asaridan moslashtirilgan.</p>
-
-        <h2>Nimalar kutilmoqda?</h2>
-
-        <p>Ikkinchi fasl Chainsaw Man mangasining "Reze Arc" qismidan boshlanishi kutilmoqda. Bu hikoyaning eng mashhur va hayajonli qismlaridan biri hisoblanadi. Yangi personajlar va shiddatli jang sahnalari muxlislarni kutmoqda.</p>
-
-        <h3>Ishlab chiqarish jamoasi</h3>
-
-        <p>MAPPA studiyasi yana seriyani ishlab chiqarish bilan shug'ullanadi. Rejissyor Ryu Nakayama ham qaytishi kutilmoqda. Ovoz aktyorlari jamoasi ham avvalgi tarkibda qoladi.</p>
-
-        <h3>Chiqish sanasi</h3>
-
-        <p>Rasmiy e'longa ko'ra, Chainsaw Man 2-fasl 2024-yil bahor faslida, aniqrog'i aprel oyida Yaponiya televizorlarida efirga chiqadi. Xalqaro platformalarda esa bir necha soat ichida ko'rish mumkin bo'ladi.</p>
-
-        <p>Muxlislar uchun bu ajoyib yangilik! Chainsaw Man universumiga qaytish yaqin orada sodir bo'ladi.</p>
+        {{ news.content|linebreaks }}
     </div>
 
     <div class="article-actions">
@@ -262,29 +311,17 @@
     <div class="related-news">
         <h2 class="related-title">O'xshash yangiliklar</h2>
         <div class="related-grid">
-            <a href="/news/2" class="related-item">
-                <div class="related-thumb" style="background-image: url('https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2070');"></div>
+            {% for post in related_news %}
+            <a href="{% url 'news_detail' post.slug %}" class="related-item">
+                <div class="related-thumb" style="background-image: url('{{ post.image_url|default:'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2070' }}');"></div>
                 <div class="related-info">
-                    <h4>Jujutsu Kaisen yangi film e'lon qilindi</h4>
-                    <p>📅 1 hafta oldin • 👁️ 8.2K ko'rildi</p>
+                    <h4>{{ post.title }}</h4>
+                    <p>📅 {{ post.created_at|date:'d M Y' }} • 👁️ {{ post.views }} ko'rildi</p>
                 </div>
             </a>
-
-            <a href="/news/3" class="related-item">
-                <div class="related-thumb" style="background-image: url('https://images.unsplash.com/photo-1606571231601-e6c4b0676f71?q=80&w=2070');"></div>
-                <div class="related-info">
-                    <h4>Attack on Titan finaliga rekord reytinglar</h4>
-                    <p>📅 2 hafta oldin • 👁️ 15.8K ko'rildi</p>
-                </div>
-            </a>
-
-            <a href="/news/4" class="related-item">
-                <div class="related-thumb" style="background-image: url('https://images.unsplash.com/photo-1618944913480-b67ee16d7b77?q=80&w=2070');"></div>
-                <div class="related-info">
-                    <h4>Demon Slayer movie box office rekordlari</h4>
-                    <p>📅 3 hafta oldin • 👁️ 6.5K ko'rildi</p>
-                </div>
-            </a>
+            {% empty %}
+            <p style="color: var(--text-dim);">O'xshash yangilik topilmadi.</p>
+            {% endfor %}
         </div>
     </div>
 </div>

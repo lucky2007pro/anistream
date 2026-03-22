@@ -1,0 +1,23 @@
+User-agent: *
+Allow: /
+Allow: /catalog
+Allow: /genres
+Allow: /schedule
+Allow: /news
+Allow: /about
+Allow: /contact
+Allow: /faq
+Allow: /premium
+Allow: /search
+
+Disallow: /admin/
+Disallow: /profile/
+Disallow: /favorites/
+Disallow: /history/
+Disallow: /settings/
+Disallow: /auth/
+Disallow: /api/
+
+Sitemap: https://anistream.uz/sitemap.xml
+
+Crawl-delay: 1

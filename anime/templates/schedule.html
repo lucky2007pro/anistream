@@ -3,7 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Haftalik Jadval - AniStream</title>
+    <title>Anime Efir Jadvali | AniStream</title>
+
+    <!-- ===== SEO META TAGS ===== -->
+    <meta name="description" content="Haftalik anime efir jadvali. Yangi qismlar qachon chiqishini bilib oling.">
+    <meta name="keywords" content="anime jadval, yangi anime qismlar, anime efir">
+    <meta name="author" content="AniStream">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Uzbek">
+    <meta name="revisit-after" content="7 days">
+    <link rel="canonical" href="https://anistream.uz/schedule">
+
+    <!-- Open Graph (Facebook, Telegram, WhatsApp preview) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Anime Efir Jadvali | AniStream">
+    <meta property="og:description" content="Haftalik anime efir jadvali. Yangi qismlar qachon chiqishini bilib oling.">
+    <meta property="og:image" content="https://anistream.uz/static/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="https://anistream.uz/schedule">
+    <meta property="og:site_name" content="AniStream">
+    <meta property="og:locale" content="uz_UZ">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Anime Efir Jadvali | AniStream">
+    <meta name="twitter:description" content="Haftalik anime efir jadvali. Yangi qismlar qachon chiqishini bilib oling.">
+    <meta name="twitter:image" content="https://anistream.uz/static/og-image.jpg">
+    <meta name="twitter:site" content="@anistream_uz">
+
+    <!-- PWA / Mobile -->
+    <meta name="theme-color" content="#ff3366">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AniStream">
+    <link rel="apple-touch-icon" href="/static/icons/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/icons/favicon-16x16.png">
+    <link rel="manifest" href="/static/manifest.json">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebPage",
+      "name": "Anime Efir Jadvali | AniStream",
+      "url": "https://anistream.uz/schedule",
+      "isPartOf": {
+        "@type": "WebSite",
+        "name": "AniStream",
+        "url": "https://anistream.uz"
+      }
+    }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -133,7 +185,7 @@
             .nav-menu { display: none !important; }
             .hamburger { display: flex !important; }
             .nav-brand { font-size: 1.4rem; }
-            .nav-actions .action-icon:not(.profile-btn):not([href="/search"]) { display: none; }
+            .nav-actions .action-icon:not(.profile-btn):not(.search-icon) { display: none; }
             .container { padding: 0 4%; }
 
             .page-header { padding: 80px 4% 30px; text-align: center; }
@@ -200,17 +252,17 @@
 <body>
 
 <nav class="navbar">
-    <a href="/" class="nav-brand">Ani<span>Stream</span></a>
+    <a href="{% url 'home' %}" class="nav-brand">Ani<span>Stream</span></a>
     <div class="nav-menu">
-        <a href="/catalog">Katalog</a>
-        <a href="/genres">Janrlar</a>
-        <a href="/schedule" class="active">Jadval</a>
-        <a href="/news">Yangiliklar</a>
+        <a href="{% url 'catalog' %}">Katalog</a>
+        <a href="{% url 'genres' %}">Janrlar</a>
+        <a href="{% url 'schedule' %}" class="active">Jadval</a>
+        <a href="{% url 'news_list' %}">Yangiliklar</a>
     </div>
     <div class="nav-actions">
-        <a href="/search" class="action-icon">🔍</a>
+        <a href="{% url 'search' %}" class="action-icon search-icon">🔍</a>
         <div class="action-icon">🔔</div>
-        <div class="action-icon profile-btn">👤</div>
+        <a href="{% if request.user.is_authenticated %}{% url 'profile' %}{% else %}{% url 'auth_page' %}{% endif %}" class="action-icon profile-btn">👤</a>
     </div>
 </nav>
 
@@ -231,77 +283,21 @@
     </div>
 
     <div class="schedule-grid">
-        <a href="/detail/1" class="schedule-card">
-            <div class="schedule-thumb" style="background-image: url('https://cdn.myanimelist.net/images/anime/1208/94745.jpg');">
-                <div class="ep-badge">EP 12</div>
+        {% for anime in animes %}
+        <a href="{% url 'detail' anime.id %}" class="schedule-card">
+            <div class="schedule-thumb" style="background-image: url('{{ anime.image_url }}');">
+                <div class="ep-badge">EP {{ anime.episodes.count }}</div>
             </div>
             <div class="schedule-info">
-                <div class="schedule-time">18:00</div>
-                <div class="schedule-title">Kimetsu no Yaiba</div>
-                <div class="schedule-meta">Action • Fantasy</div>
+                <div class="schedule-time">{{ forloop.counter|add:16 }}:00</div>
+                <div class="schedule-title">{{ anime.title }}</div>
+                <div class="schedule-meta">{{ anime.get_anime_type_display }} • {{ anime.get_status_display }}</div>
                 <span class="schedule-status">JONLI</span>
             </div>
         </a>
-
-        <a href="/detail/2" class="schedule-card">
-            <div class="schedule-thumb" style="background-image: url('https://cdn.myanimelist.net/images/anime/1337/99013.jpg');">
-                <div class="ep-badge">EP 8</div>
-            </div>
-            <div class="schedule-info">
-                <div class="schedule-time">19:30</div>
-                <div class="schedule-title">Shingeki no Kyojin</div>
-                <div class="schedule-meta">Action • Drama</div>
-                <span class="schedule-status">JONLI</span>
-            </div>
-        </a>
-
-        <a href="/detail/3" class="schedule-card">
-            <div class="schedule-thumb" style="background-image: url('https://cdn.myanimelist.net/images/anime/1286/99889.jpg');">
-                <div class="ep-badge">EP 15</div>
-            </div>
-            <div class="schedule-info">
-                <div class="schedule-time">20:00</div>
-                <div class="schedule-title">Jujutsu Kaisen</div>
-                <div class="schedule-meta">Action • Supernatural</div>
-                <span class="schedule-status">JONLI</span>
-            </div>
-        </a>
-
-        <a href="/detail/4" class="schedule-card">
-            <div class="schedule-thumb" style="background-image: url('https://cdn.myanimelist.net/images/anime/1988/117775.jpg');">
-                <div class="ep-badge">EP 22</div>
-            </div>
-            <div class="schedule-info">
-                <div class="schedule-time">21:00</div>
-                <div class="schedule-title">Spy x Family</div>
-                <div class="schedule-meta">Comedy • Action</div>
-                <span class="schedule-status">JONLI</span>
-            </div>
-        </a>
-
-        <a href="/detail/5" class="schedule-card">
-            <div class="schedule-thumb" style="background-image: url('https://cdn.myanimelist.net/images/anime/1081/119718.jpg');">
-                <div class="ep-badge">EP 10</div>
-            </div>
-            <div class="schedule-info">
-                <div class="schedule-time">22:00</div>
-                <div class="schedule-title">Chainsaw Man</div>
-                <div class="schedule-meta">Action • Horror</div>
-                <span class="schedule-status">JONLI</span>
-            </div>
-        </a>
-
-        <a href="/detail/6" class="schedule-card">
-            <div class="schedule-thumb" style="background-image: url('https://cdn.myanimelist.net/images/anime/1223/96541.jpg');">
-                <div class="ep-badge">EP 18</div>
-            </div>
-            <div class="schedule-info">
-                <div class="schedule-time">17:30</div>
-                <div class="schedule-title">Boku no Hero Academia</div>
-                <div class="schedule-meta">Action • School</div>
-                <span class="schedule-status">JONLI</span>
-            </div>
-        </a>
+        {% empty %}
+        <p>Hozircha jadval uchun anime topilmadi.</p>
+        {% endfor %}
     </div>
 </div>
 

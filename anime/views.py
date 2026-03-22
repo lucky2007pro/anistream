@@ -208,7 +208,11 @@ def genre_detail(request, slug):
 
 def schedule_page(request):
     """Haftalik jadval"""
-    animes = Anime.objects.filter(status='ongoing').order_by('-created_at')[:20]
+    animes = (
+        Anime.objects.filter(status='ongoing')
+        .prefetch_related('genres', 'episodes')
+        .order_by('-created_at')[:20]
+    )
     context = {'animes': animes}
     return render(request, 'schedule.html', context)
 
@@ -259,7 +263,10 @@ def favorites_page(request):
     profile, created = UserProfile.objects.get_or_create(user=request.user)
     favorites = profile.favorites.all().order_by('-created_at')
 
-    context = {'favorites': favorites}
+    context = {
+        'favorites': favorites,
+        'is_watchlist': False,
+    }
     return render(request, 'favorites.html', context)
 
 
@@ -285,7 +292,10 @@ def watchlist_page(request):
     profile, created = UserProfile.objects.get_or_create(user=request.user)
     watchlist = profile.watchlist.all().order_by('-created_at')
 
-    context = {'watchlist': watchlist}
+    context = {
+        'favorites': watchlist,
+        'is_watchlist': True,
+    }
     return render(request, 'favorites.html', context)
 
 

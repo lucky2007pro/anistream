@@ -3,7 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ko'rish Tarixi - AniStream</title>
+    <title>Ko'rish Tarixi | AniStream</title>
+
+    <!-- ===== SEO META TAGS ===== -->
+    <meta name="description" content="Oxirgi ko'rgan animelaring ro'yxati.">
+    <meta name="keywords" content="anime tarixi">
+    <meta name="author" content="AniStream">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Uzbek">
+    <meta name="revisit-after" content="7 days">
+    <link rel="canonical" href="https://anistream.uz/history">
+
+    <!-- Open Graph (Facebook, Telegram, WhatsApp preview) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Ko'rish Tarixi | AniStream">
+    <meta property="og:description" content="Oxirgi ko'rgan animelaring ro'yxati.">
+    <meta property="og:image" content="https://anistream.uz/static/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="https://anistream.uz/history">
+    <meta property="og:site_name" content="AniStream">
+    <meta property="og:locale" content="uz_UZ">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Ko'rish Tarixi | AniStream">
+    <meta name="twitter:description" content="Oxirgi ko'rgan animelaring ro'yxati.">
+    <meta name="twitter:image" content="https://anistream.uz/static/og-image.jpg">
+    <meta name="twitter:site" content="@anistream_uz">
+
+    <!-- PWA / Mobile -->
+    <meta name="theme-color" content="#ff3366">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AniStream">
+    <link rel="apple-touch-icon" href="/static/icons/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/icons/favicon-16x16.png">
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="robots" content="noindex, nofollow">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "AniStream",
+      "url": "https://anistream.uz",
+      "description": "O'zbekistondagi eng yaxshi anime streaming platformasi. 1000+ anime uzbek tilida bepul tomosha qiling.",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://anistream.uz/search?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      },
+      "publisher": {
+        "@type": "Organization",
+        "name": "AniStream",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://anistream.uz/static/logo.png"
+        }
+      }
+    }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -134,7 +196,7 @@
             .nav-menu { display: none !important; }
             .hamburger { display: flex !important; }
             .nav-brand { font-size: 1.4rem; }
-            .nav-actions .action-icon:not(.profile-btn):not([href="/search"]) { display: none; }
+            .nav-actions .action-icon:not(.profile-btn):not(.search-icon) { display: none; }
             .container { padding: 0 4%; }
 
             .page-header { padding: 80px 4% 30px; text-align: center; }
@@ -201,17 +263,17 @@
 <body>
 
 <nav class="navbar">
-    <a href="/" class="nav-brand">Ani<span>Stream</span></a>
+    <a href="{% url 'home' %}" class="nav-brand">Ani<span>Stream</span></a>
     <div class="nav-menu">
-        <a href="/catalog">Katalog</a>
-        <a href="/genres">Janrlar</a>
-        <a href="/schedule">Jadval</a>
-        <a href="/news">Yangiliklar</a>
+        <a href="{% url 'catalog' %}">Katalog</a>
+        <a href="{% url 'genres' %}">Janrlar</a>
+        <a href="{% url 'schedule' %}">Jadval</a>
+        <a href="{% url 'news_list' %}">Yangiliklar</a>
     </div>
     <div class="nav-actions">
-        <a href="/search" class="action-icon">🔍</a>
+        <a href="{% url 'search' %}" class="action-icon search-icon">🔍</a>
         <div class="action-icon">🔔</div>
-        <a href="/profile" class="action-icon profile-btn">👤</a>
+        <a href="{% url 'profile' %}" class="action-icon profile-btn">👤</a>
     </div>
 </nav>
 
@@ -222,93 +284,32 @@
     </div>
 
     <div class="history-list">
+        {% for item in history %}
         <div class="history-item">
-            <button class="delete-btn">✕</button>
-            <div class="history-thumb" style="background-image: url('https://cdn.myanimelist.net/images/anime/1208/94745.jpg');">
+            <div class="history-thumb" style="background-image: url('{{ item.anime.image_url }}');">
                 <div class="play-overlay">▶</div>
             </div>
             <div class="history-info">
-                <h3 class="history-title"><a href="/detail/1">Kimetsu no Yaiba</a></h3>
-                <div class="history-episode">12-qism: Tanjiro va Zenitsu</div>
+                <h3 class="history-title"><a href="{% url 'detail' item.anime.id %}">{{ item.anime.title }}</a></h3>
+                <div class="history-episode">
+                    {% if item.episode %}{{ item.episode.episode_number }}-qism: {{ item.episode.title|default:'Nomsiz qism' }}{% else %}Anime ko'rilgan{% endif %}
+                </div>
                 <div class="history-meta">
-                    <span>🕒 2 soat oldin</span>
-                    <span>⭐ 8.9</span>
-                    <span>📅 2019</span>
+                    <span>🕒 {{ item.last_watched|timesince }} oldin</span>
+                    <span>⭐ {{ item.anime.rating|floatformat:1 }}</span>
+                    <span>📅 {{ item.anime.release_year }}</span>
                 </div>
                 <div>
                     <div class="progress-bar-container">
-                        <div class="progress-bar-fill" style="width: 65%;"></div>
+                        <div class="progress-bar-fill" style="width: {{ item.watch_progress }}%;"></div>
                     </div>
-                    <div class="progress-text">65% ko'rildi (15:32 / 23:45)</div>
+                    <div class="progress-text">{{ item.watch_progress }}% ko'rildi</div>
                 </div>
             </div>
         </div>
-
-        <div class="history-item">
-            <button class="delete-btn">✕</button>
-            <div class="history-thumb" style="background-image: url('https://cdn.myanimelist.net/images/anime/1337/99013.jpg');">
-                <div class="play-overlay">▶</div>
-            </div>
-            <div class="history-info">
-                <h3 class="history-title"><a href="/detail/2">Shingeki no Kyojin</a></h3>
-                <div class="history-episode">8-qism: Qasos</div>
-                <div class="history-meta">
-                    <span>🕒 5 soat oldin</span>
-                    <span>⭐ 9.2</span>
-                    <span>📅 2013</span>
-                </div>
-                <div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-fill" style="width: 100%;"></div>
-                    </div>
-                    <div class="progress-text">100% ko'rildi (24:00 / 24:00)</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="history-item">
-            <button class="delete-btn">✕</button>
-            <div class="history-thumb" style="background-image: url('https://cdn.myanimelist.net/images/anime/1286/99889.jpg');">
-                <div class="play-overlay">▶</div>
-            </div>
-            <div class="history-info">
-                <h3 class="history-title"><a href="/detail/3">Jujutsu Kaisen</a></h3>
-                <div class="history-episode">15-qism: Kyoto Event</div>
-                <div class="history-meta">
-                    <span>🕒 1 kun oldin</span>
-                    <span>⭐ 8.7</span>
-                    <span>📅 2020</span>
-                </div>
-                <div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-fill" style="width: 42%;"></div>
-                    </div>
-                    <div class="progress-text">42% ko'rildi (10:05 / 23:50)</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="history-item">
-            <button class="delete-btn">✕</button>
-            <div class="history-thumb" style="background-image: url('https://cdn.myanimelist.net/images/anime/1988/117775.jpg');">
-                <div class="play-overlay">▶</div>
-            </div>
-            <div class="history-info">
-                <h3 class="history-title"><a href="/detail/4">Spy x Family</a></h3>
-                <div class="history-episode">22-qism: Oilaviy sayohat</div>
-                <div class="history-meta">
-                    <span>🕒 2 kun oldin</span>
-                    <span>⭐ 9.1</span>
-                    <span>📅 2022</span>
-                </div>
-                <div>
-                    <div class="progress-bar-container">
-                        <div class="progress-bar-fill" style="width: 88%;"></div>
-                    </div>
-                    <div class="progress-text">88% ko'rildi (20:15 / 23:00)</div>
-                </div>
-            </div>
-        </div>
+        {% empty %}
+        <p style="color: var(--text-dim);">Ko'rish tarixi bo'sh.</p>
+        {% endfor %}
     </div>
 </div>
 

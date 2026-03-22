@@ -3,7 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yangiliklar - AniStream</title>
+    <title>Anime Yangiliklari | AniStream</title>
+
+    <!-- ===== SEO META TAGS ===== -->
+    <meta name="description" content="O'zbek anime dunyosidagi so'nggi yangiliklar, chiqishlar va e'lonlar. AniStream anime blog.">
+    <meta name="keywords" content="anime yangiliklar, anime news, yangi anime, anime o'zbekiston">
+    <meta name="author" content="AniStream">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Uzbek">
+    <meta name="revisit-after" content="7 days">
+    <link rel="canonical" href="https://anistream.uz/news">
+
+    <!-- Open Graph (Facebook, Telegram, WhatsApp preview) -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Anime Yangiliklari | AniStream">
+    <meta property="og:description" content="O'zbek anime dunyosidagi so'nggi yangiliklar, chiqishlar va e'lonlar. AniStream anime blog.">
+    <meta property="og:image" content="https://anistream.uz/static/og-image.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="https://anistream.uz/news">
+    <meta property="og:site_name" content="AniStream">
+    <meta property="og:locale" content="uz_UZ">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Anime Yangiliklari | AniStream">
+    <meta name="twitter:description" content="O'zbek anime dunyosidagi so'nggi yangiliklar, chiqishlar va e'lonlar. AniStream anime blog.">
+    <meta name="twitter:image" content="https://anistream.uz/static/og-image.jpg">
+    <meta name="twitter:site" content="@anistream_uz">
+
+    <!-- PWA / Mobile -->
+    <meta name="theme-color" content="#ff3366">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="AniStream">
+    <link rel="apple-touch-icon" href="/static/icons/apple-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/static/icons/favicon-16x16.png">
+    <link rel="manifest" href="/static/manifest.json">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Blog",
+      "name": "AniStream Yangiliklari",
+      "url": "https://anistream.uz/news",
+      "description": "O'zbek anime dunyosidagi so'nggi yangiliklar",
+      "publisher": {
+        "@type": "Organization",
+        "name": "AniStream",
+        "logo": {
+          "@type": "ImageObject",
+          "url": "https://anistream.uz/static/logo.png"
+        }
+      }
+    }
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -139,7 +195,7 @@
             .nav-menu { display: none !important; }
             .hamburger { display: flex !important; }
             .nav-brand { font-size: 1.4rem; }
-            .nav-actions .action-icon:not(.profile-btn):not([href="/search"]) { display: none; }
+            .nav-actions .action-icon:not(.profile-btn):not(.search-icon) { display: none; }
             .container { padding: 0 4%; }
 
             .page-header { padding: 80px 4% 30px; text-align: center; }
@@ -206,17 +262,18 @@
 <body>
 
 <nav class="navbar">
-    <a href="/" class="nav-brand">Ani<span>Stream</span></a>
+
+    <a href="{% url 'home' %}" class="nav-brand">Ani<span>Stream</span></a>
     <div class="nav-menu">
-        <a href="/catalog">Katalog</a>
-        <a href="/genres">Janrlar</a>
-        <a href="/schedule">Jadval</a>
-        <a href="/news" class="active">Yangiliklar</a>
+        <a href="{% url 'catalog' %}">Katalog</a>
+        <a href="{% url 'genres' %}">Janrlar</a>
+        <a href="{% url 'schedule' %}">Jadval</a>
+        <a href="{% url 'news_list' %}" class="active">Yangiliklar</a>
     </div>
     <div class="nav-actions">
-        <a href="/search" class="action-icon">🔍</a>
+        <a href="{% url 'search' %}" class="action-icon search-icon">🔍</a>
         <div class="action-icon">🔔</div>
-        <a href="/profile" class="action-icon profile-btn">👤</a>
+        <a href="{% if request.user.is_authenticated %}{% url 'profile' %}{% else %}{% url 'auth_page' %}{% endif %}" class="action-icon profile-btn">👤</a>
     </div>
 </nav>
 
@@ -226,91 +283,42 @@
         <p class="page-subtitle">Eng so'nggi yangiliklardan xabardor bo'ling</p>
     </div>
 
-    <a href="/news/1" class="featured-news">
-        <div class="featured-bg" style="background-image: url('https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?q=80&w=2070');"></div>
+    {% with featured=page_obj.object_list|first %}
+    {% if featured %}
+    <a href="{% url 'news_detail' featured.slug %}" class="featured-news">
+        <div class="featured-bg" style="background-image: url('{{ featured.image_url|default:'https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?q=80&w=2070' }}');"></div>
         <div class="featured-overlay"></div>
         <div class="featured-content">
             <span class="featured-badge">ASOSIY YANGILIK</span>
-            <h2 class="featured-title">Chainsaw Man 2-fasl rasmiy tasdiqlandi!</h2>
-            <p class="featured-desc">MAPPA studiyasi Chainsaw Man 2-fasl ishlab chiqarilishini rasmiy e'lon qildi. Yangi fasl 2024-yil bahorida efirga chiqishi kutilmoqda.</p>
+            <h2 class="featured-title">{{ featured.title }}</h2>
+            <p class="featured-desc">{{ featured.content|truncatechars:180 }}</p>
             <div class="featured-meta">
-                <span>📅 3 kun oldin</span>
-                <span>👁️ 12.5K ko'rildi</span>
-                <span>💬 342 izoh</span>
+                <span>📅 {{ featured.created_at|date:'d M Y' }}</span>
+                <span>👁️ {{ featured.views }} ko'rildi</span>
             </div>
         </div>
     </a>
+    {% endif %}
+    {% endwith %}
 
     <div class="news-grid">
-        <a href="/news/2" class="news-card">
-            <div class="news-thumb" style="background-image: url('https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2070');">
+        {% for post in page_obj.object_list|slice:'1:' %}
+        <a href="{% url 'news_detail' post.slug %}" class="news-card">
+            <div class="news-thumb" style="background-image: url('{{ post.image_url|default:'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2070' }}');">
                 <span class="news-badge">YANGI</span>
             </div>
             <div class="news-content">
-                <h3 class="news-title">Jujutsu Kaisen yangi film e'lon qilindi</h3>
-                <p class="news-excerpt">Jujutsu Kaisen franchise uchun yangi original film ishlatilib chiqilayotgani ma'lum bo'ldi. Film 2024-yil yozida chiqishi rejalashtirilgan.</p>
+                <h3 class="news-title">{{ post.title }}</h3>
+                <p class="news-excerpt">{{ post.content|truncatechars:140 }}</p>
                 <div class="news-meta">
-                    <span>📅 1 hafta oldin</span>
-                    <span>👁️ 8.2K</span>
+                    <span>📅 {{ post.created_at|date:'d M Y' }}</span>
+                    <span>👁️ {{ post.views }}</span>
                 </div>
             </div>
         </a>
-
-        <a href="/news/3" class="news-card">
-            <div class="news-thumb" style="background-image: url('https://images.unsplash.com/photo-1606571231601-e6c4b0676f71?q=80&w=2070');">
-                <span class="news-badge">TREND</span>
-            </div>
-            <div class="news-content">
-                <h3 class="news-title">Attack on Titan finaliga rekord reytinglar</h3>
-                <p class="news-excerpt">Attack on Titan seriyasining yakuniy qismi tarihdagi eng ko'p ko'rilgan anime epizodlaridan biriga aylandi.</p>
-                <div class="news-meta">
-                    <span>📅 2 hafta oldin</span>
-                    <span>👁️ 15.8K</span>
-                </div>
-            </div>
-        </a>
-
-        <a href="/news/4" class="news-card">
-            <div class="news-thumb" style="background-image: url('https://images.unsplash.com/photo-1618944913480-b67ee16d7b77?q=80&w=2070');">
-                <span class="news-badge">SHARHLAR</span>
-            </div>
-            <div class="news-content">
-                <h3 class="news-title">Demon Slayer movie box office rekordlari</h3>
-                <p class="news-excerpt">Demon Slayer: Kimetsu no Yaiba filmi global box office'da yangi rekordlarga erishdi va $500M ni ortiq oshirdi.</p>
-                <div class="news-meta">
-                    <span>📅 3 hafta oldin</span>
-                    <span>👁️ 6.5K</span>
-                </div>
-            </div>
-        </a>
-
-        <a href="/news/5" class="news-card">
-            <div class="news-thumb" style="background-image: url('https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?q=80&w=2074');">
-                <span class="news-badge">ANONS</span>
-            </div>
-            <div class="news-content">
-                <h3 class="news-title">One Piece 25-yilligiga maxsus anons</h3>
-                <p class="news-excerpt">One Piece 25-yillik yubileyiga bag'ishlangan maxsus loyiha va animatsiya anons qilindi.</p>
-                <div class="news-meta">
-                    <span>📅 1 oy oldin</span>
-                    <span>👁️ 11.3K</span>
-                </div>
-            </div>
-        </a>
-
-        <a href="/news/6" class="news-card">
-            <div class="news-thumb" style="background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?q=80&w=1925');">
-                <span class="news-badge">INTERVYU</span>
-            </div>
-            <div class="news-content">
-                <h3 class="news-title">Makoto Shinkai yangi proyekti haqida</h3>
-                <p class="news-excerpt">Mashhur rejissyor Makoto Shinkai o'zining keyingi proyekti va ilhom manbalari haqida gapirdi.</p>
-                <div class="news-meta">
-                    <span>📅 1 oy oldin</span>
-                    <span>👁️ 4.7K</span>
-                </div>
-            </div>
-        </a>
+        {% empty %}
+        <p style="color: var(--text-dim);">Yangiliklar hozircha mavjud emas.</p>
+        {% endfor %}
     </div>
 </div>
 
