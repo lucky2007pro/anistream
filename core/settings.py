@@ -34,21 +34,29 @@ else:
     DEBUG = ENVIRONMENT != 'production'
 
 
-def _split_csv_env(var_name, default_value):
+def _split_csv_env(var_name, default_value=''):
     """Comma-separated env qiymatini tozalab list ko'rinishiga o'tkazadi."""
     raw_value = os.environ.get(var_name, default_value)
     return [item.strip() for item in raw_value.split(',') if item.strip()]
 
 
-ALLOWED_HOSTS = _split_csv_env(
-    'ALLOWED_HOSTS',
-    'anistream-694e.onrender.com,anistream.dev,www.anistream.dev,127.0.0.1,localhost'
-)
+DEFAULT_ALLOWED_HOSTS = [
+    'anistream-694e.onrender.com',
+    'anistream.dev',
+    'www.anistream.dev',
+    '127.0.0.1',
+    'localhost',
+]
 
-CSRF_TRUSTED_ORIGINS = _split_csv_env(
-    'CSRF_TRUSTED_ORIGINS',
-    'https://anistream.dev,https://www.anistream.dev,https://anistream-694e.onrender.com'
-)
+DEFAULT_CSRF_TRUSTED_ORIGINS = [
+    'https://anistream.dev',
+    'https://www.anistream.dev',
+    'https://anistream-694e.onrender.com',
+]
+
+# Env qiymatlari noto'g'ri berilgan taqdirda ham asosiy domenlar doim ruxsatda bo'ladi.
+ALLOWED_HOSTS = list(dict.fromkeys(_split_csv_env('ALLOWED_HOSTS') + DEFAULT_ALLOWED_HOSTS))
+CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(_split_csv_env('CSRF_TRUSTED_ORIGINS') + DEFAULT_CSRF_TRUSTED_ORIGINS))
 
 # Application definition
 
