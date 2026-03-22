@@ -86,6 +86,10 @@ urlpatterns = [
     path('contact/', views.contact_page, name='contact'),
     path('faq/', views.faq_page, name='faq'),
     path('premium/', views.premium_page, name='premium'),
+    path('fandub-projects/', views.fandub_projects_page, name='fandub_projects'),
+    path('live-streams/', views.live_streams_page, name='live_streams'),
+    path('billing/', views.billing_page, name='billing'),
+    path('password-help/', views.password_reset_help_page, name='password_help'),
 ]
 
 # Custom error handlers

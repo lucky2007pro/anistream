@@ -442,8 +442,8 @@
     <div class="top-nav">
         <a href="{% url 'home' %}" class="icon-btn">←</a>
         <div class="right-actions">
-            <a href="#" class="icon-btn">🔗</a>
-            <a href="#" class="icon-btn">🔖</a>
+            <a href="https://t.me/share/url?url={{ request.build_absolute_uri|urlencode }}" class="icon-btn" target="_blank" rel="noopener noreferrer">🔗</a>
+            <a href="{% url 'add_favorite' anime.id %}" class="icon-btn">🔖</a>
         </div>
     </div>
 

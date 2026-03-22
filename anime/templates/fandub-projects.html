@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fandub Loyihalar | AniStream</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0f0f13; color: #fff; margin: 0; }
+        .wrap { max-width: 900px; margin: 0 auto; padding: 32px 20px; }
+        .nav { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+        .nav a { color: #fff; text-decoration: none; padding: 8px 12px; border: 1px solid #333; border-radius: 8px; }
+        .nav a:hover { border-color: #ff3366; color: #ff3366; }
+        .card { background: #1a1a24; border: 1px solid #2a2a35; border-radius: 14px; padding: 20px; margin-bottom: 16px; }
+        h1 { margin-top: 0; }
+        .muted { color: #a0a0b0; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <nav class="nav">
+        <a href="{% url 'home' %}">Bosh sahifa</a>
+        <a href="{% url 'catalog' %}">Katalog</a>
+        <a href="{% url 'schedule' %}">Jadval</a>
+        <a href="{% url 'news_list' %}">Yangiliklar</a>
+    </nav>
+
+    <h1>Fandub loyihalar</h1>
+    <p class="muted">Jamoamiz tarjima va dubbing qilayotgan loyihalar ro'yxati.</p>
+
+    <div class="card">
+        <h3>Hozirgi faol loyiha</h3>
+        <p class="muted">Yangi epizodlar haftalik jadval asosida yuklanadi. Yangiliklarni kuzatish uchun news bo'limini tekshiring.</p>
+        <a href="{% url 'news_list' %}">Yangiliklarni ko'rish</a>
+    </div>
+
+    <div class="card">
+        <h3>Taklif yuborish</h3>
+        <p class="muted">Qaysi anime'ga fandub kerakligini bizga yozib yuboring.</p>
+        <a href="{% url 'contact' %}">Bog'lanish sahifasi</a>
+    </div>
+</div>
+</body>
+</html>
+

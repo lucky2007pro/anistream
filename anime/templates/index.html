@@ -722,12 +722,12 @@
 <body>
 
 <nav class="navbar" id="navbar">
-    <a href="#" class="nav-brand">Ani<span>Stream</span></a>
+    <a href="{% url 'home' %}" class="nav-brand">Ani<span>Stream</span></a>
 
     <div class="nav-menu">
-        <a href="#">Katalog</a>
-        <a href="#">Fandub loyihalar</a>
-        <a href="#">Jadval</a>
+        <a href="{% url 'catalog' %}">Katalog</a>
+        <a href="{% url 'fandub_projects' %}">Fandub loyihalar</a>
+        <a href="{% url 'schedule' %}">Jadval</a>
     </div>
 
     <div class="nav-actions">
@@ -772,7 +772,7 @@
         <div class="section-title">
             <h3>Yangi <span>Qo'shilganlar</span></h3>
         </div>
-        <a href="#" class="view-all">Barchasini ko'rish →</a>
+        <a href="{% url 'catalog' %}" class="view-all">Barchasini ko'rish →</a>
     </div>
 
     <div class="cards-carousel">
@@ -814,14 +814,14 @@
 
     <div class="menu-section">
         <h4 class="menu-title">MENING PROFILIM</h4>
-        <a href="#" class="menu-item"><span>📹</span> Jonli Efirlar <span class="arrow">›</span></a>
-        <a href="#" class="menu-item"><span>👤</span> Profilni tahrirlash <span class="arrow">›</span></a>
-        <a href="#" class="menu-item"><span>💳</span> Mening Hisobim <span class="value">0 UZS</span> <span
+        <a href="{% url 'live_streams' %}" class="menu-item"><span>📹</span> Jonli Efirlar <span class="arrow">›</span></a>
+        <a href="{% url 'profile' %}" class="menu-item"><span>👤</span> Profilni tahrirlash <span class="arrow">›</span></a>
+        <a href="{% url 'billing' %}" class="menu-item"><span>💳</span> Mening Hisobim <span class="value">0 UZS</span> <span
                 class="arrow">›</span></a>
-        <a href="#" class="menu-item"><span>👑</span> Premium Obuna <span class="value">Yo'q</span> <span
+        <a href="{% url 'premium' %}" class="menu-item"><span>👑</span> Premium Obuna <span class="value">Yo'q</span> <span
                 class="arrow">›</span></a>
-        <a href="#" class="menu-item"><span>🔖</span> Saqlanganlar <span class="arrow">›</span></a>
-        <a href="#" class="menu-item"><span>🕒</span> Ko'rishlar tarixi <span class="arrow">›</span></a>
+        <a href="{% url 'favorites' %}" class="menu-item"><span>🔖</span> Saqlanganlar <span class="arrow">›</span></a>
+        <a href="{% url 'history' %}" class="menu-item"><span>🕒</span> Ko'rishlar tarixi <span class="arrow">›</span></a>
     </div>
 
     {% if request.user.is_staff %}
@@ -836,12 +836,12 @@
 
     <div class="menu-section">
         <h4 class="menu-title">YORDAM VA SOZLAMALAR</h4>
-        <a href="#" class="menu-item"><span>❓</span> Yordam Markazi <span class="ai-badge">AI</span> <span
+        <a href="{% url 'faq' %}" class="menu-item"><span>❓</span> Yordam Markazi <span class="ai-badge">AI</span> <span
                 class="arrow">›</span></a>
-        <a href="#" class="menu-item"><span>⚙️</span> Ilova Sozlamalari <span class="arrow">›</span></a>
+        <a href="{% url 'settings' %}" class="menu-item"><span>⚙️</span> Ilova Sozlamalari <span class="arrow">›</span></a>
     </div>
 
-    <form action="{% url 'admin:logout' %}?next=/" method="post" style="display: inline;">
+    <form action="{% url 'logout' %}" method="post" style="display: inline;">
         {% csrf_token %}
         <button type="submit" class="menu-item logout-btn"
                 style="background:none; border:none; width:100%; text-align:left; cursor:pointer;">

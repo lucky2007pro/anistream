@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mening Hisobim | AniStream</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #0f0f13; color: #fff; margin: 0; }
+        .wrap { max-width: 900px; margin: 0 auto; padding: 32px 20px; }
+        .nav { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 24px; }
+        .nav a { color: #fff; text-decoration: none; padding: 8px 12px; border: 1px solid #333; border-radius: 8px; }
+        .nav a:hover { border-color: #ff3366; color: #ff3366; }
+        .card { background: #1a1a24; border: 1px solid #2a2a35; border-radius: 14px; padding: 20px; }
+        .muted { color: #a0a0b0; }
+        .actions { margin-top: 16px; display: flex; gap: 12px; flex-wrap: wrap; }
+        .actions a { color: #fff; text-decoration: none; background: #ff3366; padding: 10px 14px; border-radius: 10px; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <nav class="nav">
+        <a href="{% url 'profile' %}">Profil</a>
+        <a href="{% url 'premium' %}">Premium</a>
+        <a href="{% url 'settings' %}">Sozlamalar</a>
+        <a href="{% url 'home' %}">Bosh sahifa</a>
+    </nav>
+
+    <h1>Mening hisobim</h1>
+    <div class="card">
+        <p class="muted">To'lovlar, obuna holati va cheklarni shu bo'limda boshqarasiz.</p>
+        <p class="muted">Joriy tarif: Standart</p>
+        <div class="actions">
+            <a href="{% url 'premium' %}">Premiumga o'tish</a>
+            <a href="{% url 'contact' %}">Qo'llab-quvvatlash</a>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+

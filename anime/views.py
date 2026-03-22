@@ -381,6 +381,27 @@ def premium_page(request):
     return render(request, 'premium.html')
 
 
+def fandub_projects_page(request):
+    """Fandub loyihalari"""
+    return render(request, 'fandub-projects.html')
+
+
+def live_streams_page(request):
+    """Jonli efirlar"""
+    return render(request, 'live-streams.html')
+
+
+@login_required
+def billing_page(request):
+    """Foydalanuvchi hisob/billing sahifasi"""
+    return render(request, 'billing.html')
+
+
+def password_reset_help_page(request):
+    """Parolni tiklash bo'yicha yo'riqnoma sahifasi"""
+    return render(request, 'password-reset-help.html')
+
+
 def custom_404(request, exception=None):
     """404 error page"""
     return render(request, '404.html', status=404)
