@@ -24,7 +24,7 @@ from .services.telegram_storage import (
     get_telegram_file_url,
     upload_episode_to_telegram,
 )
-from asgiref.sync import async_to_sync
+from asgiref.sync import async_to_sync, sync_to_async
 from .services.telegram_streamer import get_telegram_stream_response
 import logging
 import requests
@@ -77,27 +77,34 @@ def anime_detail(request, anime_id):
         return redirect('home')
 
 
-async def episode_stream(request, episode_id):
-    """Telegram file'ni brauzerga stream qiladi (Range/seek qo'llab-quvvatlanadi)."""
+def episode_stream(request, episode_id):
+    """Telegram file'ni brauzerga stream qiladi (Range/seek qo'llab-quvvatlanadi).
+    
+    Sinxron view: Telethon (async) qismlar async_to_sync orqali chaqiriladi,
+    bu WSGI va ASGI serverlar ikkalasida ham to'g'ri ishlaydi.
+    """
     try:
-        episode = await Episode.objects.aget(id=episode_id)
+        episode = Episode.objects.get(id=episode_id)
     except Episode.DoesNotExist:
         return HttpResponse("Episode topilmadi", status=404)
 
-    # 1. MTProto orqali stream qilish (telethon) - cheklovsiz va tezroq
-    try:
-        mtproto_response = await get_telegram_stream_response(request, episode)
-        if mtproto_response:
-            return mtproto_response
-    except Exception as e:
-        logger.error(f"MTProto stream error (fallback to HTTP): {e}")
+    # 1. MTProto orqali stream qilish (telethon) - katta fayllar uchun (>20MB)
+    #    Telethon async bo'lgani uchun async_to_sync orqali chaqiramiz
+    if episode.telegram_message_id:
+        try:
+            _get_stream = async_to_sync(get_telegram_stream_response)
+            mtproto_response = _get_stream(request, episode)
+            if mtproto_response:
+                return mtproto_response
+        except Exception as e:
+            logger.error(f"MTProto stream error (fallback to HTTP): {e}")
 
     # 2. HTTP Bot API orqali stream (faqat <20MB fayllar uchun ishlaydi)
     if not episode.telegram_file_id:
         return HttpResponseBadRequest("Bu qismda Telegram file_id mavjud emas.")
 
     try:
-        file_url = await sync_to_async(get_telegram_file_url)(episode.telegram_file_id)
+        file_url = get_telegram_file_url(episode.telegram_file_id)
     except TelegramStorageError as exc:
         return HttpResponse(
             f"TELEGRAM_STREAM_ERROR: {exc}",
@@ -111,14 +118,12 @@ async def episode_stream(request, episode_id):
         outbound_headers['Range'] = range_header
 
     try:
-        def fetch_sync():
-            return requests.get(
-                file_url,
-                headers=outbound_headers,
-                stream=True,
-                timeout=90,
-            )
-        tg_response = await sync_to_async(fetch_sync)()
+        tg_response = requests.get(
+            file_url,
+            headers=outbound_headers,
+            stream=True,
+            timeout=90,
+        )
     except requests.RequestException as exc:
         return HttpResponse(
             f"TELEGRAM_NETWORK_ERROR: {exc}",
