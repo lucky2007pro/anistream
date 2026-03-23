@@ -17,7 +17,7 @@ services:
     name: anistream-telegram-bot
     runtime: python
     buildCommand: "./build.sh"
-    startCommand: "python telegram_bridge_bot.py"
+    startCommand: "python telegram_uploader_bot/telegram_bridge_bot.py"
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.0
