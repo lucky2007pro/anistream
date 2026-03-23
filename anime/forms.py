@@ -60,6 +60,7 @@ class EpisodeForm(forms.ModelForm):
             "video_file",
             "video_url",
             "telegram_file_id",
+            "telegram_message_id",
             "telegram_channel_post_url",
         ]
 
