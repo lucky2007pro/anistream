@@ -26,12 +26,30 @@ class AnimeAdmin(admin.ModelAdmin):
 
 @admin.register(Episode)
 class EpisodeAdmin(admin.ModelAdmin):
-    list_display = ('anime', 'episode_number', 'title', 'created_at')
+    list_display = ('anime', 'episode_number', 'title', 'telegram_message_id', 'created_at')
     list_filter = ('anime', 'created_at')
     search_fields = ('title', 'anime__title')
     ordering = ('anime', 'episode_number')
     list_per_page = 50
     readonly_fields = ('created_at', 'updated_at')
+    
+    fieldsets = (
+        ('Asosiy', {
+            'fields': ('anime', 'episode_number', 'title')
+        }),
+        ('Video Manbasi', {
+            'fields': ('video_file', 'video_url'),
+            'description': "Agar video serverda yoki boshqa saytda bo'lsa."
+        }),
+        ('Telegram Integratsiya (Tavsiya etiladi)', {
+            'fields': ('telegram_file_id', 'telegram_message_id', 'telegram_channel_post_url'),
+            'description': "Katta videolarni (2GB gacha) stream qilish uchun <b>Telegram message_id</b> ni to'ldirish SHART!"
+        }),
+        ('Sana', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('anime')

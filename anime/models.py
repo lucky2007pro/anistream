@@ -143,9 +143,26 @@ class Episode(models.Model):
         verbose_name="Video silkasi (URL)",
         help_text="Tashqi video silkasi"
     )
-    telegram_file_id = models.CharField(max_length=255, blank=True, null=True)
-    telegram_message_id = models.BigIntegerField(blank=True, null=True)
-    telegram_channel_post_url = models.URLField(max_length=500, blank=True, null=True)
+    telegram_file_id = models.CharField(
+        max_length=255, 
+        blank=True, 
+        null=True,
+        verbose_name="Telegram file_id",
+        help_text="Kichik videolar uchun (Bot API)"
+    )
+    telegram_message_id = models.BigIntegerField(
+        blank=True, 
+        null=True,
+        verbose_name="Telegram message_id",
+        help_text="Katta videolar (2GB) uchun SHART! (MTProto)"
+    )
+    telegram_channel_post_url = models.URLField(
+        max_length=500, 
+        blank=True, 
+        null=True,
+        verbose_name="Telegram Post URL",
+        help_text="Foydalanuvchilarga postni ochish uchun"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
