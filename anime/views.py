@@ -77,13 +77,16 @@ def anime_detail(request, anime_id):
         return redirect('home')
 
 
-def episode_stream(request, episode_id):
+async def episode_stream(request, episode_id):
     """Telegram file'ni brauzerga stream qiladi (Range/seek qo'llab-quvvatlanadi)."""
-    episode = get_object_or_404(Episode, id=episode_id)
+    try:
+        episode = await Episode.objects.aget(id=episode_id)
+    except Episode.DoesNotExist:
+        return HttpResponse("Episode topilmadi", status=404)
 
     # 1. MTProto orqali stream qilish (telethon) - cheklovsiz va tezroq
     try:
-        mtproto_response = async_to_sync(get_telegram_stream_response)(request, episode)
+        mtproto_response = await get_telegram_stream_response(request, episode)
         if mtproto_response:
             return mtproto_response
     except Exception as e:
@@ -94,7 +97,7 @@ def episode_stream(request, episode_id):
         return HttpResponseBadRequest("Bu qismda Telegram file_id mavjud emas.")
 
     try:
-        file_url = get_telegram_file_url(episode.telegram_file_id)
+        file_url = await sync_to_async(get_telegram_file_url)(episode.telegram_file_id)
     except TelegramStorageError as exc:
         return HttpResponse(
             f"TELEGRAM_STREAM_ERROR: {exc}",
@@ -108,12 +111,14 @@ def episode_stream(request, episode_id):
         outbound_headers['Range'] = range_header
 
     try:
-        tg_response = requests.get(
-            file_url,
-            headers=outbound_headers,
-            stream=True,
-            timeout=90,
-        )
+        def fetch_sync():
+            return requests.get(
+                file_url,
+                headers=outbound_headers,
+                stream=True,
+                timeout=90,
+            )
+        tg_response = await sync_to_async(fetch_sync)()
     except requests.RequestException as exc:
         return HttpResponse(
             f"TELEGRAM_NETWORK_ERROR: {exc}",

@@ -1,6 +1,7 @@
 # Django va asosiy paketlar
 Django==6.0.2
 gunicorn==21.2.0
+uvicorn[standard]==0.27.1
 psycopg[binary]>=3.1.18
 
 # Database

@@ -3,7 +3,7 @@ services:
     name: anistream
     runtime: python
     buildCommand: "./build.sh"
-    startCommand: "gunicorn core.wsgi:application"
+    startCommand: "uvicorn core.asgi:application --host 0.0.0.0 --port $PORT"
     envVars:
       - key: SECRET_KEY
         generateValue: true
