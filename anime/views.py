@@ -19,7 +19,7 @@ from .models import (
     NewsPost,
     ShortVideo,
 )
-from .forms import GenreForm, AnimeForm, EpisodeForm, NewsPostForm
+from .forms import GenreForm, AnimeForm, EpisodeForm, NewsPostForm, ShortVideoForm
 from .services.telegram_storage import (
     TelegramStorageError,
     get_telegram_file_url,
@@ -863,4 +863,82 @@ def admin_news_delete(request, pk):
         request,
         "admin/confirm_delete.html",
         {"object": news, "object_type": "Yangilik", "cancel_url": "admin_news_admin_list"},
+    )
+
+# --------- ShortVideo admin ----------
+
+@staff_required
+def admin_short_list(request):
+    query = request.GET.get("q", "").strip()
+    shorts = ShortVideo.objects.select_related("anime").all().order_by("-created_at")
+    if query:
+        shorts = shorts.filter(
+            Q(title__icontains=query)
+        )
+
+    paginator = Paginator(shorts, 20)
+    page_number = request.GET.get("page", 1)
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "admin/short_list.html",
+        {"page_obj": page_obj, "query": query},
+    )
+
+
+@staff_required
+def admin_short_create(request):
+    if request.method == "POST":
+        form = ShortVideoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Lavha muvaffaqiyatli qo'shildi.")
+            return redirect("admin_short_list")
+    else:
+        form = ShortVideoForm()
+
+    animes = Anime.objects.all().order_by('title')
+
+    return render(
+        request,
+        "admin/short_form.html",
+        {"form": form, "title": "Yangi lavha qo'shish", "animes": animes},
+    )
+
+
+@staff_required
+def admin_short_edit(request, pk):
+    short = get_object_or_404(ShortVideo, pk=pk)
+
+    if request.method == "POST":
+        form = ShortVideoForm(request.POST, instance=short)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Lavha yangilandi.")
+            return redirect("admin_short_list")
+    else:
+        form = ShortVideoForm(instance=short)
+
+    animes = Anime.objects.all().order_by('title')
+
+    return render(
+        request,
+        "admin/short_form.html",
+        {"form": form, "short": short, "title": "Lavhani tahrirlash", "animes": animes},
+    )
+
+
+@staff_required
+def admin_short_delete(request, pk):
+    short = get_object_or_404(ShortVideo, pk=pk)
+    if request.method == "POST":
+        short.delete()
+        messages.success(request, "Lavha o'chirildi.")
+        return redirect("admin_short_list")
+
+    return render(
+        request,
+        "admin/confirm_delete.html",
+        {"object": short, "object_type": "Lavha (Short)", "cancel_url": "admin_short_list"},
     )

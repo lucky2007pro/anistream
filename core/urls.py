@@ -45,6 +45,11 @@ urlpatterns = [
     path('admin/news/<int:pk>/edit/', views.admin_news_edit, name='admin_news_edit'),
     path('admin/news/<int:pk>/delete/', views.admin_news_delete, name='admin_news_delete'),
 
+    path('admin/shorts/', views.admin_short_list, name='admin_short_list'),
+    path('admin/shorts/create/', views.admin_short_create, name='admin_short_create'),
+    path('admin/shorts/<int:pk>/edit/', views.admin_short_edit, name='admin_short_edit'),
+    path('admin/shorts/<int:pk>/delete/', views.admin_short_delete, name='admin_short_delete'),
+
     # Django default admin (umumiy /admin/ prefiksidan keyin)
     path('admin/', admin.site.urls),
 

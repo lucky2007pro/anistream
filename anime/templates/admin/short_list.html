@@ -1,0 +1,61 @@
+{% extends 'admin/base_admin.html' %}
+{% block title %}Lavhalar - Admin{% endblock %}
+
+{% block content %}
+<div class="admin-header">
+    <div class="header-left">
+        <h2>Lavhalar (Shorts)</h2>
+        <p class="subtitle">Barcha qisqa videolar ro'yxati</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'admin_short_create' %}" class="btn-primary">Yangi Qo'shish</a>
+    </div>
+</div>
+
+<div class="data-table-container">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Sarlavha</th>
+                <th>Anime</th>
+                <th>File ID</th>
+                <th>Sana</th>
+                <th class="text-right">Amallar</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for short in page_obj %}
+            <tr>
+                <td><strong>{{ short.title }}</strong></td>
+                <td>{{ short.anime.title|default:"-" }}</td>
+                <td><span class="badge badge-info">{{ short.telegram_file_id|truncatechars:15 }}</span></td>
+                <td>{{ short.created_at|date:"d.m.Y H:i" }}</td>
+                <td class="text-right actions-cell">
+                    <a href="{% url 'short_stream' short.id %}" target="_blank" class="action-btn view-btn" title="Ko'rish">👁</a>
+                    <a href="{% url 'admin_short_edit' short.id %}" class="action-btn edit-btn" title="Tahrirlash">✏️</a>
+                    <a href="{% url 'admin_short_delete' short.id %}" class="action-btn delete-btn" title="O'chirish" onclick="return confirm('Rostdan o\'chirmoqchimisiz?');">🗑</a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center empty-state">Lavhalar topilmadi.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}" class="page-link">&laquo;</a>
+        {% endif %}
+        
+        <span class="current-page">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+        
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&q={{ query }}" class="page-link">&raquo;</a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

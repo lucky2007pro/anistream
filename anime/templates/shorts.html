@@ -227,7 +227,7 @@
 
     <div class="shorts-grid">
         {% for short in page_obj %}
-        <div class="short-card" onclick="openModal('{% url \'short_stream\' short.id %}', '{{ short.title|escapejs }}')">
+        <div class="short-card" onclick="openModal('{% url 'short_stream' short.id %}', '{{ short.title|escapejs }}')">
             <div class="short-thumbnail">
                 <div class="play-overlay">▶</div>
                 <video src="{% url 'short_stream' short.id %}#t=0.5" preload="metadata"></video>

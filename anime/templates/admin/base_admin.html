@@ -439,6 +439,9 @@
             <li><a href="{% url 'admin_episode_list' %}" class="nav-link{% if request.resolver_match.url_name == 'admin_episode_list' or request.resolver_match.url_name == 'admin_episode_create' or request.resolver_match.url_name == 'admin_episode_edit' %} active{% endif %}">
                 <span class="icon">📺</span> <span>Qismlar</span>
             </a></li>
+            <li><a href="{% url 'admin_short_list' %}" class="nav-link{% if request.resolver_match.url_name == 'admin_short_list' or request.resolver_match.url_name == 'admin_short_create' or request.resolver_match.url_name == 'admin_short_edit' %} active{% endif %}">
+                <span class="icon">📱</span> <span>Lavhalar</span>
+            </a></li>
             <li><a href="{% url 'admin_news_admin_list' %}" class="nav-link{% if request.resolver_match.url_name == 'admin_news_admin_list' or request.resolver_match.url_name == 'admin_news_create' or request.resolver_match.url_name == 'admin_news_edit' %} active{% endif %}">
                 <span class="icon">📰</span> <span>Yangiliklar</span>
             </a></li>

@@ -1,7 +1,7 @@
 from django import forms
 from django.utils.text import slugify
 
-from .models import Genre, Anime, Episode, NewsPost
+from .models import Genre, Anime, Episode, NewsPost, ShortVideo
 
 
 class GenreForm(forms.ModelForm):
@@ -80,4 +80,14 @@ class NewsPostForm(forms.ModelForm):
         if not slug and title:
             slug = slugify(title)
         return slug
+
+class ShortVideoForm(forms.ModelForm):
+    class Meta:
+        model = ShortVideo
+        fields = ['title', 'anime', 'telegram_file_id']
+        widgets = {
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Masalan: Treyler'}),
+            'anime': forms.Select(attrs={'class': 'form-control'}),
+            'telegram_file_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'BQACAQ...'}),
+        }
 
