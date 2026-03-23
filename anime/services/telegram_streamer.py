@@ -1,61 +1,56 @@
 import os
 import re
 import asyncio
-import queue
-import threading
 import logging
 from django.http import StreamingHttpResponse, HttpResponse
+from asgiref.sync import async_to_sync
 from .telegram_client import get_telegram_client
 
 logger = logging.getLogger(__name__)
 
 CHANNEL_ID = os.environ.get("TELEGRAM_CHANNEL_ID")
 
-# Sentinel: iter tugaganini bildiradi
-_DONE = object()
-# Sentinel: xato yuz berganini bildiradi
-_ERROR = object()
 
+class SyncTelethonStreamer:
+    """
+    Telethon async generatorini Django WSGI (sinxron) uchun moslashtiruvchi sinxron iterator.
+    async_to_sync orqali iter_download ning __anext__ metodini bitta standart
+    asgiref event loopida xavfsiz chaqiradi.
+    Bu orqali cross-thread event loop mismatch xatolari oldi olinadi.
+    """
+    def __init__(self, client, media, offset, length):
+        self.client = client
+        self.agen = client.iter_download(
+            media,
+            offset=offset,
+            limit=length,
+            chunk_size=512 * 1024,   # 512KB chunks
+            request_size=512 * 1024,
+        )
 
-def _run_async_download(coro, chunk_queue):
-    """
-    Yangi eventloop da async coroutine ishlatadi va
-    chunklarni sinxron queue ga qo'yadi.
-    Bu alohida threadda chaqiriladi.
-    """
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        loop.run_until_complete(coro(chunk_queue))
-    except Exception as e:
-        chunk_queue.put((_ERROR, e))
-    finally:
-        loop.close()
+    def __iter__(self):
+        return self
 
+    def __next__(self):
+        # async generatorning keyingi elementini olish uchun coroutine
+        async def _get_next_chunk():
+            return await self.agen.__anext__()
 
-def _make_sync_generator(chunk_queue):
-    """
-    Queue dan chunklar olib sinxron generator sifatida yield qiladi.
-    """
-    while True:
-        item = chunk_queue.get()
-        if item is _DONE:
-            break
-        if isinstance(item, tuple) and item[0] is _ERROR:
-            logger.error(f"Stream thread xato: {item[1]}")
-            break
-        yield item
+        try:
+            # asgiref.sync.async_to_sync xuddi get_telegram_client chaqirilgan
+            # loopni topib, o'sha joyda bajaradi. 
+            return async_to_sync(_get_next_chunk)()
+        except StopAsyncIteration:
+            raise StopIteration
+        except Exception as e:
+            logger.error(f"Telethon chunk stream xata: {e}")
+            raise StopIteration
 
 
 async def get_telegram_stream_response(request, episode):
     """
     Episode uchun Telegram MTProto stream response qaytaradi.
-    
     Bu funksiya async bo'lib, views.py da async_to_sync() orqali chaqiriladi.
-    Katta fayllar uchun thread+queue yondashuvi ishlatiladi:
-    - Telethon async download alohida threadda ishlaydi
-    - Django StreamingHttpResponse sinxron generator bilan ishlaydi
-    - RAM da butun fayl saqlanmaydi (true streaming)
     """
     client = await get_telegram_client()
     if not client:
@@ -112,40 +107,11 @@ async def get_telegram_stream_response(request, episode):
             status_code = 206
             content_range = f"bytes {start}-{end}/{file_size}"
 
-    # Capture variables for the async download coroutine
-    _client = client
-    _media = message.media
-    _offset = offset
-    _length = length
-
-    async def _download_to_queue(chunk_queue):
-        """Telethon iter_download'dan chunklar olib queue ga qo'yadi."""
-        try:
-            async for chunk in _client.iter_download(
-                _media,
-                offset=_offset,
-                limit=_length,
-                chunk_size=512 * 1024,    # 512KB - brauzer uchun optimal
-                request_size=512 * 1024,
-            ):
-                chunk_queue.put(chunk)
-        except Exception as e:
-            chunk_queue.put((_ERROR, e))
-        finally:
-            chunk_queue.put(_DONE)
-
-    # Thread + Queue: async download sinxron generatorga "ko'prik"
-    chunk_queue = queue.Queue(maxsize=8)  # 8 * 512KB = 4MB buffer
-
-    download_thread = threading.Thread(
-        target=_run_async_download,
-        args=(_download_to_queue, chunk_queue),
-        daemon=True,
-    )
-    download_thread.start()
+    # Asgiref async_to_sync arxitekturasiga mos tushadigan sinxron iterator
+    sync_streamer = SyncTelethonStreamer(client, message.media, offset, length)
 
     response = StreamingHttpResponse(
-        _make_sync_generator(chunk_queue),
+        sync_streamer,
         status=status_code,
         content_type=mime_type,
     )
