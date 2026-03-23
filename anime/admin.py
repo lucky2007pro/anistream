@@ -1,7 +1,7 @@
 from django.contrib import admin
 from .models import (
     Genre, Anime, Episode, UserProfile,
-    WatchHistory, Comment, NewsPost
+    WatchHistory, Comment, NewsPost, ShortVideo
 )
 
 
@@ -26,7 +26,7 @@ class AnimeAdmin(admin.ModelAdmin):
 
 @admin.register(Episode)
 class EpisodeAdmin(admin.ModelAdmin):
-    list_display = ('anime', 'episode_number', 'title', 'telegram_message_id', 'created_at')
+    list_display = ('anime', 'episode_number', 'title', 'created_at')
     list_filter = ('anime', 'created_at')
     search_fields = ('title', 'anime__title')
     ordering = ('anime', 'episode_number')
@@ -38,12 +38,8 @@ class EpisodeAdmin(admin.ModelAdmin):
             'fields': ('anime', 'episode_number', 'title')
         }),
         ('Video Manbasi', {
-            'fields': ('video_file', 'video_url'),
-            'description': "Agar video serverda yoki boshqa saytda bo'lsa."
-        }),
-        ('Telegram Integratsiya (Tavsiya etiladi)', {
-            'fields': ('telegram_file_id', 'telegram_message_id', 'telegram_channel_post_url'),
-            'description': "Katta videolarni (2GB gacha) stream qilish uchun <b>Telegram message_id</b> ni to'ldirish SHART!"
+            'fields': ('video_file', 'video_url', 'telegram_file_id'),
+            'description': "Video faylini yuklang yoki bot orqali kichik video IDsini yozing."
         }),
         ('Sana', {
             'fields': ('created_at', 'updated_at'),
@@ -90,3 +86,9 @@ class NewsPostAdmin(admin.ModelAdmin):
     search_fields = ('title', 'content', 'tags')
     prepopulated_fields = {'slug': ('title',)}
     readonly_fields = ('views', 'created_at', 'updated_at')
+
+@admin.register(ShortVideo)
+class ShortVideoAdmin(admin.ModelAdmin):
+    list_display = ('title', 'anime', 'telegram_file_id', 'created_at')
+    list_filter = ('created_at',)
+    search_fields = ('title', 'anime__title')

@@ -17,12 +17,12 @@ from .models import (
     WatchHistory,
     Comment,
     NewsPost,
+    ShortVideo,
 )
 from .forms import GenreForm, AnimeForm, EpisodeForm, NewsPostForm
 from .services.telegram_storage import (
     TelegramStorageError,
     get_telegram_file_url,
-    upload_episode_to_telegram,
 )
 from asgiref.sync import async_to_sync, sync_to_async
 from .services.telegram_streamer import get_telegram_stream_response
@@ -77,34 +77,32 @@ def anime_detail(request, anime_id):
         return redirect('home')
 
 
-def episode_stream(request, episode_id):
-    """Telegram file'ni brauzerga stream qiladi (Range/seek qo'llab-quvvatlanadi).
+def shorts_page(request):
+    """Lavhalar va qisqa videolar sahifasi"""
+    shorts_qs = ShortVideo.objects.all().order_by('-created_at')
     
-    Sinxron view: Telethon (async) qismlar async_to_sync orqali chaqiriladi,
-    bu WSGI va ASGI serverlar ikkalasida ham to'g'ri ishlaydi.
-    """
+    paginator = Paginator(shorts_qs, 12)
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'page_obj': page_obj,
+    }
+    return render(request, 'shorts.html', context)
+
+
+def short_stream(request, short_id):
+    """Telegram file'ni brauzerga stream qiladi (Range/seek qo'llab-quvvatlanadi). Kichik lavhalar uchun."""
     try:
-        episode = Episode.objects.get(id=episode_id)
-    except Episode.DoesNotExist:
-        return HttpResponse("Episode topilmadi", status=404)
+        short_video = ShortVideo.objects.get(id=short_id)
+    except ShortVideo.DoesNotExist:
+        return HttpResponse("Lavha topilmadi", status=404)
 
-    # 1. MTProto orqali stream qilish (telethon) - katta fayllar uchun (>20MB)
-    #    Telethon async bo'lgani uchun async_to_sync orqali chaqiramiz
-    if episode.telegram_message_id:
-        try:
-            _get_stream = async_to_sync(get_telegram_stream_response)
-            mtproto_response = _get_stream(request, episode)
-            if mtproto_response:
-                return mtproto_response
-        except Exception as e:
-            logger.error(f"MTProto stream error (fallback to HTTP): {e}")
-
-    # 2. HTTP Bot API orqali stream (faqat <20MB fayllar uchun ishlaydi)
-    if not episode.telegram_file_id:
-        return HttpResponseBadRequest("Bu qismda Telegram file_id mavjud emas.")
+    if not short_video.telegram_file_id:
+        return HttpResponseBadRequest("Bu lavhada Telegram file_id mavjud emas.")
 
     try:
-        file_url = get_telegram_file_url(episode.telegram_file_id)
+        file_url = get_telegram_file_url(short_video.telegram_file_id)
     except TelegramStorageError as exc:
         return HttpResponse(
             f"TELEGRAM_STREAM_ERROR: {exc}",
@@ -144,7 +142,6 @@ def episode_stream(request, episode_id):
         status=tg_response.status_code,
     )
 
-    # Seek/replay stabil ishlashi uchun upstream range headerlarini uzatamiz.
     if tg_response.headers.get('Content-Range'):
         stream['Content-Range'] = tg_response.headers['Content-Range']
     if tg_response.headers.get('Content-Length'):
@@ -154,8 +151,8 @@ def episode_stream(request, episode_id):
     else:
         stream['Accept-Ranges'] = 'bytes'
 
-    stream['Content-Disposition'] = f'inline; filename="episode-{episode.id}.mp4"'
-    stream['Cache-Control'] = 'private, max-age=300'
+    stream['Content-Disposition'] = f'inline; filename="short-{short_video.id}.mp4"'
+    stream['Cache-Control'] = 'public, max-age=3600'
     return stream
 
 
@@ -365,18 +362,35 @@ def favorites_page(request):
 
 @login_required
 def add_to_favorites(request, anime_id):
-    """Sevimlilarga qo'shish"""
     anime = get_object_or_404(Anime, id=anime_id)
-    profile, created = UserProfile.objects.get_or_create(user=request.user)
+    profile = get_object_or_404(UserProfile, user=request.user)
 
     if anime in profile.favorites.all():
         profile.favorites.remove(anime)
-        messages.info(request, f"{anime.title} sevimlilardan olib tashlandi")
+        messages.success(request, f"{anime.title} sevimlilardan olib tashlandi.")
     else:
         profile.favorites.add(anime)
-        messages.success(request, f"{anime.title} sevimlilarga qo'shildi!")
+        messages.success(request, f"{anime.title} sevimlilarga qo'shildi.")
 
-    return redirect(request.META.get('HTTP_REFERER', 'home'))
+    return redirect('detail', anime_id=anime.id)
+
+
+@login_required
+def add_comment(request, anime_id):
+    if request.method == "POST":
+        anime = get_object_or_404(Anime, id=anime_id)
+        text = request.POST.get('text', '').strip()
+        if text:
+            Comment.objects.create(
+                anime=anime,
+                user=request.user,
+                text=text
+            )
+            messages.success(request, "Izohingiz qo'shildi!")
+        else:
+            messages.error(request, "Izoh matni bo'sh bo'lishi mumkin emas.")
+        
+    return redirect('detail', anime_id=anime_id)
 
 
 @login_required
@@ -725,23 +739,6 @@ def admin_episode_create(request):
         form = EpisodeForm(request.POST, request.FILES)
         if form.is_valid():
             episode = form.save()
-
-            if form.cleaned_data.get("upload_to_telegram"):
-                def _progress(uploaded, total):
-                    if total > 0:
-                        percent = int((uploaded * 100) / total)
-                        logger.info("Episode upload progress (create): %s%% | episode_id=%s", percent, episode.id)
-
-                try:
-                    upload_episode_to_telegram(
-                        episode,
-                        delete_local_file=form.cleaned_data.get("delete_local_after_upload", False),
-                        progress_callback=_progress,
-                    )
-                    messages.success(request, "Video Telegram kanalga ham yuklandi.")
-                except TelegramStorageError as exc:
-                    messages.warning(request, f"Episode saqlandi, lekin Telegram upload bo'lmadi: {exc}")
-
             messages.success(request, "Qism muvaffaqiyatli qo'shildi.")
             return redirect("admin_episode_list")
     else:
@@ -762,23 +759,6 @@ def admin_episode_edit(request, pk):
         form = EpisodeForm(request.POST, request.FILES, instance=episode)
         if form.is_valid():
             episode = form.save()
-
-            if form.cleaned_data.get("upload_to_telegram"):
-                def _progress(uploaded, total):
-                    if total > 0:
-                        percent = int((uploaded * 100) / total)
-                        logger.info("Episode upload progress (edit): %s%% | episode_id=%s", percent, episode.id)
-
-                try:
-                    upload_episode_to_telegram(
-                        episode,
-                        delete_local_file=form.cleaned_data.get("delete_local_after_upload", False),
-                        progress_callback=_progress,
-                    )
-                    messages.success(request, "Video Telegram kanalga ham yuklandi.")
-                except TelegramStorageError as exc:
-                    messages.warning(request, f"Episode yangilandi, lekin Telegram upload bo'lmadi: {exc}")
-
             messages.success(request, "Qism yangilandi.")
             return redirect("admin_episode_list")
     else:

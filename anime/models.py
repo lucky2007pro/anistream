@@ -150,19 +150,6 @@ class Episode(models.Model):
         verbose_name="Telegram file_id",
         help_text="Kichik videolar uchun (Bot API)"
     )
-    telegram_message_id = models.BigIntegerField(
-        blank=True, 
-        null=True,
-        verbose_name="Telegram message_id",
-        help_text="Katta videolar (2GB) uchun SHART! (MTProto)"
-    )
-    telegram_channel_post_url = models.URLField(
-        max_length=500, 
-        blank=True, 
-        null=True,
-        verbose_name="Telegram Post URL",
-        help_text="Foydalanuvchilarga postni ochish uchun"
-    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -196,6 +183,37 @@ class Episode(models.Model):
         if self.video_url:
             return self.video_url
         return ""
+
+
+class ShortVideo(models.Model):
+    title = models.CharField(
+        max_length=200,
+        verbose_name="Lavha nomi",
+        help_text="Qisqa video/lavha nomi"
+    )
+    anime = models.ForeignKey(
+        'Anime',
+        on_delete=models.CASCADE,
+        related_name='shorts',
+        blank=True,
+        null=True,
+        verbose_name="Tegishli Anime"
+    )
+    telegram_file_id = models.CharField(
+        max_length=255, 
+        verbose_name="Telegram file_id",
+        help_text="Bot orqali yuklangan qisqa video ID'si"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        verbose_name = "Lavha (Short)"
+        verbose_name_plural = "Lavhalar (Shorts)"
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return self.title
 
 
 class UserProfile(models.Model):

@@ -55,7 +55,8 @@ urlpatterns = [
 
     # Anime
     path('anime/<int:anime_id>/', views.anime_detail, name='detail'),
-    path('episodes/<int:episode_id>/stream/', views.episode_stream, name='episode_stream'),
+    path('shorts/', views.shorts_page, name='shorts_page'),
+    path('shorts/<int:short_id>/stream/', views.short_stream, name='short_stream'),
 
     # Janrlar
     path('genres/', views.genres_page, name='genres'),
@@ -77,6 +78,7 @@ urlpatterns = [
 
     # Actions
     path('anime/<int:anime_id>/favorite/', views.add_to_favorites, name='add_favorite'),
+    path('anime/<int:anime_id>/comment/', views.add_comment, name='add_comment'),
 
     # Yangiliklar
     path('news/', views.news_list, name='news_list'),

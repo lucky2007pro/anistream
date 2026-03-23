@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lavhalar | AniStream</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-base: #0f0f13;
+            --bg-surface: #1a1a24;
+            --accent: #ff3366;
+            --accent-hover: #ff003c;
+            --text-light: #ffffff;
+            --text-dim: #8a8a9d;
+            --glass-bg: rgba(26, 26, 36, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.05);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-light);
+            overflow-x: hidden;
+            padding-top: 80px;
+        }
+
+        /* NAVBAR */
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            background: rgba(15, 15, 19, 0.98);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        .nav-brand { font-size: 1.8rem; font-weight: 900; color: var(--text-light); text-decoration: none; display: flex; align-items: center; gap: 10px; }
+        .nav-brand span { color: var(--accent); }
+        
+        .nav-menu { display: flex; gap: 35px; }
+        .nav-menu a {
+            color: var(--text-light); text-decoration: none; font-weight: 600;
+            font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px;
+            position: relative; transition: color 0.3s;
+        }
+        .nav-menu a:hover, .nav-menu a.active { color: var(--accent); }
+        .nav-menu a::after {
+            content: ''; position: absolute; bottom: -5px; left: 0; width: 0%;
+            height: 2px; background: var(--accent); transition: width 0.3s ease;
+        }
+        .nav-menu a:hover::after, .nav-menu a.active::after { width: 100%; }
+        
+        .nav-actions { display: flex; gap: 15px; }
+        .action-icon { background: transparent; border: none; color: var(--text-light); width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background 0.2s ease; font-size: 1.4rem; text-decoration: none;}
+        .action-icon:hover { background: rgba(255, 255, 255, 0.1); }
+        
+        /* CONTAINER */
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px 5%; min-height: 80vh; }
+        .page-title { font-size: 3rem; font-weight: 900; margin-bottom: 30px; }
+        .page-title span { color: var(--accent); }
+
+        /* GRID */
+        .shorts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+        }
+
+        .short-card {
+            background: var(--bg-surface);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s, border-color 0.3s;
+        }
+        
+        .short-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--accent);
+        }
+
+        .short-thumbnail {
+            width: 100%;
+            height: 350px;
+            background: #000;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text-dim);
+            font-size: 3rem;
+        }
+
+        .short-thumbnail video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            pointer-events: none; /* Let the card handle clicks */
+        }
+
+        .play-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0,0,0,0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .short-card:hover .play-overlay {
+            opacity: 1;
+            background: rgba(255, 51, 102, 0.2);
+        }
+
+        .short-info {
+            padding: 15px;
+        }
+
+        .short-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+
+        .short-anime {
+            font-size: 0.85rem;
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: none;
+            border: none;
+            color: white;
+            font-size: 2.5rem;
+            cursor: pointer;
+            z-index: 2001;
+        }
+
+        .modal-close:hover {
+            color: var(--accent);
+        }
+
+        .video-container {
+            width: 100%;
+            max-width: 450px;
+            height: 80vh;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(255,51,102,0.2);
+            background: #000;
+        }
+        
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu { display: none; }
+            .shorts-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+            .short-thumbnail { height: 250px; }
+            .video-container { height: 100vh; max-width: 100%; border-radius: 0; }
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="{% url 'home' %}" class="nav-brand">Ani<span>Stream</span></a>
+    <div class="nav-menu">
+        <a href="{% url 'catalog' %}">Katalog</a>
+        <a href="{% url 'shorts_page' %}" class="active">Lavhalar</a>
+        <a href="{% url 'genres' %}">Janrlar</a>
+        <a href="{% url 'schedule' %}">Jadval</a>
+    </div>
+    <div class="nav-actions">
+        <a href="{% url 'search' %}" class="action-icon">🔍</a>
+        <a href="{% if request.user.is_authenticated %}{% url 'profile' %}{% else %}{% url 'auth_page' %}{% endif %}" class="action-icon">👤</a>
+    </div>
+</nav>
+
+<div class="container">
+    <h1 class="page-title">Anime <span>Lavhalar</span></h1>
+
+    <div class="shorts-grid">
+        {% for short in page_obj %}
+        <div class="short-card" onclick="openModal('{% url \'short_stream\' short.id %}', '{{ short.title|escapejs }}')">
+            <div class="short-thumbnail">
+                <div class="play-overlay">▶</div>
+                <video src="{% url 'short_stream' short.id %}#t=0.5" preload="metadata"></video>
+            </div>
+            <div class="short-info">
+                <div class="short-title">{{ short.title }}</div>
+                {% if short.anime %}
+                <div class="short-anime">{{ short.anime.title }}</div>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <p style="color: var(--text-dim); grid-column: 1/-1;">Hozircha lavhalar mavjud emas.</p>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="videoModal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div class="video-container">
+        <video id="modalVideoPlayer" controls autoplay playsinline loop></video>
+    </div>
+</div>
+
+<script>
+    const modal = document.getElementById('videoModal');
+    const videoPlayer = document.getElementById('modalVideoPlayer');
+
+    function openModal(videoSrc, title) {
+        videoPlayer.src = videoSrc;
+        modal.classList.add('active');
+        videoPlayer.play();
+    }
+
+    function closeModal() {
+        modal.classList.remove('active');
+        videoPlayer.pause();
+        videoPlayer.src = "";
+    }
+
+    // Close on background click
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === "Escape") {
+            closeModal();
+        }
+    });
+</script>
+
+</body>
+</html>

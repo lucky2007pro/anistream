@@ -47,8 +47,7 @@ if ADMIN_IDS_RAW:
                 pass
 # Telethon Client
 client = TelegramClient('bot_session', int(API_ID), API_HASH)
-# User States: user_id -> "long" | "short" | "file" | None
-user_modes = {}
+client = TelegramClient('bot_session', int(API_ID), API_HASH)
 def load_state_data():
     if STATE_FILE.exists():
         try:
@@ -74,28 +73,18 @@ async def start_handler(event):
         return
     # Menyu
     markup = [
-        [Button.text("🎬 Uzun Video (Film)", resize=True), Button.text("📹 Qisqa Video (Serial)", resize=True)],
-        [Button.text("📁 Hujjat/Fayl", resize=True)],
+        [Button.text("📹 Qisqa Video (Lavha) Yuklash", resize=True)],
         [Button.text("📊 Statistika"), Button.text("❓ Yordam")]
     ]
     await event.respond(
         f"👋 Assalomu alaykum, {sender.first_name}!\n\n"
-        "Qanday turdagi media yuklamoqchisiz? Quyidan tanlang:",
+        "Qisqa video (Lavha) yoki treyler yuklash uchun quyidagi tugmani bosing va videoni yuboring:",
         buttons=markup
     )
-    user_modes[user_id] = "waiting"
-@client.on(events.NewMessage(pattern=r'🎬 Uzun Video \(Film\)'))
-async def mode_long(event):
-    user_modes[event.sender_id] = "long"
-    await event.respond("✅ **Uzun Video** rejimi tanlandi.\nVideoni yuboring (Film).")
-@client.on(events.NewMessage(pattern=r'📹 Qisqa Video \(Serial\)'))
+
+@client.on(events.NewMessage(pattern=r'📹 Qisqa Video \(Lavha\) Yuklash'))
 async def mode_short(event):
-    user_modes[event.sender_id] = "short"
-    await event.respond("✅ **Qisqa Video** rejimi tanlandi.\nVideoni yuboring (Serial/Trailer).")
-@client.on(events.NewMessage(pattern='📁 Hujjat/Fayl'))
-async def mode_file(event):
-    user_modes[event.sender_id] = "file"
-    await event.respond("✅ **Fayl** rejimi tanlandi.\nFaylni yuboring.")
+    await event.respond("✅ **Qisqa Video** rejimi tayyor.\nVideoni yuboring (Lavha).")
 @client.on(events.NewMessage(pattern='📊 Statistika'))
 async def stats_handler(event):
     st = load_state_data()
@@ -119,23 +108,17 @@ async def help_handler(event):
 async def upload_main(event):
     # Only process media if it's NOT a command/text button
     txt = (event.message.text or "")
-    if txt.startswith('/') or txt in ['🎬 Uzun Video (Film)', '📹 Qisqa Video (Serial)', '📁 Hujjat/Fayl', '📊 Statistika', '❓ Yordam']:
+    if txt.startswith('/') or txt in ['📹 Qisqa Video (Lavha) Yuklash', '📊 Statistika', '❓ Yordam']:
         return
     user_id = event.sender_id
     if ADMIN_IDS and user_id not in ADMIN_IDS:
         return
     if not event.message.media:
-        if user_modes.get(user_id) == "waiting":
-            await event.respond("👇 Iltimos, avval pastdagi menyudan turni tanlang.")
+        await event.respond("👇 Iltimos, video yuboring.")
         return
-    mode = user_modes.get(user_id, "waiting")
-    if mode == "waiting":
-        await event.respond("👇 Iltimos, avval pastdagi menyudan turni tanlang.")
-        return
-    status_msg = await event.respond("⏳ **Kanalga yuklanmoqda...**\n(Katta fayllar biroz vaqt olishi mumkin)")
+    
+    status_msg = await event.respond("⏳ **Kanalga yuklanmoqda...**")
     try:
-        # Determine strict attributes if needed
-        force_doc = (mode == "file")
         final_caption = event.message.text or ""
         # Progress bar funksiyasi (agar qayta yuklash kerak bo'lsa ishlaydi)
         async def progress_cb(current, total):
@@ -150,7 +133,6 @@ async def upload_main(event):
             CHANNEL_ID_INT,
             target_media,
             caption=final_caption,
-            force_document=force_doc,
             supports_streaming=True, # Video stream bo'lishi uchun
             progress_callback=progress_cb
         )
@@ -166,11 +148,9 @@ async def upload_main(event):
         save_state_data('last_channel_message_id', chan_post_id)
         response_text = (
             f"✅ **Muvaffaqiyatli Yuklandi!**\n\n"
-            f"📂 **File ID (Bot API)**: {f_id}\n" # Bu ID Bot API uchun
-            f"🆔 **Message ID (MTProto)**: {chan_post_id}\n" # Bu ID Sayt uchun muhimroq bo'lishi mumkin
-            f"🔗 **Link**: [Postga o'tish]({link_url})\n"
-            f"🏷 **Rejim**: {mode}\n\n"
-            f"⚠️ **Eslatma:** Sayt admin paneliga **Message ID** ni kiriting."
+            f"📂 **File ID (Lavhalar uchun)**: `{f_id}`\n" 
+            f"🔗 **Link**: [Postga o'tish]({link_url})\n\n"
+            f"⚠️ Ushbu File ID ni saytingizdagi Lavhalar qismiga joylang."
         )
         await status_msg.edit(response_text, link_preview=False)
     except Exception as e:

@@ -41,16 +41,6 @@ class AnimeForm(forms.ModelForm):
 
 
 class EpisodeForm(forms.ModelForm):
-    upload_to_telegram = forms.BooleanField(
-        required=False,
-        label="Saqlashdan keyin Telegram kanalga yuklash"
-    )
-    delete_local_after_upload = forms.BooleanField(
-        required=False,
-        initial=True,
-        label="Telegram'ga yuklangach local video faylni o'chirish"
-    )
-
     class Meta:
         model = Episode
         fields = [
@@ -60,27 +50,18 @@ class EpisodeForm(forms.ModelForm):
             "video_file",
             "video_url",
             "telegram_file_id",
-            "telegram_message_id",
-            "telegram_channel_post_url",
         ]
 
     def clean(self):
         cleaned_data = super().clean()
         video_file = cleaned_data.get("video_file")
         video_url = cleaned_data.get("video_url")
+        telegram_file_id = cleaned_data.get("telegram_file_id")
 
-        if not video_file and not video_url:
-            telegram_file_id = cleaned_data.get("telegram_file_id")
-            if not telegram_file_id:
-                raise forms.ValidationError(
-                    "Kamida bitta maydonni to'ldiring: video fayl, video URL yoki Telegram file_id."
-                )
-
-        if cleaned_data.get("upload_to_telegram") and not video_file:
-            raise forms.ValidationError("Telegram'ga yuklash uchun video fayl tanlang.")
-
-        if cleaned_data.get("delete_local_after_upload") and not cleaned_data.get("upload_to_telegram"):
-            raise forms.ValidationError("Local faylni o'chirish uchun Telegram upload ham yoqilgan bo'lishi kerak.")
+        if not video_file and not video_url and not telegram_file_id:
+            raise forms.ValidationError(
+                "Kamida bitta maydonni to'ldiring: video fayl, video URL yoki Telegram file_id."
+            )
 
         return cleaned_data
 

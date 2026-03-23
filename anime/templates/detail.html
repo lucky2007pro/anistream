@@ -546,18 +546,28 @@
 
         <div id="chat" class="tab-content">
             <div class="chat-container">
-                <div class="chat-input-box">
-                    <input type="text" placeholder="Fikringizni yozing...">
-                    <button class="send-btn">YUBORISH</button>
-                </div>
+                {% if request.user.is_authenticated %}
+                <form action="{% url 'add_comment' anime.id %}" method="post" class="chat-input-box">
+                    {% csrf_token %}
+                    <input type="text" name="text" placeholder="Fikringizni yozing..." required>
+                    <button type="submit" class="send-btn">YUBORISH</button>
+                </form>
+                {% else %}
+                <p style="color: var(--text-dim); margin-bottom: 20px;">Izoh qoldirish uchun <a href="{% url 'auth_page' %}" style="color: var(--accent);">kiring</a>.</p>
+                {% endif %}
+                
                 <div class="comments-list">
+                    {% for comment in anime.comments.all|dictsortreversed:"created_at" %}
                     <div class="comment">
-                        <div class="avatar">U</div>
+                        <div class="avatar">{{ comment.user.username|make_list|first|upper }}</div>
                         <div class="comment-text">
-                            <h4>User_992 <span class="comment-time">2 soat oldin</span></h4>
-                            <p>Bu animening grafikasi shunchaki daxshat! Keyingi qismini kutib qolaman.</p>
+                            <h4>{{ comment.user.username }} <span class="comment-time">{{ comment.created_at|timesince }} oldin</span></h4>
+                            <p>{{ comment.text }}</p>
                         </div>
                     </div>
+                    {% empty %}
+                    <p style="color: var(--text-dim);">Hali izohlar yo'q. Birinchi bo'lib fikr bildiring!</p>
+                    {% endfor %}
                 </div>
             </div>
         </div>
