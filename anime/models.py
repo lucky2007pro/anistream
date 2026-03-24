@@ -150,6 +150,19 @@ class Episode(models.Model):
         verbose_name="Telegram file_id",
         help_text="Kichik videolar uchun (Bot API)"
     )
+    telegram_message_id = models.IntegerField(
+        blank=True,
+        null=True,
+        verbose_name="Telegram message_id",
+        help_text="MTProto stream uchun (Kanal/Guruhdagi xabar ID'si)"
+    )
+    telegram_channel_post_url = models.URLField(
+        max_length=500,
+        blank=True,
+        null=True,
+        verbose_name="Telegram post URL",
+        help_text="Telegram kanaldagi xabar havolasi"
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -172,6 +185,8 @@ class Episode(models.Model):
             raise ValidationError("Qism raqami 1 dan kichik bo'lishi mumkin emas")
 
     def get_video_source(self):
+        if self.telegram_message_id:
+            return reverse('episode_stream', args=[self.id])
         if self.telegram_file_id:
             return reverse('episode_stream', args=[self.id])
         if self.video_file:

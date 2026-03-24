@@ -45,9 +45,10 @@ if ADMIN_IDS_RAW:
                 ADMIN_IDS.add(int(x.strip()))
             except:
                 pass
-# Telethon Client
-client = TelegramClient('bot_session', int(API_ID), API_HASH)
-client = TelegramClient('bot_session', int(API_ID), API_HASH)
+
+# Telethon Client - biz uni main() ichida yoki loop yaratilgandan keyin yaratamiz
+client = None
+
 def load_state_data():
     if STATE_FILE.exists():
         try:
@@ -63,7 +64,6 @@ def save_state_data(key, value):
     except Exception as e:
         logger.error(f"State save error: {e}")
 # --- Handlers ---
-@client.on(events.NewMessage(pattern='/start'))
 async def start_handler(event):
     sender = await event.get_sender()
     if not sender: return
@@ -82,10 +82,9 @@ async def start_handler(event):
         buttons=markup
     )
 
-@client.on(events.NewMessage(pattern=r'📹 Qisqa Video \(Lavha\) Yuklash'))
 async def mode_short(event):
     await event.respond("✅ **Qisqa Video** rejimi tayyor.\nVideoni yuboring (Lavha).")
-@client.on(events.NewMessage(pattern='📊 Statistika'))
+
 async def stats_handler(event):
     st = load_state_data()
     last_fid = st.get('last_channel_file_id', 'mavjud emas')
@@ -96,7 +95,7 @@ async def stats_handler(event):
         f"🔹 So'nggi yuklangan File ID: {last_fid}\n"
         f"🔹 So'nggi Message ID: {last_mid}"
     )
-@client.on(events.NewMessage(pattern='❓ Yordam'))
+
 async def help_handler(event):
     await event.respond(
         "📚 **Yordam:**\n"
@@ -104,7 +103,7 @@ async def help_handler(event):
         "2. Media faylni yuboring.\n"
         "3. Bot uni kanalga joylab, ID qaytaradi."
     )
-@client.on(events.NewMessage)
+
 async def upload_main(event):
     # Only process media if it's NOT a command/text button
     txt = (event.message.text or "")
@@ -156,11 +155,23 @@ async def upload_main(event):
     except Exception as e:
         logger.error(f"Error: {e}")
         await status_msg.edit(f"❌ Xatolik yuz berdi: {e}")
+
 async def main():
+    global client
+    client = TelegramClient('bot_session', int(API_ID), API_HASH)
+    
+    # Handlers ro'yxatdan o'tkazish
+    client.add_event_handler(start_handler, events.NewMessage(pattern='/start'))
+    client.add_event_handler(mode_short, events.NewMessage(pattern=r'📹 Qisqa Video \(Lavha\) Yuklash'))
+    client.add_event_handler(stats_handler, events.NewMessage(pattern='📊 Statistika'))
+    client.add_event_handler(help_handler, events.NewMessage(pattern='❓ Yordam'))
+    client.add_event_handler(upload_main, events.NewMessage())
+
     print("🤖 Bot ishga tushdi (Telethon)...")
     await client.start(bot_token=BOT_TOKEN)
     print("✅ Bot onlayn. Telegram orqali /start bosing.")
     await client.run_until_disconnected()
+
 if __name__ == '__main__':
     try:
         # Telethon logs noise kamaytirish

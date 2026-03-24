@@ -23,6 +23,7 @@ from .forms import GenreForm, AnimeForm, EpisodeForm, NewsPostForm, ShortVideoFo
 from .services.telegram_storage import (
     TelegramStorageError,
     get_telegram_file_url,
+    upload_episode_to_telegram,
 )
 from asgiref.sync import async_to_sync, sync_to_async
 from .services.telegram_streamer import get_telegram_stream_response
@@ -154,6 +155,66 @@ def short_stream(request, short_id):
     stream['Content-Disposition'] = f'inline; filename="short-{short_video.id}.mp4"'
     stream['Cache-Control'] = 'public, max-age=3600'
     return stream
+
+
+async def episode_stream(request, episode_id):
+    """Episode videosini stream qiladi. telegram_message_id bo'lsa MTProto, bo'lmasa Bot API orqali."""
+    from asgiref.sync import sync_to_async
+    try:
+        from django.shortcuts import get_object_or_404
+        episode = await sync_to_async(get_object_or_404)(Episode, id=episode_id)
+    except Exception:
+        return HttpResponse(status=404)
+
+    # 1. MTProto stream (Large files, recommended)
+    if episode.telegram_message_id:
+        try:
+            # get_telegram_stream_response is async
+            response = await get_telegram_stream_response(request, episode)
+            if response:
+                return response
+        except Exception as e:
+            logger.error(f"MTProto stream error: {e}")
+
+    # 2. Bot API stream (Small files < 20MB)
+    if episode.telegram_file_id:
+        try:
+            def get_bot_api_stream():
+                file_url = get_telegram_file_url(episode.telegram_file_id)
+                
+                outbound_headers = {}
+                range_header = request.headers.get('Range') or request.META.get('HTTP_RANGE')
+                if range_header:
+                    outbound_headers['Range'] = range_header
+
+                tg_response = requests.get(
+                    file_url,
+                    headers=outbound_headers,
+                    stream=True,
+                    timeout=90,
+                )
+
+                if tg_response.status_code in (200, 206):
+                    stream = StreamingHttpResponse(
+                        tg_response.iter_content(chunk_size=1024 * 1024),
+                        content_type=tg_response.headers.get('Content-Type', 'video/mp4'),
+                        status=tg_response.status_code,
+                    )
+                    if tg_response.headers.get('Content-Range'):
+                        stream['Content-Range'] = tg_response.headers['Content-Range']
+                    if tg_response.headers.get('Content-Length'):
+                        stream['Content-Length'] = tg_response.headers['Content-Length']
+                    
+                    stream['Accept-Ranges'] = 'bytes'
+                    stream['Content-Disposition'] = f'inline; filename="episode-{episode.id}.mp4"'
+                    return stream
+            response = await sync_to_async(get_bot_api_stream)()
+            if response:
+                return response
+        except Exception as e:
+            logger.error(f"Bot API stream error: {e}")
+
+    return HttpResponse("Video stream qilib bo'lmadi", status=404)
 
 
 def auth_view(request):
@@ -739,7 +800,20 @@ def admin_episode_create(request):
         form = EpisodeForm(request.POST, request.FILES)
         if form.is_valid():
             episode = form.save()
-            messages.success(request, "Qism muvaffaqiyatli qo'shildi.")
+            
+            # Telegram'ga yuklash
+            upload_to_tg = form.cleaned_data.get('upload_to_telegram')
+            delete_local = form.cleaned_data.get('delete_local_after_upload')
+            
+            if upload_to_tg and episode.video_file:
+                try:
+                    upload_episode_to_telegram(episode, delete_local_file=delete_local)
+                    messages.success(request, "Qism muvaffaqiyatli qo'shildi va Telegram'ga yuklandi.")
+                except TelegramStorageError as e:
+                    messages.warning(request, f"Qism qo'shildi, lekin Telegram'ga yuklashda xato: {e}")
+            else:
+                messages.success(request, "Qism muvaffaqiyatli qo'shildi.")
+            
             return redirect("admin_episode_list")
     else:
         form = EpisodeForm()
@@ -759,7 +833,20 @@ def admin_episode_edit(request, pk):
         form = EpisodeForm(request.POST, request.FILES, instance=episode)
         if form.is_valid():
             episode = form.save()
-            messages.success(request, "Qism yangilandi.")
+            
+            # Telegram'ga yuklash
+            upload_to_tg = form.cleaned_data.get('upload_to_telegram')
+            delete_local = form.cleaned_data.get('delete_local_after_upload')
+            
+            if upload_to_tg and episode.video_file:
+                try:
+                    upload_episode_to_telegram(episode, delete_local_file=delete_local)
+                    messages.success(request, "Qism yangilandi va Telegram'ga yuklandi.")
+                except TelegramStorageError as e:
+                    messages.warning(request, f"Qism yangilandi, lekin Telegram'ga yuklashda xato: {e}")
+            else:
+                messages.success(request, "Qism yangilandi.")
+                
             return redirect("admin_episode_list")
     else:
         form = EpisodeForm(instance=episode)

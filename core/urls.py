@@ -60,6 +60,7 @@ urlpatterns = [
 
     # Anime
     path('anime/<int:anime_id>/', views.anime_detail, name='detail'),
+    path('episode/<int:episode_id>/stream/', views.episode_stream, name='episode_stream'),
     path('shorts/', views.shorts_page, name='shorts_page'),
     path('shorts/<int:short_id>/stream/', views.short_stream, name='short_stream'),
 

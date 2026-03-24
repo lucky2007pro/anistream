@@ -10,43 +10,6 @@ logger = logging.getLogger(__name__)
 
 CHANNEL_ID = os.environ.get("TELEGRAM_CHANNEL_ID")
 
-
-class SyncTelethonStreamer:
-    """
-    Telethon async generatorini Django WSGI (sinxron) uchun moslashtiruvchi sinxron iterator.
-    async_to_sync orqali iter_download ning __anext__ metodini bitta standart
-    asgiref event loopida xavfsiz chaqiradi.
-    Bu orqali cross-thread event loop mismatch xatolari oldi olinadi.
-    """
-    def __init__(self, client, media, offset, length):
-        self.client = client
-        self.agen = client.iter_download(
-            media,
-            offset=offset,
-            limit=length,
-            chunk_size=512 * 1024,   # 512KB chunks
-            request_size=512 * 1024,
-        )
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        # async generatorning keyingi elementini olish uchun coroutine
-        async def _get_next_chunk():
-            return await self.agen.__anext__()
-
-        try:
-            # asgiref.sync.async_to_sync xuddi get_telegram_client chaqirilgan
-            # loopni topib, o'sha joyda bajaradi. 
-            return async_to_sync(_get_next_chunk)()
-        except StopAsyncIteration:
-            raise StopIteration
-        except Exception as e:
-            logger.error(f"Telethon chunk stream xata: {e}")
-            raise StopIteration
-
-
 async def get_telegram_stream_response(request, episode):
     """
     Episode uchun Telegram MTProto stream response qaytaradi.
@@ -107,11 +70,24 @@ async def get_telegram_stream_response(request, episode):
             status_code = 206
             content_range = f"bytes {start}-{end}/{file_size}"
 
-    # Asgiref async_to_sync arxitekturasiga mos tushadigan sinxron iterator
-    sync_streamer = SyncTelethonStreamer(client, message.media, offset, length)
+    # Asynchronous generator
+    async def async_streamer():
+        try:
+            async for chunk in client.iter_download(
+                message.media,
+                offset=offset,
+                limit=length,
+                chunk_size=512 * 1024,
+                request_size=512 * 1024,
+            ):
+                yield chunk
+        except asyncio.CancelledError:
+            pass
+        except Exception as e:
+            logger.error(f"Telethon chunk stream xata: {e}")
 
     response = StreamingHttpResponse(
-        sync_streamer,
+        async_streamer(),
         status=status_code,
         content_type=mime_type,
     )

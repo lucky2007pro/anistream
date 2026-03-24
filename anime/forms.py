@@ -41,6 +41,10 @@ class AnimeForm(forms.ModelForm):
 
 
 class EpisodeForm(forms.ModelForm):
+    # Bu maydonlar modelga emas, formaga tegishli (yuklash mantiqi uchun)
+    upload_to_telegram = forms.BooleanField(required=False, initial=False)
+    delete_local_after_upload = forms.BooleanField(required=False, initial=False)
+
     class Meta:
         model = Episode
         fields = [
@@ -50,6 +54,8 @@ class EpisodeForm(forms.ModelForm):
             "video_file",
             "video_url",
             "telegram_file_id",
+            "telegram_message_id",
+            "telegram_channel_post_url",
         ]
 
     def clean(self):
@@ -57,10 +63,11 @@ class EpisodeForm(forms.ModelForm):
         video_file = cleaned_data.get("video_file")
         video_url = cleaned_data.get("video_url")
         telegram_file_id = cleaned_data.get("telegram_file_id")
+        telegram_message_id = cleaned_data.get("telegram_message_id")
 
-        if not video_file and not video_url and not telegram_file_id:
+        if not video_file and not video_url and not telegram_file_id and not telegram_message_id:
             raise forms.ValidationError(
-                "Kamida bitta maydonni to'ldiring: video fayl, video URL yoki Telegram file_id."
+                "Kamida bitta maydonni to'ldiring: video fayl, video URL, Telegram file_id yoki Telegram message_id."
             )
 
         return cleaned_data
