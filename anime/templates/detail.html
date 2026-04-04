@@ -309,65 +309,6 @@
         .ep-list-item.playing .ep-list-info h4 { color: var(--accent); }
         .ep-list-info span { font-size: 0.75rem; background: rgba(255,255,255,0.1); padding: 3px 8px; border-radius: 4px; color: var(--text-dim); font-weight: 700; }
 
-        /* ===== HAMBURGER MENU ===== */
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            gap: 5px;
-            cursor: pointer;
-            background: transparent;
-            border: none;
-            padding: 5px;
-            z-index: 10001;
-        }
-        .hamburger span {
-            display: block;
-            width: 25px;
-            height: 2px;
-            background: #fff;
-            border-radius: 2px;
-            transition: all 0.3s ease;
-        }
-        .hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-        .hamburger.active span:nth-child(2) { opacity: 0; }
-        .hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-        .mobile-nav-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(15,15,19,0.98);
-            z-index: 10000;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 0;
-        }
-        .mobile-nav-overlay.open { display: flex; }
-        .mobile-nav-overlay a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.4rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            padding: 18px 40px;
-            width: 100%;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            transition: color 0.2s, background 0.2s;
-        }
-        .mobile-nav-overlay a:hover { color: #ff3366; background: rgba(255,51,102,0.05); }
-        .mobile-nav-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 1.8rem;
-            cursor: pointer;
-        }
 
         /* ===== HAMBURGER MENU ===== */
         .hamburger {
@@ -502,8 +443,9 @@
         <h1 class="anime-title">{{ anime.title }}</h1>
 
         <div class="genres">
-            <span>Action</span>
-            <span>Fantasy</span>
+            {% for genre in anime.genres.all %}
+            <span>{{ genre.name }}</span>
+            {% endfor %}
             <span>{{ anime.release_year }}</span>
         </div>
 
@@ -537,15 +479,15 @@
             <div class="info-grid">
                 <div class="info-card">
                     <div class="info-label">Studiya</div>
-                    <div class="info-value">A-1 Pictures</div>
+                    <div class="info-value">{{ anime.studio|default:"Noma'lum" }}</div>
                 </div>
                 <div class="info-card">
                     <div class="info-label">Holati</div>
-                    <div class="info-value" style="color: #00c853;">Davom etmoqda</div>
+                    <div class="info-value" style="color: #00c853;">{{ anime.get_status_display }}</div>
                 </div>
                 <div class="info-card">
                     <div class="info-label">Yosh chegarasi</div>
-                    <div class="info-value">16+</div>
+                    <div class="info-value">{{ anime.age_rating }}</div>
                 </div>
                 <div class="info-card">
                     <div class="info-label">Chiqarilgan yili</div>
@@ -586,57 +528,21 @@
 
     <div class="player-overlay" id="customPlayer">
         <div class="video-container" id="videoContainer">
-            <video id="mainVideo" playsinline></video>
+            <div class="player-header" id="playerHeader">
+                <div class="player-back" onclick="closePlayer()" style="background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 8px; cursor: pointer;">
+                    <button class="player-back-icon" style="margin-right: 10px; background: none; color: white; border: none; font-size: 1.2rem; cursor: pointer;">❮</button>
+                    <div class="player-title">
+                        <h2 id="playerTitle" style="margin: 0; font-size: 1.1rem;">{{ anime.title }}</h2>
+                    </div>
+                </div>
+                <button class="player-settings-btn" onclick="toggleEpisodes()" style="background: rgba(0,0,0,0.5); padding: 5px 15px; border-radius: 8px; color: white; border: none; cursor: pointer;">📚 Qismlar</button>
+            </div>
+
+            <video id="mainVideo" controls preload="auto" playsinline style="width: 100%; height: 100%; max-height: 100vh; background: #000; outline: none;" crossorigin="anonymous"></video>
+
             <div id="playerStatusOverlay" class="player-status-overlay hidden">
                 <div id="playerSpinner" class="player-spinner"></div>
                 <div id="playerStatusText" class="player-status-text">Video yuklanmoqda...</div>
-            </div>
-
-            <div class="player-header" id="playerHeader">
-                <div class="player-back" onclick="closePlayer()">
-                    <button class="player-back-icon">❮</button>
-                    <div class="player-title">
-                        <h2 id="playerTitle">{{ anime.title }}</h2>
-                        <p>STUDIYO: ANISTREAM</p>
-                    </div>
-                </div>
-                <button class="player-settings-btn" onclick="toggleSettings()">⚙️</button>
-            </div>
-
-            <div class="center-play" id="centerPlayBtn" onclick="togglePlay()">▶</div>
-
-            <div class="player-controls" id="playerControls">
-                <div class="progress-container" id="progressContainer" onclick="seekVideo(event)">
-                    <div class="progress-bar" id="progressBar"></div>
-                </div>
-
-                <div class="controls-row">
-                    <div class="controls-left">
-                        <button class="control-btn" id="playPauseBtn" onclick="togglePlay()">▶</button>
-                        <span class="time-display" id="timeDisplay">00:00 / 00:00</span>
-                    </div>
-
-                    <div class="controls-right">
-                        <button class="control-btn btn-episodes" onclick="toggleEpisodes()">📚 QISMLAR</button>
-                        <button class="control-btn" onclick="toggleFullScreen()">⛶</button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="settings-sidebar" id="settingsSidebar">
-                <div class="settings-header">
-                    <h3>PLEYER</h3>
-                    <button class="player-settings-btn" style="width: 35px; height:35px; font-size: 0.9rem;" onclick="toggleSettings()">✕</button>
-                </div>
-                <div class="setting-group">
-                    <div class="setting-title">⚡ TEZLIK</div>
-                    <div class="speed-grid">
-                        <button class="speed-btn" onclick="setSpeed(0.5, this)">0.5x</button>
-                        <button class="speed-btn active" onclick="setSpeed(1, this)">1x</button>
-                        <button class="speed-btn" onclick="setSpeed(1.5, this)">1.5x</button>
-                        <button class="speed-btn" onclick="setSpeed(2, this)">2x</button>
-                    </div>
-                </div>
             </div>
 
             <div class="episodes-modal" id="episodesModal">
@@ -657,12 +563,10 @@
                     {% endfor %}
                 </div>
             </div>
-
         </div>
     </div>
 
     <script>
-        // Tablar
         function openTab(tabId, element) {
             document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
             element.classList.add('active');
@@ -670,7 +574,6 @@
             document.getElementById(tabId).classList.add('active-content');
         }
 
-        // Parallax skroll
         const banner = document.getElementById('parallaxBanner');
         window.addEventListener('scroll', () => {
             let scrollY = window.scrollY;
@@ -679,15 +582,9 @@
             }
         });
 
-        // Pleyer mantiqi
         const playerOverlay = document.getElementById('customPlayer');
         const video = document.getElementById('mainVideo');
-        const playPauseBtn = document.getElementById('playPauseBtn');
-        const centerPlayBtn = document.getElementById('centerPlayBtn');
-        const progressBar = document.getElementById('progressBar');
-        const timeDisplay = document.getElementById('timeDisplay');
         const playerTitle = document.getElementById('playerTitle');
-        const settingsSidebar = document.getElementById('settingsSidebar');
         const episodesModal = document.getElementById('episodesModal');
         const playerStatusOverlay = document.getElementById('playerStatusOverlay');
         const playerSpinner = document.getElementById('playerSpinner');
@@ -696,116 +593,39 @@
         function showPlayerStatus(text, showSpinner = true) {
             playerStatusText.textContent = text;
             playerStatusOverlay.classList.remove('hidden');
-            playerSpinner.classList.toggle('hidden', !showSpinner);
+            if(playerSpinner) playerSpinner.classList.toggle('hidden', !showSpinner);
         }
 
         function hidePlayerStatus() {
             playerStatusOverlay.classList.add('hidden');
         }
 
-        function getVideoErrorMessage() {
-            if (!navigator.onLine) {
-                return "Internet aloqasi yo'q. Tarmoqni tekshirib qayta urinib ko'ring.";
-            }
-            if (!video.error) {
-                return "Video ijro etib bo'lmadi. Qayta urinib ko'ring.";
-            }
-            switch (video.error.code) {
-                case MediaError.MEDIA_ERR_ABORTED:
-                    return "Video yuklash to'xtatildi.";
-                case MediaError.MEDIA_ERR_NETWORK:
-                    return "Tarmoq xatosi sabab video yuklanmadi.";
-                case MediaError.MEDIA_ERR_DECODE:
-                    return "Video fayl formatini o'qib bo'lmadi.";
-                case MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED:
-                    return "Video manbasi qo'llab-quvvatlanmaydi yoki topilmadi.";
-                default:
-                    return "Noma'lum xatolik yuz berdi.";
-            }
-        }
-
-        async function diagnoseStreamError(videoUrl) {
-            if (!videoUrl || !videoUrl.includes('/episodes/')) {
-                return getVideoErrorMessage();
-            }
-
-            try {
-                const response = await fetch(videoUrl, {
-                    method: 'GET',
-                    headers: { Range: 'bytes=0-1' },
-                    cache: 'no-store',
-                });
-
-                if (response.status === 404) {
-                    return "Video topilmadi. Telegramdagi fayl o'chgan bo'lishi mumkin.";
-                }
-                if (response.status === 403) {
-                    return "Video manbasiga ruxsat yo'q. Bot/kanaI sozlamasini tekshiring.";
-                }
-                if (response.status === 416) {
-                    return "Video stream range xatosi. Qayta urinib ko'ring.";
-                }
-                if (!response.ok) {
-                    const text = await response.text();
-                    if (text.includes('TELEGRAM_NETWORK_ERROR')) {
-                        return "Telegram bilan aloqa uzilgan. Keyinroq qayta urinib ko'ring.";
-                    }
-                    if (text.includes('TELEGRAM_STREAM_ERROR')) {
-                        if (text.toLowerCase().includes('file is too big')) {
-                            return "Telegram Bot API bu videoni bera olmaydi (fayl juda katta). Katta videolarni S3/Cloudinary kabi storageda saqlang.";
-                        }
-                        return "Telegram file_id noto'g'ri yoki muddati o'tgan.";
-                    }
-                    return "Video manbasi topilmadi yoki serverda xatolik bor.";
-                }
-
-                const contentType = (response.headers.get('Content-Type') || '').toLowerCase();
-                if (contentType && !contentType.startsWith('video/') && !contentType.includes('octet-stream')) {
-                    return "Video formati brauzer tomonidan qo'llab-quvvatlanmaydi.";
-                }
-            } catch (error) {
-                return "Tarmoq xatosi: serverdan javob kelmadi.";
-            }
-
-            return getVideoErrorMessage();
-        }
-
-        // Epizodni o'ynatish (Bazadan olingan ma'lumot bilan ishlash)
         function playEpisode(videoSrc, epNum) {
-
             if (!videoSrc) {
                 showPlayerStatus("Bu qism uchun video manbasi topilmadi.", false);
                 playerOverlay.classList.add('active');
                 document.body.style.overflow = 'hidden';
                 return;
             }
-
             video.src = videoSrc;
             video.load();
-            playerTitle.innerText = `{{ anime.title }} - ${epNum}-qism`;
-
+            playerTitle.innerText = `{{ anime.title|escapejs }} - ${epNum}-qism`;
             playerOverlay.classList.add('active');
             document.body.style.overflow = 'hidden';
-
+            
+            toggleEpisodes(false);
+            
             showPlayerStatus("Video yuklanmoqda...", true);
-
-            video.play().then(() => {
-                playPauseBtn.innerText = '⏸';
-                centerPlayBtn.style.display = 'none';
-            }).catch(() => {
-                showPlayerStatus("Video avtomatik boshlanmadi. Markazdagi tugma orqali ishga tushiring.", false);
-                playPauseBtn.innerText = '▶';
-                centerPlayBtn.style.display = 'flex';
+            video.play().catch(e => {
+                showPlayerStatus("Avtomatik boshlanish xatosi. Play tugmasini bosing.", false);
+                hidePlayerStatus();
+                console.error("Play error:", e);
             });
         }
 
-        // Asosiy "Tomosha qilish" tugmasi birinchi qismni ochadi
         function playFirstEpisode() {
             {% if anime.episodes.first %}
-                playEpisode(
-                    '{{ anime.episodes.first.get_video_source|escapejs }}',
-                    '{{ anime.episodes.first.episode_number }}'
-                );
+                playEpisode('{{ anime.episodes.first.get_video_source|escapejs }}', '{{ anime.episodes.first.episode_number }}');
             {% else %}
                 alert("Kechirasiz, hali bu animening qismlari bazaga qo'shilmagan!");
             {% endif %}
@@ -816,133 +636,29 @@
             video.pause();
             video.removeAttribute('src');
             video.load();
-            playPauseBtn.innerText = '▶';
-            centerPlayBtn.style.display = 'flex';
             document.body.style.overflow = 'auto';
-            settingsSidebar.classList.remove('open');
             episodesModal.classList.remove('open');
             hidePlayerStatus();
         }
 
-        function togglePlay() {
-            if (video.paused) {
-                video.play().then(() => {
-                    playPauseBtn.innerText = '⏸';
-                    centerPlayBtn.classList.add('pulse-hide');
-                    setTimeout(() => centerPlayBtn.style.display = 'none', 400);
-                    if (typeof showControls === 'function') showControls();
-                }).catch(() => {
-                    showPlayerStatus(getVideoErrorMessage(), false);
-                });
+        function toggleEpisodes(force_state) {
+            if (force_state !== undefined) {
+                if (force_state) episodesModal.classList.add('open');
+                else episodesModal.classList.remove('open');
             } else {
-                video.pause();
-                playPauseBtn.innerText = '▶';
-                centerPlayBtn.style.display = 'flex';
-                centerPlayBtn.classList.remove('pulse-hide');
-                centerPlayBtn.innerText = '▶';
-                if (typeof showControls === 'function') showControls();
+                episodesModal.classList.toggle('open');
             }
         }
-        video.addEventListener('click', togglePlay);
 
         video.addEventListener('loadstart', () => showPlayerStatus("Video yuklanmoqda...", true));
         video.addEventListener('waiting', () => showPlayerStatus("Buffering...", true));
-        video.addEventListener('stalled', () => showPlayerStatus("Tarmoq sekin. Video kutilyapti...", true));
         video.addEventListener('canplay', hidePlayerStatus);
         video.addEventListener('playing', hidePlayerStatus);
-        video.addEventListener('error', async () => {
-            const detailedMessage = await diagnoseStreamError(video.currentSrc || video.src);
-            showPlayerStatus(detailedMessage, false);
+        video.addEventListener('error', () => {
+            showPlayerStatus("Video ijro etib bo'lmadi.", false);
         });
-        video.addEventListener('ended', () => {
-            playPauseBtn.innerText = '▶';
-            centerPlayBtn.style.display = 'flex';
-        });
-
-        window.addEventListener('offline', () => {
-            if (playerOverlay.classList.contains('active')) {
-                showPlayerStatus("Internet uzildi. Ulanishni tekshiring.", false);
-            }
-        });
-
-        window.addEventListener('online', () => {
-            if (playerOverlay.classList.contains('active') && video.paused) {
-                showPlayerStatus("Internet tiklandi. Qayta play bosing.", false);
-            }
-        });
-
-        function formatTime(seconds) {
-            let m = Math.floor(seconds / 60);
-            let s = Math.floor(seconds % 60);
-            return (m >= 10 ? m : "0" + m) + ":" + (s >= 10 ? s : "0" + s);
-        }
-
-        video.addEventListener('timeupdate', () => {
-            const percent = (video.currentTime / video.duration) * 100;
-            progressBar.style.width = `${percent}%`;
-            timeDisplay.innerText = `${formatTime(video.currentTime)} / ${formatTime(video.duration || 0)}`;
-        });
-
-        function seekVideo(e) {
-            const rect = document.getElementById('progressContainer').getBoundingClientRect();
-            const pos = (e.clientX - rect.left) / rect.width;
-            video.currentTime = pos * video.duration;
-        }
-
-        function toggleSettings() {
-            settingsSidebar.classList.toggle('open');
-            episodesModal.classList.remove('open');
-        }
-
-        function toggleEpisodes() {
-            episodesModal.classList.toggle('open');
-            settingsSidebar.classList.remove('open');
-        }
-
-        function setSpeed(speed, btn) {
-            video.playbackRate = speed;
-            document.querySelectorAll('.speed-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-        }
-
-        function toggleFullScreen() {
-            const container = document.getElementById('videoContainer');
-            if (!document.fullscreenElement) {
-                container.requestFullscreen().catch(err => alert(err.message));
-            } else {
-                document.exitFullscreen();
-            }
-        }
-
-        let controlsTimeout;
-        const mainContainer = document.getElementById('videoContainer');
-        const pHeader = document.getElementById('playerHeader');
-        const pControls = document.getElementById('playerControls');
-
-        function showControls() {
-            mainContainer.classList.add('show-cursor');
-            pHeader.style.opacity = '1';
-            pControls.style.opacity = '1';
-            
-            clearTimeout(controlsTimeout);
-            if (!video.paused) {
-                controlsTimeout = setTimeout(hideControls, 3000);
-            }
-        }
-
-        function hideControls() {
-            if (!video.paused && !settingsSidebar.classList.contains('open') && !episodesModal.classList.contains('open')) {
-                mainContainer.classList.remove('show-cursor');
-                pHeader.style.opacity = '0';
-                pControls.style.opacity = '0';
-            }
-        }
-
-        mainContainer.addEventListener('mousemove', showControls);
-        mainContainer.addEventListener('mouseleave', hideControls);
-        mainContainer.addEventListener('touchstart', showControls);
-        mainContainer.addEventListener('click', showControls);
     </script>
+</script>
 
 <script>
     function toggleMobileNav() {

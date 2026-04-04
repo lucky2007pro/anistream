@@ -185,16 +185,9 @@ class Episode(models.Model):
             raise ValidationError("Qism raqami 1 dan kichik bo'lishi mumkin emas")
 
     def get_video_source(self):
-        if self.telegram_message_id:
+        if self.telegram_message_id or self.telegram_file_id or self.video_file:
+            # We push all media through episode_stream to enable progressive loading (Accept-Ranges) correctly
             return reverse('episode_stream', args=[self.id])
-        if self.telegram_file_id:
-            return reverse('episode_stream', args=[self.id])
-        if self.video_file:
-            try:
-                if self.video_file.storage.exists(self.video_file.name):
-                    return self.video_file.url
-            except Exception:
-                pass
         if self.video_url:
             return self.video_url
         return ""

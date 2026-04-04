@@ -158,30 +158,81 @@ def short_stream(request, short_id):
 
 
 async def episode_stream(request, episode_id):
-    """Episode videosini stream qiladi. telegram_message_id bo'lsa MTProto, bo'lmasa Bot API orqali."""
+    """Episode videosini stream qiladi. Backend, MTProto va Bot API orqali progressiv yuklash (Range) qollab-quvvatlanadi."""
     from asgiref.sync import sync_to_async
+    import os
+    import re
     try:
         from django.shortcuts import get_object_or_404
         episode = await sync_to_async(get_object_or_404)(Episode, id=episode_id)
     except Exception:
-        return HttpResponse(status=404)
+        return HttpResponse("Episode topilmadi", status=404)
 
-    # 1. MTProto stream (Large files, recommended)
+    # 1. Local video_file stream (Supports Range requests for progressive playback)
+    if episode.video_file:
+        try:
+            video_path = episode.video_file.path
+            if os.path.exists(video_path):
+                file_size = os.path.getsize(video_path)
+                range_header = request.headers.get('Range') or request.META.get('HTTP_RANGE')
+                start_byte = 0
+                end_byte = file_size - 1
+                status_code = 200
+                content_range = None
+
+                if range_header:
+                    range_match = re.search(r'bytes=(\d+)-(\d*)', range_header)
+                    if range_match:
+                        start_byte = int(range_match.group(1))
+                        end_byte = int(range_match.group(2)) if range_match.group(2) else file_size - 1
+                        if start_byte >= file_size:
+                            return HttpResponse(status=416)
+                        status_code = 206
+                        content_range = f'bytes {start_byte}-{end_byte}/{file_size}'
+                
+                length = end_byte - start_byte + 1
+
+                def file_iterator():
+                    with open(video_path, 'rb') as f:
+                        f.seek(start_byte)
+                        bytes_left = length
+                        while bytes_left > 0:
+                            chunk_size = min(1024 * 1024, bytes_left)
+                            data = f.read(chunk_size)
+                            if not data:
+                                break
+                            bytes_left -= len(data)
+                            yield data
+
+                stream = StreamingHttpResponse(
+                    file_iterator(),
+                    content_type='video/mp4',
+                    status=status_code
+                )
+                stream['Content-Length'] = str(length)
+                stream['Accept-Ranges'] = 'bytes'
+                stream['Content-Disposition'] = f'inline; filename="episode-{episode.id}.mp4"'
+                stream['Cache-Control'] = 'public, max-age=3600'
+                if content_range:
+                    stream['Content-Range'] = content_range
+                return stream
+        except Exception as e:
+            logger.error(f"Local stream error: {e}")
+
+    # 2. MTProto stream (Large files, recommended)
     if episode.telegram_message_id:
         try:
-            # get_telegram_stream_response is async
             response = await get_telegram_stream_response(request, episode)
             if response:
                 return response
         except Exception as e:
             logger.error(f"MTProto stream error: {e}")
 
-    # 2. Bot API stream (Small files < 20MB)
+    # 3. Bot API stream (Small files < 20MB)
     if episode.telegram_file_id:
         try:
             def get_bot_api_stream():
                 file_url = get_telegram_file_url(episode.telegram_file_id)
-                
                 outbound_headers = {}
                 range_header = request.headers.get('Range') or request.META.get('HTTP_RANGE')
                 if range_header:
@@ -200,22 +251,23 @@ async def episode_stream(request, episode_id):
                         content_type=tg_response.headers.get('Content-Type', 'video/mp4'),
                         status=tg_response.status_code,
                     )
+                    stream['Accept-Ranges'] = 'bytes'
+                    stream['Content-Disposition'] = f'inline; filename="episode-{episode.id}.mp4"'
+                    stream['Cache-Control'] = 'public, max-age=3600'
+                    
                     if tg_response.headers.get('Content-Range'):
                         stream['Content-Range'] = tg_response.headers['Content-Range']
                     if tg_response.headers.get('Content-Length'):
                         stream['Content-Length'] = tg_response.headers['Content-Length']
-                    
-                    stream['Accept-Ranges'] = 'bytes'
-                    stream['Content-Disposition'] = f'inline; filename="episode-{episode.id}.mp4"'
                     return stream
+            
             response = await sync_to_async(get_bot_api_stream)()
             if response:
                 return response
         except Exception as e:
             logger.error(f"Bot API stream error: {e}")
 
-    return HttpResponse("Video stream qilib bo'lmadi", status=404)
-
+    return HttpResponse("Video stream qilib bo'lmadi o'rnatilgan manbalardan yo'q.", status=404)
 
 def auth_view(request):
     """Login va Register sahifasi"""
