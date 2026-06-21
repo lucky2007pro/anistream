@@ -968,7 +968,7 @@ def chat(request):
     has_more = messages_count > 40
 
     messages_list = list(
-        ChatMessage.objects.select_related('user', 'reply_to', 'user__avatar', 'user__vip_data').order_by(
+        ChatMessage.objects.select_related('user', 'reply_to', 'user__profile').order_by(
             '-created_at')[:40])
     messages_list.reverse()
 
@@ -977,7 +977,7 @@ def chat(request):
 
     if request.method == "POST":
 
-        if request.user.is_banned:
+        if not request.user.is_active:
             messages.error(request, "Siz yozolmaysiz")
             return redirect('chat')
 
@@ -1021,7 +1021,7 @@ def chat_messages_api(request):
     except ValueError:
         limit = 20
 
-    qs = ChatMessage.objects.select_related('user', 'user__avatar', 'user__vip_data', 'reply_to').order_by(
+    qs = ChatMessage.objects.select_related('user', 'user__profile', 'reply_to').order_by(
         '-created_at')
     if before_id and before_id.isdigit():
         qs = qs.filter(id__lt=before_id)
@@ -1039,7 +1039,7 @@ def chat_messages_api(request):
                 'message': msg.reply_to.message
             }
 
-        avatar_url = msg.user.avatar.image.url if getattr(msg.user, 'avatar', None) and msg.user.avatar.image else None
+        avatar_url = msg.user.profile.avatar_url if hasattr(msg.user, 'profile') and msg.user.profile.avatar_url else None
 
         data.append({
             'id': msg.id,
@@ -1049,11 +1049,11 @@ def chat_messages_api(request):
             'time': localtime(msg.created_at, tz).strftime('%H:%M'),
             'edited': msg.edited,
             'is_own': msg.user == request.user,
-            'is_admin': msg.user.is_admin_user,
-            'is_vip': hasattr(msg.user, 'vip_data') and msg.user.vip_data.vip_active(),
+            'is_admin': msg.user.is_staff,
+            'is_vip': hasattr(msg.user, 'profile') and msg.user.profile.is_premium,
             'reply_to': reply_data,
-            'can_edit': (msg.user == request.user) or request.user.is_admin_user,
-            'can_ban': request.user.is_admin_user and not msg.user.is_admin_user,
+            'can_edit': (msg.user == request.user) or request.user.is_staff,
+            'can_ban': request.user.is_staff and not msg.user.is_staff,
             'user_id': msg.user.id
         })
 
@@ -1069,7 +1069,7 @@ def chat_messages_api(request):
 def edit_message(request, message_id):
     msg = get_object_or_404(ChatMessage, id=message_id)
 
-    if request.user != msg.user and not request.user.is_admin_user:
+    if request.user != msg.user and not request.user.is_staff:
         messages.error(request, "Ruxsat yo‘q")
         return redirect('chat')
 
@@ -1092,7 +1092,7 @@ def edit_message(request, message_id):
 def delete_message(request, message_id):
     msg = get_object_or_404(ChatMessage, id=message_id)
 
-    if request.user != msg.user and not request.user.is_admin_user:
+    if request.user != msg.user and not request.user.is_staff:
         messages.error(request, "Ruxsat yo‘q")
         return redirect('chat')
 
@@ -1107,8 +1107,13 @@ def delete_message(request, message_id):
 
 @login_required
 def ban_user(request, user_id):
-    if not request.user.is_admin_user:
+    if not request.user.is_staff:
         return redirect('chat')
+    user_to_ban = get_object_or_404(User, id=user_id)
+    if not user_to_ban.is_staff:
+        user_to_ban.is_active = False
+        user_to_ban.save()
+    return redirect('chat')
 
     user_to_ban = get_object_or_404(CustomUser, id=user_id)
 
@@ -1230,9 +1235,7 @@ def add_reel_comment(request, reel_id):
         reply_to=reply_obj,
     )
 
-    avatar_url = None
-    if getattr(request.user, 'avatar', None) and request.user.avatar.image:
-        avatar_url = request.user.avatar.image.url
+    avatar_url = request.user.profile.avatar_url if hasattr(request.user, 'profile') and request.user.profile.avatar_url else None
 
     return JsonResponse({
         'status': 'ok',
@@ -1254,14 +1257,12 @@ def add_reel_comment(request, reel_id):
 @login_required
 def reel_comments_api(request, reel_id):
     comments = ReelComment.objects.select_related(
-        'user', 'user__avatar', 'reply_to', 'reply_to__user'
+        'user', 'user__profile', 'reply_to', 'reply_to__user'
     ).filter(reel_id=reel_id).order_by('created_at')
 
     data = []
     for c in comments:
-        avatar_url = None
-        if getattr(c.user, 'avatar', None) and c.user.avatar.image:
-            avatar_url = c.user.avatar.image.url
+        avatar_url = c.user.profile.avatar_url if hasattr(c.user, 'profile') and c.user.profile.avatar_url else None
 
         data.append({
             'id': c.id,
