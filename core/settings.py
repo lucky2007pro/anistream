@@ -69,8 +69,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Third party apps
-    'cloudinary_storage',
-    'cloudinary',
 
     # Local apps
     'anime.apps.AnimeConfig',
@@ -163,22 +161,11 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] if os.path.exists(os.path.
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # ==========================================
-# CLOUDINARY SOZLAMALARI (Media files uchun)
+# LOCAL STORAGE SOZLAMALARI (Media files uchun)
 # ==========================================
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME', ''),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY', ''),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET', ''),
-}
-
-# Production'da Cloudinary ishlatish
-if not DEBUG or os.environ.get('USE_CLOUDINARY', 'False') == 'True':
-    DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
-    MEDIA_URL = '/media/'  # Cloudinary avtomatik URL beradi
-else:
-    # Local development uchun
-    MEDIA_URL = '/media/'
-    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# Server xotirasidan foydalanish uchun Cloudinary o'chirildi va lokal xotiraga sozlangan
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # ==========================================
 # SECURITY SOZLAMALARI (Production uchun)

@@ -19,6 +19,3 @@ cryptg==0.5.2
 # Pillow (rasm yuklash uchun) - Python 3.14 uchun
 Pillow>=11.0.0
 
-# Cloudinary (Media storage)
-cloudinary==1.41.0
-django-cloudinary-storage==0.3.0
