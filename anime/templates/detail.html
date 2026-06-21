@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
@@ -18,7 +18,7 @@
     <meta property="og:type" content="video.tv_show">
     <meta property="og:title" content="{{ anime.title }} - AniStream">
     <meta property="og:description" content="{{ anime.description|truncatechars:160 }}">
-    <meta property="og:image" content="{{ anime.image_url }}">
+    <meta property="og:image" content="{{ anime.image.url }}">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:url" content="https://anistream.uz/anime/{{ anime.id }}">
@@ -29,7 +29,7 @@
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="{{ anime.title }} - AniStream">
     <meta name="twitter:description" content="{{ anime.description|truncatechars:160 }}">
-    <meta name="twitter:image" content="{{ anime.image_url }}">
+    <meta name="twitter:image" content="{{ anime.image.url }}">
     <meta name="twitter:site" content="@anistream_uz">
 
     <!-- PWA / Mobile -->
@@ -52,7 +52,7 @@
       "@type": "TVSeries",
       "name": "{{ anime.title }}",
       "description": "{{ anime.description|truncatechars:200 }}",
-      "image": "{{ anime.image_url }}",
+      "image": "{{ anime.image.url }}",
       "startDate": "{{ anime.release_year }}",
       "genre": "Anime",
       "inLanguage": "uz",
@@ -92,7 +92,7 @@
         /* Orqa fon uchun Immersive Blur effekti */
         .ambient-bg {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-            background: url('{{ anime.image_url }}') center/cover no-repeat;
+            background: url('{{ anime.image.url }}') center/cover no-repeat;
             filter: blur(80px) brightness(0.2); z-index: -1; transform: scale(1.2);
         }
 
@@ -119,7 +119,7 @@
 
         .hero-banner {
             position: absolute; inset: -5%;
-            background: url('{{ anime.image_url }}') center/cover no-repeat;
+            background: url('{{ anime.image.url }}') center/cover no-repeat;
             transition: transform 0.1s ease-out; will-change: transform;
         }
 
@@ -164,7 +164,7 @@
         .episodes-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; padding-bottom: 100px; }
         .episode-card { background: var(--bg-surface); border-radius: 12px; overflow: hidden; cursor: pointer; border: 1px solid rgba(255,255,255,0.05); transition: 0.3s; display: flex; align-items: center; }
         .episode-card:hover { transform: translateY(-5px); border-color: var(--accent); background: rgba(255,51,102,0.05); box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
-        .ep-thumb { width: 120px; height: 80px; background: url('{{ anime.image_url }}') center/cover; position: relative; }
+        .ep-thumb { width: 120px; height: 80px; background: url('{{ anime.image.url }}') center/cover; position: relative; }
         .ep-thumb::after { content: '▶'; position: absolute; inset: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; font-size: 1.5rem; transition: 0.3s;}
         .episode-card:hover .ep-thumb::after { background: rgba(255,51,102,0.4); color: white; }
         .ep-info { padding: 15px; }
@@ -303,7 +303,7 @@
         .ep-list-item { display: flex; align-items: center; gap: 20px; background: rgba(255,255,255,0.03); padding: 12px; border-radius: 12px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; border: 1px solid transparent; }
         .ep-list-item:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); }
         .ep-list-item.playing { background: rgba(255,51,102,0.1); border-color: var(--accent); }
-        .ep-list-thumb { width: 120px; height: 70px; border-radius: 8px; background: url('{{ anime.image_url }}') center/cover; position: relative; }
+        .ep-list-thumb { width: 120px; height: 70px; border-radius: 8px; background: url('{{ anime.image.url }}') center/cover; position: relative; }
         .ep-list-item.playing .ep-list-thumb::after { content: 'I I I'; position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; color: var(--accent); font-weight: 900; font-size: 1.2rem; letter-spacing: 2px; }
         .ep-list-info h4 { font-size: 1.1rem; color: white; transition: 0.2s; margin-bottom: 5px;}
         .ep-list-item.playing .ep-list-info h4 { color: var(--accent); }

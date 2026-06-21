@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
@@ -286,7 +286,7 @@
     <div class="history-list">
         {% for item in history %}
         <div class="history-item">
-            <div class="history-thumb" style="background-image: url('{{ item.anime.image_url }}');">
+            <div class="history-thumb" style="background-image: url('{{ item.anime.image.url }}');">
                 <div class="play-overlay">▶</div>
             </div>
             <div class="history-info">
@@ -328,3 +328,4 @@
 
 </body>
 </html>
+

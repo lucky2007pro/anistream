@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
@@ -304,7 +304,7 @@
                 <div class="anime-card">
                     <div class="top-badge">★ {{ anime.rating|floatformat:1 }}</div>
                     <div class="badge-quality">HD</div>
-                    <img src="{{ anime.image_url }}" alt="{{ anime.title }}">
+                    <img src="{{ anime.image.url }}" alt="{{ anime.title }}">
                 </div>
             </a>
             <div class="card-info-bottom">
@@ -338,3 +338,4 @@
 
 </body>
 </html>
+

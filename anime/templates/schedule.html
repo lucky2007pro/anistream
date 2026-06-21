@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
@@ -285,7 +285,7 @@
     <div class="schedule-grid">
         {% for anime in animes %}
         <a href="{% url 'detail' anime.id %}" class="schedule-card">
-            <div class="schedule-thumb" style="background-image: url('{{ anime.image_url }}');">
+            <div class="schedule-thumb" style="background-image: url('{{ anime.image.url }}');">
                 <div class="ep-badge">EP {{ anime.episodes.count }}</div>
             </div>
             <div class="schedule-info">
@@ -316,3 +316,4 @@
 
 </body>
 </html>
+

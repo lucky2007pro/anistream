@@ -17,18 +17,12 @@ from .models import (
     WatchHistory,
     Comment,
     NewsPost,
-    ShortVideo,
+    Reel,
 )
-from .forms import GenreForm, AnimeForm, EpisodeForm, NewsPostForm, ShortVideoForm
-from .services.telegram_storage import (
-    TelegramStorageError,
-    get_telegram_file_url,
-    upload_episode_to_telegram,
-)
-from asgiref.sync import async_to_sync, sync_to_async
-from .services.telegram_streamer import get_telegram_stream_response
+from .forms import GenreForm, AnimeForm, EpisodeForm, NewsPostForm, ReelForm
 import logging
-import requests
+import os
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -78,11 +72,11 @@ def anime_detail(request, anime_id):
         return redirect('home')
 
 
-def shorts_page(request):
-    """Lavhalar va qisqa videolar sahifasi"""
-    shorts_qs = ShortVideo.objects.all().order_by('-created_at')
+def reels_page(request):
+    """Reels sahifasi"""
+    reels_qs = Reel.objects.all().order_by('-created_at')
     
-    paginator = Paginator(shorts_qs, 12)
+    paginator = Paginator(reels_qs, 12)
     page_number = request.GET.get('page', 1)
     page_obj = paginator.get_page(page_number)
     
@@ -92,83 +86,12 @@ def shorts_page(request):
     return render(request, 'shorts.html', context)
 
 
-def short_stream(request, short_id):
-    """Telegram file'ni brauzerga stream qiladi (Range/seek qo'llab-quvvatlanadi). Kichik lavhalar uchun."""
-    try:
-        short_video = ShortVideo.objects.get(id=short_id)
-    except ShortVideo.DoesNotExist:
-        return HttpResponse("Lavha topilmadi", status=404)
+def episode_stream(request, episode_id):
+    """Episode videosini stream qiladi."""
+    from django.shortcuts import get_object_or_404
+    from django.http import HttpResponse, StreamingHttpResponse
+    episode = get_object_or_404(Episode, id=episode_id)
 
-    if not short_video.telegram_file_id:
-        return HttpResponseBadRequest("Bu lavhada Telegram file_id mavjud emas.")
-
-    try:
-        file_url = get_telegram_file_url(short_video.telegram_file_id)
-    except TelegramStorageError as exc:
-        return HttpResponse(
-            f"TELEGRAM_STREAM_ERROR: {exc}",
-            status=502,
-            content_type='text/plain; charset=utf-8',
-        )
-
-    outbound_headers = {}
-    range_header = request.headers.get('Range') or request.META.get('HTTP_RANGE')
-    if range_header:
-        outbound_headers['Range'] = range_header
-
-    try:
-        tg_response = requests.get(
-            file_url,
-            headers=outbound_headers,
-            stream=True,
-            timeout=90,
-        )
-    except requests.RequestException as exc:
-        return HttpResponse(
-            f"TELEGRAM_NETWORK_ERROR: {exc}",
-            status=502,
-            content_type='text/plain; charset=utf-8',
-        )
-
-    if tg_response.status_code not in (200, 206):
-        return HttpResponse(
-            f"TELEGRAM_UPSTREAM_ERROR: {tg_response.status_code}",
-            status=tg_response.status_code if tg_response.status_code in (400, 401, 403, 404, 416) else 502,
-            content_type='text/plain; charset=utf-8',
-        )
-
-    stream = StreamingHttpResponse(
-        tg_response.iter_content(chunk_size=1024 * 1024),
-        content_type=tg_response.headers.get('Content-Type', 'application/octet-stream'),
-        status=tg_response.status_code,
-    )
-
-    if tg_response.headers.get('Content-Range'):
-        stream['Content-Range'] = tg_response.headers['Content-Range']
-    if tg_response.headers.get('Content-Length'):
-        stream['Content-Length'] = tg_response.headers['Content-Length']
-    if tg_response.headers.get('Accept-Ranges'):
-        stream['Accept-Ranges'] = tg_response.headers['Accept-Ranges']
-    else:
-        stream['Accept-Ranges'] = 'bytes'
-
-    stream['Content-Disposition'] = f'inline; filename="short-{short_video.id}.mp4"'
-    stream['Cache-Control'] = 'public, max-age=3600'
-    return stream
-
-
-async def episode_stream(request, episode_id):
-    """Episode videosini stream qiladi. Backend, MTProto va Bot API orqali progressiv yuklash (Range) qollab-quvvatlanadi."""
-    from asgiref.sync import sync_to_async
-    import os
-    import re
-    try:
-        from django.shortcuts import get_object_or_404
-        episode = await sync_to_async(get_object_or_404)(Episode, id=episode_id)
-    except Exception:
-        return HttpResponse("Episode topilmadi", status=404)
-
-    # 1. Local video_file stream (Supports Range requests for progressive playback)
     if episode.video_file:
         try:
             video_path = episode.video_file.path
@@ -219,55 +142,7 @@ async def episode_stream(request, episode_id):
         except Exception as e:
             logger.error(f"Local stream error: {e}")
 
-    # 2. MTProto stream (Large files, recommended)
-    if episode.telegram_message_id:
-        try:
-            response = await get_telegram_stream_response(request, episode)
-            if response:
-                return response
-        except Exception as e:
-            logger.error(f"MTProto stream error: {e}")
-
-    # 3. Bot API stream (Small files < 20MB)
-    if episode.telegram_file_id:
-        try:
-            def get_bot_api_stream():
-                file_url = get_telegram_file_url(episode.telegram_file_id)
-                outbound_headers = {}
-                range_header = request.headers.get('Range') or request.META.get('HTTP_RANGE')
-                if range_header:
-                    outbound_headers['Range'] = range_header
-
-                tg_response = requests.get(
-                    file_url,
-                    headers=outbound_headers,
-                    stream=True,
-                    timeout=90,
-                )
-
-                if tg_response.status_code in (200, 206):
-                    stream = StreamingHttpResponse(
-                        tg_response.iter_content(chunk_size=1024 * 1024),
-                        content_type=tg_response.headers.get('Content-Type', 'video/mp4'),
-                        status=tg_response.status_code,
-                    )
-                    stream['Accept-Ranges'] = 'bytes'
-                    stream['Content-Disposition'] = f'inline; filename="episode-{episode.id}.mp4"'
-                    stream['Cache-Control'] = 'public, max-age=3600'
-                    
-                    if tg_response.headers.get('Content-Range'):
-                        stream['Content-Range'] = tg_response.headers['Content-Range']
-                    if tg_response.headers.get('Content-Length'):
-                        stream['Content-Length'] = tg_response.headers['Content-Length']
-                    return stream
-            
-            response = await sync_to_async(get_bot_api_stream)()
-            if response:
-                return response
-        except Exception as e:
-            logger.error(f"Bot API stream error: {e}")
-
-    return HttpResponse("Video stream qilib bo'lmadi o'rnatilgan manbalardan yo'q.", status=404)
+    return HttpResponse("Video topilmadi.", status=404)
 
 def auth_view(request):
     """Login va Register sahifasi"""
@@ -852,24 +727,14 @@ def admin_episode_create(request):
         form = EpisodeForm(request.POST, request.FILES)
         if form.is_valid():
             episode = form.save()
-            
-            # Telegram'ga yuklash
-            upload_to_tg = form.cleaned_data.get('upload_to_telegram')
-            delete_local = form.cleaned_data.get('delete_local_after_upload')
-            
-            if upload_to_tg and episode.video_file:
-                try:
-                    upload_episode_to_telegram(episode, delete_local_file=delete_local)
-                    messages.success(request, "Qism muvaffaqiyatli qo'shildi va Telegram'ga yuklandi.")
-                except TelegramStorageError as e:
-                    messages.warning(request, f"Qism qo'shildi, lekin Telegram'ga yuklashda xato: {e}")
-            else:
-                messages.success(request, "Qism muvaffaqiyatli qo'shildi.")
-            
+            from django.contrib import messages
+            messages.success(request, "Qism muvaffaqiyatli qo'shildi.")
+            from django.shortcuts import redirect
             return redirect("admin_episode_list")
     else:
         form = EpisodeForm()
 
+    from django.shortcuts import render
     return render(
         request,
         "admin/episode_form.html",
@@ -879,26 +744,15 @@ def admin_episode_create(request):
 
 @staff_required
 def admin_episode_edit(request, pk):
+    from django.shortcuts import get_object_or_404, redirect, render
+    from django.contrib import messages
     episode = get_object_or_404(Episode, pk=pk)
 
     if request.method == "POST":
         form = EpisodeForm(request.POST, request.FILES, instance=episode)
         if form.is_valid():
             episode = form.save()
-            
-            # Telegram'ga yuklash
-            upload_to_tg = form.cleaned_data.get('upload_to_telegram')
-            delete_local = form.cleaned_data.get('delete_local_after_upload')
-            
-            if upload_to_tg and episode.video_file:
-                try:
-                    upload_episode_to_telegram(episode, delete_local_file=delete_local)
-                    messages.success(request, "Qism yangilandi va Telegram'ga yuklandi.")
-                except TelegramStorageError as e:
-                    messages.warning(request, f"Qism yangilandi, lekin Telegram'ga yuklashda xato: {e}")
-            else:
-                messages.success(request, "Qism yangilandi.")
-                
+            messages.success(request, "Qism yangilandi.")
             return redirect("admin_episode_list")
     else:
         form = EpisodeForm(instance=episode)
@@ -1004,21 +858,23 @@ def admin_news_delete(request, pk):
         {"object": news, "object_type": "Yangilik", "cancel_url": "admin_news_admin_list"},
     )
 
-# --------- ShortVideo admin ----------
+# --------- Reel admin ----------
 
 @staff_required
 def admin_short_list(request):
     query = request.GET.get("q", "").strip()
-    shorts = ShortVideo.objects.select_related("anime").all().order_by("-created_at")
+    reels = Reel.objects.select_related("anime").all().order_by("-created_at")
     if query:
-        shorts = shorts.filter(
+        reels = reels.filter(
             Q(title__icontains=query)
         )
 
-    paginator = Paginator(shorts, 20)
+    from django.core.paginator import Paginator
+    paginator = Paginator(reels, 20)
     page_number = request.GET.get("page", 1)
     page_obj = paginator.get_page(page_number)
 
+    from django.shortcuts import render
     return render(
         request,
         "admin/short_list.html",
@@ -1029,55 +885,62 @@ def admin_short_list(request):
 @staff_required
 def admin_short_create(request):
     if request.method == "POST":
-        form = ShortVideoForm(request.POST)
+        form = ReelForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            messages.success(request, "Lavha muvaffaqiyatli qo'shildi.")
+            from django.contrib import messages
+            from django.shortcuts import redirect
+            messages.success(request, "Reel muvaffaqiyatli qo'shildi.")
             return redirect("admin_short_list")
     else:
-        form = ShortVideoForm()
+        form = ReelForm()
 
     animes = Anime.objects.all().order_by('title')
 
+    from django.shortcuts import render
     return render(
         request,
         "admin/short_form.html",
-        {"form": form, "title": "Yangi lavha qo'shish", "animes": animes},
+        {"form": form, "title": "Yangi reel qo'shish", "animes": animes},
     )
 
 
 @staff_required
 def admin_short_edit(request, pk):
-    short = get_object_or_404(ShortVideo, pk=pk)
+    from django.shortcuts import get_object_or_404, redirect, render
+    from django.contrib import messages
+    short = get_object_or_404(Reel, pk=pk)
 
     if request.method == "POST":
-        form = ShortVideoForm(request.POST, instance=short)
+        form = ReelForm(request.POST, request.FILES, instance=short)
         if form.is_valid():
             form.save()
-            messages.success(request, "Lavha yangilandi.")
+            messages.success(request, "Reel yangilandi.")
             return redirect("admin_short_list")
     else:
-        form = ShortVideoForm(instance=short)
+        form = ReelForm(instance=short)
 
     animes = Anime.objects.all().order_by('title')
 
     return render(
         request,
         "admin/short_form.html",
-        {"form": form, "short": short, "title": "Lavhani tahrirlash", "animes": animes},
+        {"form": form, "short": short, "title": "Reel tahrirlash", "animes": animes},
     )
 
 
 @staff_required
 def admin_short_delete(request, pk):
-    short = get_object_or_404(ShortVideo, pk=pk)
+    from django.shortcuts import get_object_or_404, redirect, render
+    from django.contrib import messages
+    short = get_object_or_404(Reel, pk=pk)
     if request.method == "POST":
         short.delete()
-        messages.success(request, "Lavha o'chirildi.")
+        messages.success(request, "Reel o'chirildi.")
         return redirect("admin_short_list")
 
     return render(
         request,
         "admin/confirm_delete.html",
-        {"object": short, "object_type": "Lavha (Short)", "cancel_url": "admin_short_list"},
+        {"object": short, "object_type": "Reel", "cancel_url": "admin_short_list"},
     )

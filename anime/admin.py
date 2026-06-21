@@ -1,16 +1,14 @@
-from django.contrib import admin
+﻿from django.contrib import admin
 from .models import (
     Genre, Anime, Episode, UserProfile,
-    WatchHistory, Comment, NewsPost, ShortVideo
+    WatchHistory, Comment, NewsPost, Reel, Story, ChatMessage, SiteSettings, UserSettings
 )
-
 
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
     list_display = ('name', 'slug')
     prepopulated_fields = {'slug': ('name',)}
     search_fields = ('name',)
-
 
 @admin.register(Anime)
 class AnimeAdmin(admin.ModelAdmin):
@@ -22,7 +20,6 @@ class AnimeAdmin(admin.ModelAdmin):
     ordering = ('-created_at',)
     list_per_page = 20
     readonly_fields = ('views_count', 'created_at', 'updated_at')
-
 
 @admin.register(Episode)
 class EpisodeAdmin(admin.ModelAdmin):
@@ -38,8 +35,8 @@ class EpisodeAdmin(admin.ModelAdmin):
             'fields': ('anime', 'episode_number', 'title')
         }),
         ('Video Manbasi', {
-            'fields': ('video_file', 'video_url', 'telegram_file_id'),
-            'description': "Video faylini yuklang yoki bot orqali kichik video IDsini yozing."
+            'fields': ('video_file', 'video_url'),
+            'description': "Video faylini yuklang yoki video URL yozing."
         }),
         ('Sana', {
             'fields': ('created_at', 'updated_at'),
@@ -50,14 +47,12 @@ class EpisodeAdmin(admin.ModelAdmin):
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('anime')
 
-
 @admin.register(UserProfile)
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ('user', 'is_premium', 'premium_until')
     list_filter = ('is_premium',)
     search_fields = ('user__username', 'user__email')
     filter_horizontal = ('favorites', 'watchlist')
-
 
 @admin.register(WatchHistory)
 class WatchHistoryAdmin(admin.ModelAdmin):
@@ -66,10 +61,9 @@ class WatchHistoryAdmin(admin.ModelAdmin):
     search_fields = ('user__username', 'anime__title')
     readonly_fields = ('last_watched',)
 
-
 @admin.register(Comment)
 class CommentAdmin(admin.ModelAdmin):
-    list_display = ('user', 'anime', 'text_short', 'created_at', 'likes_count')
+    list_display = ('user', 'anime', 'text_short', 'created_at')
     list_filter = ('created_at',)
     search_fields = ('user__username', 'anime__title', 'text')
     readonly_fields = ('created_at', 'updated_at')
@@ -77,7 +71,6 @@ class CommentAdmin(admin.ModelAdmin):
     def text_short(self, obj):
         return obj.text[:50] + '...' if len(obj.text) > 50 else obj.text
     text_short.short_description = 'Izoh'
-
 
 @admin.register(NewsPost)
 class NewsPostAdmin(admin.ModelAdmin):
@@ -87,8 +80,31 @@ class NewsPostAdmin(admin.ModelAdmin):
     prepopulated_fields = {'slug': ('title',)}
     readonly_fields = ('views', 'created_at', 'updated_at')
 
-@admin.register(ShortVideo)
-class ShortVideoAdmin(admin.ModelAdmin):
-    list_display = ('title', 'anime', 'telegram_file_id', 'created_at')
+@admin.register(Reel)
+class ReelAdmin(admin.ModelAdmin):
+    list_display = ('title', 'user', 'anime', 'created_at')
     list_filter = ('created_at',)
     search_fields = ('title', 'anime__title')
+
+@admin.register(Story)
+class StoryAdmin(admin.ModelAdmin):
+    list_display = ('title', 'is_active', 'expires_at', 'created_at')
+    list_filter = ('is_active', 'created_at')
+    search_fields = ('title',)
+
+@admin.register(ChatMessage)
+class ChatMessageAdmin(admin.ModelAdmin):
+    list_display = ('user', 'message', 'created_at', 'is_banned', 'is_admin')
+    list_filter = ('created_at', 'is_banned', 'is_admin')
+    search_fields = ('user__username', 'message')
+
+@admin.register(SiteSettings)
+class SiteSettingsAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'updated_at')
+
+@admin.register(UserSettings)
+class UserSettingsAdmin(admin.ModelAdmin):
+    list_display = ('user', 'theme', 'tabbar_on')
+    list_filter = ('theme', 'tabbar_on')
+    search_fields = ('user__username',)
+

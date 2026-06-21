@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
@@ -286,7 +286,7 @@
     {% with featured=page_obj.object_list|first %}
     {% if featured %}
     <a href="{% url 'news_detail' featured.slug %}" class="featured-news">
-        <div class="featured-bg" style="background-image: url('{{ featured.image_url|default:'https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?q=80&w=2070' }}');"></div>
+        <div class="featured-bg" style="background-image: url('{{ featured.image.url|default:'https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?q=80&w=2070' }}');"></div>
         <div class="featured-overlay"></div>
         <div class="featured-content">
             <span class="featured-badge">ASOSIY YANGILIK</span>
@@ -304,7 +304,7 @@
     <div class="news-grid">
         {% for post in page_obj.object_list|slice:'1:' %}
         <a href="{% url 'news_detail' post.slug %}" class="news-card">
-            <div class="news-thumb" style="background-image: url('{{ post.image_url|default:'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2070' }}');">
+            <div class="news-thumb" style="background-image: url('{{ post.image.url|default:'https://images.unsplash.com/photo-1578632767115-351597cf2477?q=80&w=2070' }}');">
                 <span class="news-badge">YANGI</span>
             </div>
             <div class="news-content">
@@ -337,3 +337,4 @@
 
 </body>
 </html>
+

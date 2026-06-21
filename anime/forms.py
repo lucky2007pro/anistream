@@ -1,8 +1,7 @@
-from django import forms
+﻿from django import forms
 from django.utils.text import slugify
 
-from .models import Genre, Anime, Episode, NewsPost, ShortVideo
-
+from .models import Genre, Anime, Episode, NewsPost, Reel
 
 class GenreForm(forms.ModelForm):
     class Meta:
@@ -16,7 +15,6 @@ class GenreForm(forms.ModelForm):
             slug = slugify(name)
         return slug
 
-
 class AnimeForm(forms.ModelForm):
     class Meta:
         model = Anime
@@ -28,9 +26,9 @@ class AnimeForm(forms.ModelForm):
             "status",
             "release_year",
             "rating",
-            "image_url",
-            "banner_url",
-            "trailer_url",
+            "image",
+            "banner",
+            "trailer",
             "studio",
             "age_rating",
         ]
@@ -39,12 +37,7 @@ class AnimeForm(forms.ModelForm):
             "description": forms.Textarea(attrs={"rows": 4}),
         }
 
-
 class EpisodeForm(forms.ModelForm):
-    # Bu maydonlar modelga emas, formaga tegishli (yuklash mantiqi uchun)
-    upload_to_telegram = forms.BooleanField(required=False, initial=False)
-    delete_local_after_upload = forms.BooleanField(required=False, initial=False)
-
     class Meta:
         model = Episode
         fields = [
@@ -53,25 +46,19 @@ class EpisodeForm(forms.ModelForm):
             "title",
             "video_file",
             "video_url",
-            "telegram_file_id",
-            "telegram_message_id",
-            "telegram_channel_post_url",
         ]
 
     def clean(self):
         cleaned_data = super().clean()
         video_file = cleaned_data.get("video_file")
         video_url = cleaned_data.get("video_url")
-        telegram_file_id = cleaned_data.get("telegram_file_id")
-        telegram_message_id = cleaned_data.get("telegram_message_id")
 
-        if not video_file and not video_url and not telegram_file_id and not telegram_message_id:
+        if not video_file and not video_url:
             raise forms.ValidationError(
-                "Kamida bitta maydonni to'ldiring: video fayl, video URL, Telegram file_id yoki Telegram message_id."
+                "Kamida bitta maydonni to'ldiring: video fayl yoki video URL."
             )
 
         return cleaned_data
-
 
 class NewsPostForm(forms.ModelForm):
     class Meta:
@@ -88,13 +75,11 @@ class NewsPostForm(forms.ModelForm):
             slug = slugify(title)
         return slug
 
-class ShortVideoForm(forms.ModelForm):
+class ReelForm(forms.ModelForm):
     class Meta:
-        model = ShortVideo
-        fields = ['title', 'anime', 'telegram_file_id']
+        model = Reel
+        fields = ['title', 'anime', 'video_file', 'video_url', 'thumbnail']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Masalan: Treyler'}),
             'anime': forms.Select(attrs={'class': 'form-control'}),
-            'telegram_file_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'BQACAQ...'}),
         }
-
