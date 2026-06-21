@@ -55,15 +55,33 @@ def home_page(request):
     try:
         all_animes = Anime.objects.all().order_by('-created_at')
         active_stories = Story.objects.filter(is_active=True).order_by('-created_at')
+        
+        hero_movies = Anime.objects.all().order_by('-created_at')[:5]
+        recommended_movies = Anime.objects.filter(rating__gte=8).order_by('-rating')[:10]
+        if recommended_movies.count() < 5:
+            recommended_movies = all_animes[:10]
+            
+        fav_ids = []
+        if request.user.is_authenticated:
+            try:
+                fav_ids = list(request.user.profile.favorites.values_list('id', flat=True))
+            except Exception:
+                pass
+                
         context = {
             'animes': all_animes,
+            'movies': all_animes[:20],
+            'hero_movies': hero_movies,
+            'recommended_movies': recommended_movies,
             'stories': active_stories,
+            'seen_stories': [],
+            'fav_ids': fav_ids,
         }
         return render(request, 'index.html', context)
     except Exception as e:
         logger.error(f"Home page error: {e}")
         messages.error(request, "Xatolik yuz berdi. Iltimos qaytadan urinib ko'ring.")
-        return render(request, 'index.html', {'animes': []})
+        return render(request, 'index.html', {'animes': [], 'movies': []})
 
 
 def anime_detail(request, anime_id):
