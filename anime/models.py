@@ -1,4 +1,4 @@
-﻿from django.db import models
+from django.db import models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.exceptions import ValidationError
 from django.contrib.auth.models import User
@@ -332,7 +332,7 @@ class ActiveSession(models.Model):
 class UserProfile(models.Model):
     """Foydalanuvchi profili"""
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    avatar_url = models.URLField(max_length=500, blank=True, null=True)
+    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
     bio = models.TextField(max_length=500, blank=True, verbose_name="Bio")
     birth_date = models.DateField(blank=True, null=True, verbose_name="Tug'ilgan kun")
     favorites = models.ManyToManyField(Anime, related_name='favorited_by', blank=True)
@@ -390,7 +390,7 @@ class NewsPost(models.Model):
     slug = models.SlugField(max_length=200, unique=True)
     content = models.TextField(verbose_name="Matn")
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='news_posts')
-    image_url = models.URLField(max_length=500, blank=True)
+    image = models.ImageField(upload_to='news/images/', blank=True, null=True)
     tags = models.CharField(max_length=200, blank=True, help_text="Vergul bilan ajrating")
     views = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)

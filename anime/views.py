@@ -332,11 +332,11 @@ def profile_page(request):
 
     if request.method == 'POST':
         bio = request.POST.get('bio', '')
-        avatar_url = request.POST.get('avatar_url', '')
+        avatar = request.FILES.get('avatar')
 
         profile.bio = bio
-        if avatar_url:
-            profile.avatar_url = avatar_url
+        if avatar:
+            profile.avatar = avatar
         profile.save()
 
         messages.success(request, "Profil yangilandi!")

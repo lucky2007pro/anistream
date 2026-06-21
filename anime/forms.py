@@ -1,4 +1,4 @@
-﻿from django import forms
+from django import forms
 from django.utils.text import slugify
 
 from .models import Genre, Anime, Episode, NewsPost, Reel
@@ -63,7 +63,7 @@ class EpisodeForm(forms.ModelForm):
 class NewsPostForm(forms.ModelForm):
     class Meta:
         model = NewsPost
-        fields = ["title", "slug", "content", "image_url", "tags", "is_published"]
+        fields = ["title", "slug", "content", "image", "tags", "is_published"]
         widgets = {
             "content": forms.Textarea(attrs={"rows": 6}),
         }

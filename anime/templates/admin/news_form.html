@@ -1,4 +1,4 @@
-﻿{% extends "admin/base_admin.html" %}
+{% extends "admin/base_admin.html" %}
 
 {% block breadcrumb %}Yangilik / Forma{% endblock %}
 
@@ -11,7 +11,7 @@
         </div>
     </div>
 
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         <div class="form-grid">
             <div class="form-group">
@@ -25,9 +25,9 @@
                 {{ form.slug.errors }}
             </div>
             <div class="form-group">
-                <label for="id_image_url">Rasm URL</label>
-                {{ form.image.url }}
-                {{ form.image.url.errors }}
+                <label for="id_image">Rasm (Yuklash)</label>
+                {{ form.image }}
+                {{ form.image.errors }}
             </div>
             <div class="form-group">
                 <label for="id_tags">Teglar (vergul bilan)</label>

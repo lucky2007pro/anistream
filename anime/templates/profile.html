@@ -315,10 +315,15 @@
         <div class="main-content">
             <h2 class="section-title">Profil <span>Tahrirlash</span></h2>
 
-            <form>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label class="form-label">Avatar (Rasm)</label>
+                    <input type="file" name="avatar" class="form-input" accept="image/*">
+                </div>
                 <div class="form-group">
                     <label class="form-label">Foydalanuvchi nomi</label>
-                    <input type="text" class="form-input" value="username" placeholder="Foydalanuvchi nomi">
+                    <input type="text" class="form-input" value="{{ request.user.username }}" disabled>
                 </div>
 
                 <div class="form-group">
@@ -328,7 +333,7 @@
 
                 <div class="form-group">
                     <label class="form-label">Bio</label>
-                    <textarea class="form-input form-textarea" placeholder="O'zingiz haqingizda yozing...">Anime ishqibozi va manga o'quvchisi</textarea>
+                    <textarea name="bio" class="form-input form-textarea" placeholder="O'zingiz haqingizda yozing...">{{ profile.bio }}</textarea>
                 </div>
 
                 <div class="form-group">
