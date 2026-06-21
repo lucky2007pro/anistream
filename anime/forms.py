@@ -45,17 +45,15 @@ class EpisodeForm(forms.ModelForm):
             "episode_number",
             "title",
             "video_file",
-            "video_url",
         ]
 
     def clean(self):
         cleaned_data = super().clean()
         video_file = cleaned_data.get("video_file")
-        video_url = cleaned_data.get("video_url")
 
-        if not video_file and not video_url:
+        if not video_file:
             raise forms.ValidationError(
-                "Kamida bitta maydonni to'ldiring: video fayl yoki video URL."
+                "Kamida bitta maydonni to'ldiring: video fayl."
             )
 
         return cleaned_data
@@ -78,7 +76,7 @@ class NewsPostForm(forms.ModelForm):
 class ReelForm(forms.ModelForm):
     class Meta:
         model = Reel
-        fields = ['title', 'anime', 'video_file', 'video_url', 'thumbnail']
+        fields = ['title', 'anime', 'video_file', 'thumbnail']
         widgets = {
             'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Masalan: Treyler'}),
             'anime': forms.Select(attrs={'class': 'form-control'}),

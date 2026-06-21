@@ -38,51 +38,6 @@
                 {{ form.video_file.errors }}
             </div>
             <div class="form-group">
-                <label for="id_video_url">Video URL</label>
-                {{ form.video_url }}
-                {{ form.video_url.errors }}
-            </div>
-        </div>
-
-        <div class="form-grid" style="margin-top: 10px;">
-            <div class="form-group">
-                <label for="id_telegram_file_id">Telegram file_id</label>
-                {{ form.telegram_file_id }}
-                {{ form.telegram_file_id.errors }}
-            </div>
-            <div class="form-group">
-                <label for="id_telegram_message_id">Telegram message_id (Katta videolar uchun SHART)</label>
-                {{ form.telegram_message_id }}
-                {{ form.telegram_message_id.errors }}
-            </div>
-            <div class="form-group">
-                <label for="id_telegram_channel_post_url">Telegram post URL</label>
-                {{ form.telegram_channel_post_url }}
-                {{ form.telegram_channel_post_url.errors }}
-                {% if form.instance.telegram_channel_post_url %}
-                <div style="margin-top: 8px; font-size: 0.9rem;">
-                    <a href="{{ form.instance.telegram_channel_post_url }}" target="_blank" rel="noopener noreferrer">Postni ochish</a>
-                </div>
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="form-group" style="margin-top: 10px;">
-            <label for="id_upload_to_telegram" style="display:flex; align-items:center; gap:8px;">
-                {{ form.upload_to_telegram }}
-                <span>Saqlashdan keyin videoni bot orqali kanalga yuklash</span>
-            </label>
-            {{ form.upload_to_telegram.errors }}
-        </div>
-
-        <div class="form-group" style="margin-top: 10px;">
-            <label for="id_delete_local_after_upload" style="display:flex; align-items:center; gap:8px;">
-                {{ form.delete_local_after_upload }}
-                <span>Telegram'ga yuklangach local video faylni o'chirish</span>
-            </label>
-            {{ form.delete_local_after_upload.errors }}
-        </div>
-
         {% if form.non_field_errors %}
             <ul class="errorlist">
                 {% for error in form.non_field_errors %}
@@ -153,7 +108,6 @@
             progressPercent.textContent = percent + '%';
 
             if (percent >= 100) {
-                progressLabel.textContent = 'Server tekshirmoqda / Telegramga yubormoqda...';
             }
         };
 

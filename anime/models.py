@@ -134,13 +134,6 @@ class Episode(models.Model):
         verbose_name="Videoni kompyuterdan yuklash",
         help_text="Kompyuterdan video yuklash"
     )
-    video_url = models.URLField(
-        max_length=500,
-        blank=True,
-        null=True,
-        verbose_name="Video silkasi (URL)",
-        help_text="Tashqi video silkasi"
-    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -157,16 +150,14 @@ class Episode(models.Model):
         return f"{self.anime.title} - {self.episode_number}-qism"
 
     def clean(self):
-        if not self.video_file and not self.video_url:
-            raise ValidationError("Video fayl yoki URL dan birini kiriting")
+        if not self.video_file:
+            raise ValidationError("Video faylni kiriting")
         if self.episode_number < 1:
             raise ValidationError("Qism raqami 1 dan kichik bo'lishi mumkin emas")
 
     def get_video_source(self):
         if self.video_file:
             return reverse('episode_stream', args=[self.id])
-        if self.video_url:
-            return self.video_url
         return ""
 
 class Reel(models.Model):
@@ -175,7 +166,6 @@ class Reel(models.Model):
     title = models.CharField(max_length=200, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     video_file = models.FileField(upload_to='reels/videos/', blank=True, null=True)
-    video_url = models.URLField(blank=True, null=True)
     thumbnail = models.ImageField(upload_to='reels/thumbnails/', blank=True, null=True)
     views_count = models.PositiveIntegerField(default=0)
     shares_count = models.PositiveIntegerField(default=0)
@@ -193,7 +183,7 @@ class Reel(models.Model):
     def get_video_src(self):
         if self.video_file:
             return self.video_file.url
-        return self.video_url or ''
+        return ''
 
     def __str__(self):
         return f"Reel #{self.id} - {self.title or 'No title'}"
