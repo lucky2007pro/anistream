@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>{{ story.title }}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --accent: #ff3366;
+    --accent-glow: rgba(255, 51, 102, 0.35);
+    --glass: rgba(255,255,255,0.07);
+    --glass-border: rgba(255,255,255,0.12);
+    --text: #f0f0f0;
+    --text-muted: rgba(240,240,240,0.55);
+    --dark: #080808;
+    --radius: 18px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --safe-top: env(safe-area-inset-top, 0px);
+}
+
+html, body {
+    height: 100%;
+    height: 100dvh;
+}
+
+body {
+    background: var(--dark);
+    overflow: hidden;
+    font-family: 'Outfit', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100dvh;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+/* ============================================================
+   BACKGROUND BLUR VIDEO
+   ============================================================ */
+.bg-video {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.bg-video::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+}
+
+.bg-video video {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    filter: blur(30px) saturate(1.4);
+    transform: scale(1.25);
+}
+
+/* ============================================================
+   STORY CONTAINER
+   ============================================================ */
+.story-box {
+    position: relative;
+    width: 100%;
+    height: 100dvh;
+    overflow: hidden;
+    background: #000;
+    will-change: transform, opacity;
+}
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+.progress-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: rgba(255,255,255,0.15);
+    z-index: 100;
+    cursor: pointer;
+}
+
+.progress-fill {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent-glow);
+    transition: width 0.1s linear;
+    border-radius: 0 2px 2px 0;
+}
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+.top-bar {
+    position: absolute;
+    top: calc(14px + var(--safe-top));
+    left: 14px; right: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 10;
+}
+
+.back-btn {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 0;
+    width: 40px; height: 40px;
+    color: var(--text);
+    border-radius: 12px;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    flex-shrink: 0;
+    transition: background 0.2s, transform 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.back-btn:hover {
+    background: rgba(255,255,255,0.13);
+    transform: translateX(-2px);
+}
+
+.back-btn:active {
+    transform: scale(0.92);
+    background: rgba(255,255,255,0.18);
+}
+
+.back-btn svg {
+    display: block;
+    width: 18px; height: 18px;
+    stroke: var(--text);
+    stroke-width: 2.2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.title {
+    flex: 1;
+    text-align: center;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text);
+    text-shadow: 0 2px 12px rgba(0,0,0,0.9);
+}
+
+/* Views badge */
+.views {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    padding: 6px 11px 6px 9px;
+    border-radius: 30px;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    letter-spacing: 0.02em;
+}
+
+.views svg {
+    display: block;
+    width: 16px; height: 16px;
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 1.8;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    filter: drop-shadow(0 0 4px var(--accent-glow));
+}
+
+/* ============================================================
+   MEDIA
+   ============================================================ */
+.story-media {
+    width: 100%;
+    height: 100dvh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #000;
+}
+
+.story-media img,
+.story-media video {
+    width: 100%;
+    height: 100dvh;
+    object-fit: contain;
+    background: #000;
+    display: block;
+    pointer-events: none;
+}
+
+/* ============================================================
+   PLAY / PAUSE OVERLAY BUTTON
+   ============================================================ */
+.play-pause-overlay {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0);
+    z-index: 30;
+    pointer-events: none;
+    transition: transform 0.15s cubic-bezier(0.34, 1.56, 0.64, 1),
+                opacity 0.25s ease;
+    opacity: 0;
+}
+
+.play-pause-overlay.show {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}
+
+.play-pause-overlay.hide {
+    transform: translate(-50%, -50%) scale(0.8);
+    opacity: 0;
+}
+
+.play-pause-overlay .icon-circle {
+    width: 68px; height: 68px;
+    border-radius: 50%;
+    background: rgba(255, 51, 102, 0.15);
+    border: 2px solid var(--accent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 0 30px var(--accent-glow), 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.play-pause-overlay svg {
+    width: 26px; height: 26px;
+    fill: var(--accent);
+    display: block;
+    filter: drop-shadow(0 0 6px var(--accent-glow));
+}
+
+/* Center tap area for play/pause */
+.center-tap {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 160px; height: 160px;
+    z-index: 20;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+/* ============================================================
+   DESCRIPTION
+   ============================================================ */
+.story-description {
+    position: absolute;
+    bottom: calc(96px + var(--safe-bottom));
+    left: 14px; right: 14px;
+    color: var(--text);
+    font-size: 13px;
+    line-height: 1.55;
+    background: rgba(0,0,0,0.48);
+    border: 1px solid var(--glass-border);
+    padding: 11px 14px;
+    border-radius: var(--radius);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    z-index: 60;
+    font-weight: 300;
+    max-height: 30vh;
+    overflow-y: auto;
+}
+
+/* ============================================================
+   BOTTOM BAR
+   ============================================================ */
+.bottom-bar {
+    position: absolute;
+    bottom: calc(22px + var(--safe-bottom));
+    left: 14px; right: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    z-index: 50;
+}
+
+/* Play/pause button in bottom bar */
+.pp-btn {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: var(--text);
+    width: 48px; height: 48px;
+    border-radius: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    transition: background 0.2s, transform 0.15s;
+    flex-shrink: 0;
+}
+
+.pp-btn:hover { background: rgba(255,255,255,0.13); transform: scale(1.06); }
+.pp-btn:active { transform: scale(0.92); background: rgba(255,255,255,0.18); }
+
+.pp-btn svg {
+    width: 20px; height: 20px;
+    fill: var(--accent);
+    display: block;
+    filter: drop-shadow(0 0 4px var(--accent-glow));
+    transition: transform 0.1s;
+}
+
+.watch-btn {
+    flex: 1;
+}
+
+.watch-btn a,
+.watch-btn button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    background: var(--accent);
+    color: #0a0a0a;
+    font-family: 'Outfit', sans-serif;
+    font-size: 14px;
+    font-weight: 800;
+    letter-spacing: 0.03em;
+    padding: 13px 18px;
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+    transition: transform 0.18s, box-shadow 0.18s;
+    box-shadow: 0 4px 24px var(--accent-glow);
+    text-decoration: none;
+    -webkit-font-smoothing: antialiased;
+}
+
+.watch-btn a svg,
+.watch-btn button svg {
+    width: 15px; height: 15px;
+    fill: #0a0a0a;
+    flex-shrink: 0;
+}
+
+.watch-btn a:hover,
+.watch-btn button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px var(--accent-glow);
+}
+
+.watch-btn a:active,
+.watch-btn button:active {
+    transform: scale(0.97);
+}
+
+.watch-btn button:disabled {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    cursor: default;
+    transform: none;
+    box-shadow: none;
+}
+
+.watch-btn button:disabled svg { fill: var(--text-muted); opacity: 0.4; }
+
+/* ============================================================
+   SWIPE LEFT / RIGHT ZONES  (invisible tap areas on sides)
+   ============================================================ */
+.swipe-zone {
+    position: absolute;
+    top: 60px;
+    bottom: 120px;
+    width: 35%;
+    z-index: 15;
+    cursor: pointer;
+}
+
+.swipe-zone.left  { left: 0; }
+.swipe-zone.right { right: 0; }
+
+/* ============================================================
+   DESKTOP ARROW HINTS
+   ============================================================ */
+.swipe-hint {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 20;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 50%;
+    width: 44px; height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.swipe-hint svg {
+    width: 18px; height: 18px;
+    stroke: var(--text);
+    stroke-width: 2.2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.swipe-hint.left  { left: 12px; }
+.swipe-hint.right { right: 12px; }
+
+.story-box:hover .swipe-hint { opacity: 1; }
+
+/* ============================================================
+   SWIPE ANIMATIONS
+   ============================================================ */
+.story-box.slide-left  { animation: slideLeft  0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+.story-box.slide-right { animation: slideRight 0.22s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+@keyframes slideLeft {
+    from { transform: translateX(0); opacity:1; }
+    to   { transform: translateX(-100%); opacity:0; }
+}
+
+@keyframes slideRight {
+    from { transform: translateX(0); opacity:1; }
+    to   { transform: translateX(100%); opacity:0; }
+}
+
+/* ============================================================
+   MOBILE  (max-width: 600px)
+   ============================================================ */
+@media (max-width: 600px) {
+    .title {
+        font-size: 14px;
+        color: #fff;
+    }
+
+    .story-description {
+        bottom: calc(88px + var(--safe-bottom));
+        font-size: 12.5px;
+        line-height: 1.5;
+    }
+
+    .bottom-bar {
+        bottom: calc(18px + var(--safe-bottom));
+        left: 12px;
+        right: 12px;
+    }
+
+    .watch-btn a,
+    .watch-btn button {
+        font-size: 15px;
+        padding: 14px 18px;
+    }
+
+    .swipe-hint { display: none; }
+}
+
+/* ============================================================
+   DESKTOP / TABLET  (min-width: 768px)
+   ============================================================ */
+@media (min-width: 768px) {
+    .story-box {
+        width: 420px;
+        height: 100dvh;
+        border-radius: 24px;
+        overflow: hidden;
+        box-shadow: 0 0 0 1px var(--glass-border), 0 30px 80px rgba(0,0,0,0.7);
+    }
+
+    .story-media video,
+    .story-media img { height: 100dvh; object-fit: contain; }
+
+    .top-bar  { top: 16px; left: 16px; right: 16px; }
+    .bottom-bar { bottom: 40px; left: 16px; right: 16px; }
+    .story-description { bottom: 116px; left: 16px; right: 16px; }
+}
+</style>
+</head>
+<body>
+
+{% if story.video %}
+<div class="bg-video">
+    <video autoplay muted loop playsinline>
+        <source src="{{ story.video.url }}">
+    </video>
+</div>
+{% endif %}
+
+<div class="story-box" id="storyBox">
+
+    <!-- PROGRESS BAR -->
+    <div class="progress-bar" id="progressBar">
+        <div class="progress-fill" id="progressFill"></div>
+    </div>
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <button class="back-btn" onclick="window.location.href='/'">
+            <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+
+        <div class="title">{{ story.title }}</div>
+
+        <div class="views">
+            <svg viewBox="0 0 24 24">
+                <path d="M1 12C1 12 5 4 12 4s11 8 11 8-4 8-11 8S1 12 1 12z"/>
+                <circle cx="12" cy="12" r="3"/>
+                <circle cx="12" cy="12" r="1.2" fill="var(--accent)" stroke="none"/>
+            </svg>
+            {{ story.views.count }}
+        </div>
+    </div>
+
+    <!-- DESKTOP ARROW HINTS -->
+    <div class="swipe-hint left">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+    </div>
+    <div class="swipe-hint right">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </div>
+
+    <!-- MEDIA -->
+    <div class="story-media" id="mediaWrapper">
+        {% if story.video %}
+            <video id="storyVideo" autoplay playsinline>
+                <source src="{{ story.video.url }}">
+            </video>
+        {% elif story.image %}
+            <img src="{{ story.image.url }}" alt="{{ story.title }}">
+        {% endif %}
+    </div>
+
+    <!-- CENTER TAP (play/pause) — only for video -->
+    {% if story.video %}
+    <div class="center-tap" id="centerTap"></div>
+    {% endif %}
+
+    <!-- PLAY/PAUSE OVERLAY ICON -->
+    <div class="play-pause-overlay" id="ppOverlay">
+        <div class="icon-circle">
+            <svg id="ppOverlaySvg" viewBox="0 0 24 24">
+                <polygon points="5 3 19 12 5 21 5 3"/>
+            </svg>
+        </div>
+    </div>
+
+    <!-- DESCRIPTION -->
+    {% if story.description %}
+    <div class="story-description">{{ story.description|linebreaks }}</div>
+    {% endif %}
+
+    <!-- BOTTOM BAR -->
+    <div class="bottom-bar">
+
+        {% if story.video %}
+        <button class="pp-btn" id="ppBtn" title="Play / Pause">
+            <svg id="ppBtnSvg" viewBox="0 0 24 24">
+                <rect x="6" y="4" width="4" height="16" rx="1.5"/>
+                <rect x="14" y="4" width="4" height="16" rx="1.5"/>
+            </svg>
+        </button>
+        {% endif %}
+
+        <div class="watch-btn">
+            {% if story.link %}
+                {# To'g'ridan-to'g'ri <a> tegi — admin quygan linkga ochadi #}
+                <a href="{{ story.link }}" target="_blank" rel="noopener noreferrer">
+                    <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Tomosha qilish
+                </a>
+            {% else %}
+                <button disabled>
+                    <svg viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                    Link yo'q
+                </button>
+            {% endif %}
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+// ============================================================
+// URL-lar (Django template)
+// ============================================================
+const nextUrl = "{% url 'next_story' story.id %}";
+const prevUrl = "{% url 'prev_story' story.id %}";
+
+// ============================================================
+// DOM ELEMENTLARI
+// ============================================================
+const box          = document.getElementById("storyBox");
+const video        = document.getElementById("storyVideo");
+const progressBar  = document.getElementById("progressBar");
+const progressFill = document.getElementById("progressFill");
+const ppBtn        = document.getElementById("ppBtn");
+const ppBtnSvg     = document.getElementById("ppBtnSvg");
+const centerTap    = document.getElementById("centerTap");
+const ppOverlay    = document.getElementById("ppOverlay");
+const ppOverlaySvg = document.getElementById("ppOverlaySvg");
+
+const PLAY_ICON  = '<polygon points="5 3 19 12 5 21 5 3"/>';
+const PAUSE_ICON = '<rect x="6" y="4" width="4" height="16" rx="1.5"/><rect x="14" y="4" width="4" height="16" rx="1.5"/>';
+
+// ============================================================
+// NAVIGATSIYA
+// ============================================================
+let navigating = false;
+
+function goNext() {
+    // ← chapga sursa KEYINGI story (reels/2 → reels/3)
+    if (navigating) return;
+    navigating = true;
+    box.classList.add("slide-left");
+    setTimeout(() => { window.location.href = nextUrl; }, 200);
+}
+
+function goPrev() {
+    // → o'ngga sursa OLDINGI story (reels/2 → reels/1)
+    if (navigating) return;
+    navigating = true;
+    box.classList.add("slide-right");
+    setTimeout(() => { window.location.href = prevUrl; }, 200);
+}
+
+// ============================================================
+// PLAY / PAUSE
+// ============================================================
+let overlayTimer = null;
+
+function showOverlay(paused) {
+    if (!ppOverlaySvg || !ppOverlay) return;
+    ppOverlaySvg.innerHTML = paused ? PLAY_ICON : PAUSE_ICON;
+    ppOverlay.classList.remove('show', 'hide');
+    void ppOverlay.offsetWidth;
+    ppOverlay.classList.add('show');
+    clearTimeout(overlayTimer);
+    overlayTimer = setTimeout(() => {
+        ppOverlay.classList.remove('show');
+        ppOverlay.classList.add('hide');
+    }, 700);
+}
+
+function updateBtnIcon() {
+    if (!video || !ppBtnSvg) return;
+    ppBtnSvg.innerHTML = video.paused ? PLAY_ICON : PAUSE_ICON;
+}
+
+function togglePlay() {
+    if (!video) return;
+    if (video.paused) {
+        video.play();
+        showOverlay(false);
+    } else {
+        video.pause();
+        showOverlay(true);
+    }
+    updateBtnIcon();
+}
+
+if (ppBtn)     ppBtn.addEventListener("click", e => { e.stopPropagation(); togglePlay(); });
+if (centerTap) centerTap.addEventListener("click", togglePlay);
+
+// ============================================================
+// VIDEO — PROGRESS & AUTO-NEXT
+// ============================================================
+if (video) {
+    video.controls = false;
+
+    video.addEventListener("timeupdate", () => {
+        if (!isNaN(video.duration) && video.duration > 0) {
+            progressFill.style.width = (video.currentTime / video.duration * 100) + "%";
+        }
+    });
+
+    video.addEventListener("ended", () => {
+        progressFill.style.width = "100%";
+        goNext();
+    });
+
+    video.addEventListener("play",  updateBtnIcon);
+    video.addEventListener("pause", updateBtnIcon);
+    video.addEventListener("canplay", updateBtnIcon, { once: true });
+}
+
+// ============================================================
+// PROGRESS BAR — SEEK
+// ============================================================
+if (progressBar) {
+    let isSeeking = false;
+
+    progressBar.addEventListener("click", e => {
+        if (!video) return;
+        const rect = progressBar.getBoundingClientRect();
+        const pct  = (e.clientX - rect.left) / rect.width;
+        video.currentTime = Math.max(0, Math.min(1, pct)) * video.duration;
+    });
+
+    progressBar.addEventListener("touchstart", e => {
+        e.stopPropagation();
+        isSeeking = true;
+    }, { passive: true });
+
+    progressBar.addEventListener("touchmove", e => {
+        if (!isSeeking || !video) return;
+        e.stopPropagation();
+        const rect = progressBar.getBoundingClientRect();
+        const pct  = (e.touches[0].clientX - rect.left) / rect.width;
+        video.currentTime = Math.max(0, Math.min(1, pct)) * video.duration;
+    }, { passive: true });
+
+    progressBar.addEventListener("touchend", () => { isSeeking = false; }, { passive: true });
+}
+
+// ============================================================
+// SWIPE NAVIGATION  (touch)
+// ============================================================
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartTime = 0;
+
+function onTouchStart(e) {
+    touchStartX    = e.touches[0].clientX;
+    touchStartY    = e.touches[0].clientY;
+    touchStartTime = Date.now();
+}
+
+function onTouchEnd(e) {
+    const diffX    = touchStartX - e.changedTouches[0].clientX;  // chapga + = keyingi
+    const diffY    = touchStartY - e.changedTouches[0].clientY;
+    const duration = Date.now() - touchStartTime;
+
+    // Gorizontal swipe: kamida 50px va vertikal harakat kichik bo'lsin
+    const isHorizontal = Math.abs(diffX) > Math.abs(diffY) * 1.2;
+    const isFast       = duration < 400;
+    const isLong       = Math.abs(diffX) > 50;
+
+    if (isHorizontal && (isFast || isLong)) {
+        if (diffX > 0) {
+            goNext();   // chapga sursa → keyingi
+        } else {
+            goPrev();   // o'ngga sursa → oldingi
+        }
+    }
+}
+
+// Swipe uchun faqat media zonasida ishlaydi (tugmalar bundan mustasno)
+box.addEventListener("touchstart", e => {
+    if (e.target.closest(
+        ".progress-bar, .pp-btn, .watch-btn, .back-btn, .story-description, .center-tap"
+    )) return;
+    onTouchStart(e);
+}, { passive: true });
+
+box.addEventListener("touchend", e => {
+    if (e.target.closest(
+        ".progress-bar, .pp-btn, .watch-btn, .back-btn, .story-description, .center-tap"
+    )) return;
+    onTouchEnd(e);
+}, { passive: true });
+
+// ============================================================
+// MOUSE DRAG NAVIGATION  (desktop)
+// ============================================================
+let mouseStartX = 0;
+let isDragging  = false;
+
+box.addEventListener("mousedown", e => {
+    if (e.target.closest(
+        ".progress-bar, .pp-btn, .watch-btn, .back-btn, .story-description, .center-tap"
+    )) return;
+    mouseStartX = e.clientX;
+    isDragging  = true;
+});
+
+box.addEventListener("mouseup", e => {
+    if (!isDragging) return;
+    isDragging = false;
+    const diff = mouseStartX - e.clientX;
+    if (Math.abs(diff) > 60) {
+        diff > 0 ? goNext() : goPrev();
+    }
+});
+
+box.addEventListener("mouseleave", () => { isDragging = false; });
+
+// ============================================================
+// KLAVIATURA
+// ============================================================
+document.addEventListener("keydown", e => {
+    if (e.key === "ArrowRight") goNext();
+    if (e.key === "ArrowLeft")  goPrev();
+    if (e.key === " " || e.key === "k") { e.preventDefault(); togglePlay(); }
+});
+</script>
+
+</body>
+</html>

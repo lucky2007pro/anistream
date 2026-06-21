@@ -61,7 +61,26 @@ urlpatterns = [
     # Anime
     path('anime/<int:anime_id>/', views.anime_detail, name='detail'),
     path('episode/<int:episode_id>/stream/', views.episode_stream, name='episode_stream'),
-    path('reels/', views.reels_page, name='reels_page'),
+    # Reels
+    path('reels/', views.reels_feed, name='reels_page'),
+    path('reels/<int:reel_id>/', views.reel_detail, name='reel_detail'),
+    path('reels/<int:reel_id>/like/', views.toggle_reel_like, name='toggle_reel_like'),
+    path('reels/<int:reel_id>/comment/', views.add_reel_comment, name='add_reel_comment'),
+    path('reels/<int:reel_id>/comments/', views.reel_comments_api, name='reel_comments_api'),
+    path('reels/<int:reel_id>/share/', views.reel_share, name='reel_share'),
+
+    # Chat
+    path('chat/', views.chat, name='chat'),
+    path('chat/messages/', views.chat_messages_api, name='chat_messages_api'),
+    path('ban_user/<int:user_id>/', views.ban_user, name='ban_user'),
+    path('edit_message/<int:message_id>/', views.edit_message, name='edit_message'),
+    path('delete_message/<int:message_id>/', views.delete_message, name='delete_message'),
+
+    # Story
+    path('story/<int:story_id>/', views.story_view, name='story_view'),
+    path('story/seen/<int:story_id>/', views.mark_story_seen, name='mark_story_seen'),
+    path('story/<int:story_id>/next/', views.next_story_view, name='next_story'),
+    path('story/<int:story_id>/prev/', views.prev_story_view, name='prev_story'),
 
     # Janrlar
     path('genres/', views.genres_page, name='genres'),

@@ -1,3 +1,12 @@
+
+from django.http import JsonResponse
+from django.utils import timezone
+from .models import ChatMessage, ReelLike, ReelComment, ReelShare, StoryView, Story, Reel
+from django.db.models import F
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
@@ -45,8 +54,10 @@ def home_page(request):
     """Asosiy sahifa - Anime katalog"""
     try:
         all_animes = Anime.objects.all().order_by('-created_at')
+        active_stories = Story.objects.filter(is_active=True).order_by('-created_at')
         context = {
             'animes': all_animes,
+            'stories': active_stories,
         }
         return render(request, 'index.html', context)
     except Exception as e:
@@ -944,3 +955,412 @@ def admin_short_delete(request, pk):
         "admin/confirm_delete.html",
         {"object": short, "object_type": "Reel", "cancel_url": "admin_short_list"},
     )
+
+
+# --- MIGRATED VIEWS ---
+
+@login_required
+def chat(request):
+    tz = ZoneInfo('Asia/Tashkent')
+
+    # fetch all messages up to limit
+    messages_count = ChatMessage.objects.count()
+    has_more = messages_count > 40
+
+    messages_list = list(
+        ChatMessage.objects.select_related('user', 'reply_to', 'user__avatar', 'user__vip_data').order_by(
+            '-created_at')[:40])
+    messages_list.reverse()
+
+    for msg in messages_list:
+        msg.local_created_at = localtime(msg.created_at, tz)
+
+    if request.method == "POST":
+
+        if request.user.is_banned:
+            messages.error(request, "Siz yozolmaysiz")
+            return redirect('chat')
+
+        text = request.POST.get("message", "").strip()
+        reply_to_id = request.POST.get("reply_to")
+        reply_to_msg = None
+
+        if reply_to_id:
+            try:
+                reply_to_msg = ChatMessage.objects.get(id=int(reply_to_id))
+            except:
+                pass
+
+        if text:
+            ChatMessage.objects.create(
+                user=request.user,
+                message=text,
+                created_at=timezone.now(),
+                reply_to=reply_to_msg
+            )
+
+        return redirect('chat')
+
+    return render(request, 'chat.html', {
+        'messages': messages_list,
+        'has_more': has_more
+    })
+
+
+# =======================
+# CHAT API (Load older messages)
+# =======================
+
+
+@login_required
+def chat_messages_api(request):
+    tz = ZoneInfo('Asia/Tashkent')
+    before_id = request.GET.get('before')
+    try:
+        limit = int(request.GET.get('limit', 20))
+    except ValueError:
+        limit = 20
+
+    qs = ChatMessage.objects.select_related('user', 'user__avatar', 'user__vip_data', 'reply_to').order_by(
+        '-created_at')
+    if before_id and before_id.isdigit():
+        qs = qs.filter(id__lt=before_id)
+
+    messages_list = list(qs[:limit])
+    messages_list.reverse()
+
+    data = []
+    for msg in messages_list:
+        reply_data = None
+        if msg.reply_to:
+            reply_data = {
+                'id': msg.reply_to.id,
+                'username': msg.reply_to.user.username,
+                'message': msg.reply_to.message
+            }
+
+        avatar_url = msg.user.avatar.image.url if getattr(msg.user, 'avatar', None) and msg.user.avatar.image else None
+
+        data.append({
+            'id': msg.id,
+            'message': msg.message,
+            'username': msg.user.username,
+            'avatar_url': avatar_url,
+            'time': localtime(msg.created_at, tz).strftime('%H:%M'),
+            'edited': msg.edited,
+            'is_own': msg.user == request.user,
+            'is_admin': msg.user.is_admin_user,
+            'is_vip': hasattr(msg.user, 'vip_data') and msg.user.vip_data.vip_active(),
+            'reply_to': reply_data,
+            'can_edit': (msg.user == request.user) or request.user.is_admin_user,
+            'can_ban': request.user.is_admin_user and not msg.user.is_admin_user,
+            'user_id': msg.user.id
+        })
+
+    return JsonResponse({'messages': data})
+
+
+# =======================
+# EDIT MESSAGE
+# =======================
+
+
+@login_required
+def edit_message(request, message_id):
+    msg = get_object_or_404(ChatMessage, id=message_id)
+
+    if request.user != msg.user and not request.user.is_admin_user:
+        messages.error(request, "Ruxsat yo‘q")
+        return redirect('chat')
+
+    if request.method == "POST":
+        new_text = request.POST.get("message", "").strip()
+        if new_text:
+            msg.message = new_text
+            msg.edited = True
+            msg.save()
+
+    return redirect('chat')
+
+
+# =======================
+# DELETE MESSAGE
+# =======================
+
+
+@login_required
+def delete_message(request, message_id):
+    msg = get_object_or_404(ChatMessage, id=message_id)
+
+    if request.user != msg.user and not request.user.is_admin_user:
+        messages.error(request, "Ruxsat yo‘q")
+        return redirect('chat')
+
+    msg.delete()
+    return redirect('chat')
+
+
+# =======================
+# BAN USER
+# =======================
+
+
+@login_required
+def ban_user(request, user_id):
+    if not request.user.is_admin_user:
+        return redirect('chat')
+
+    user_to_ban = get_object_or_404(CustomUser, id=user_id)
+
+    if not user_to_ban.is_admin_user:
+        user_to_ban.is_banned = True
+        user_to_ban.save()
+
+    return redirect('chat')
+
+
+# =======================
+# PREMIUM PAGE
+# =======================
+
+
+@login_required
+def reels_feed(request):
+    latest = Reel.objects.order_by('-created_at').first()
+    if latest:
+        return redirect('reel_detail', reel_id=latest.id)
+    return render(request, 'reels.html', {'reels': [], 'liked_ids': []})
+
+
+
+
+def reel_detail(request, reel_id):
+    reel = get_object_or_404(Reel, id=reel_id)
+    Reel.objects.filter(id=reel_id).update(views_count=models.F('views_count') + 1)
+
+    # Pastga scroll = eski reel (created_at kichikroq)
+    next_reel = Reel.objects.filter(
+        created_at__lt=reel.created_at
+    ).order_by('-created_at').first()
+
+    # Tepaga scroll = yangi reel (created_at kattaroq)
+    prev_reel = Reel.objects.filter(
+        created_at__gt=reel.created_at
+    ).order_by('created_at').first()
+
+    is_liked = False
+    if request.user.is_authenticated:
+        is_liked = ReelLike.objects.filter(user=request.user, reel=reel).exists()
+
+    return render(request, 'reel_detail.html', {
+        'reel': reel,
+        'is_liked': is_liked,
+        'total_likes': reel.likes.count(),
+        'total_comments': reel.comments.count(),
+        'next_reel': next_reel,
+        'prev_reel': prev_reel,
+    })
+
+
+
+
+# confikuchun viev qismi
+
+BG_COLORS = [
+    {'name': 'Qora',           'value': '#0a0a0f',   'css': '#0a0a0f'},
+    {'name': 'Qoʻngʻir qora',  'value': '#0d0d0d',   'css': '#0d0d0d'},
+    {'name': 'To\'q ko\'k',    'value': '#050d1a',   'css': '#050d1a'},
+    {'name': 'Chuqur ko\'k',   'value': '#060b18',   'css': 'linear-gradient(135deg,#060b18,#0a0f22)'},
+    {'name': 'Qoʻngʻir',       'value': '#120a06',   'css': '#120a06'},
+    {'name': 'Qizil-qora',     'value': '#120a0f',   'css': '#120a0f'},
+    {'name': 'Roʻza-qora',     'value': '#180810',   'css': 'linear-gradient(135deg,#180810,#0d0510)'},
+    {'name': 'Binafsha-qora',  'value': '#0a0818',   'css': 'linear-gradient(135deg,#0a0818,#120a1f)'},
+    {'name': 'Yashil-qora',    'value': '#060f0a',   'css': '#060f0a'},
+    {'name': 'Kulrang',        'value': '#101014',   'css': '#101014'},
+]
+
+
+
+
+@login_required
+def toggle_reel_like(request, reel_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST talab qilinadi'}, status=405)
+
+    reel = get_object_or_404(Reel, id=reel_id)
+    like, created = ReelLike.objects.get_or_create(user=request.user, reel=reel)
+
+    if not created:
+        like.delete()
+        liked = False
+    else:
+        liked = True
+
+    return JsonResponse({
+        'liked': liked,
+        'total_likes': reel.likes.count(),
+    })
+
+
+
+
+@login_required
+def add_reel_comment(request, reel_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST talab qilinadi'}, status=405)
+
+    reel = get_object_or_404(Reel, id=reel_id)
+    text = request.POST.get('text', '').strip()
+    reply_to_id = request.POST.get('reply_to')
+
+    reply_obj = None
+    if reply_to_id:
+        try:
+            reply_obj = ReelComment.objects.get(id=int(reply_to_id))
+        except (ReelComment.DoesNotExist, ValueError):
+            reply_obj = None
+
+    if not text:
+        return JsonResponse({'error': "Izoh bo'sh bo'lmasin"}, status=400)
+
+    comment = ReelComment.objects.create(
+        reel=reel,
+        user=request.user,
+        text=text,
+        reply_to=reply_obj,
+    )
+
+    avatar_url = None
+    if getattr(request.user, 'avatar', None) and request.user.avatar.image:
+        avatar_url = request.user.avatar.image.url
+
+    return JsonResponse({
+        'status': 'ok',
+        'comment': {
+            'id': comment.id,
+            'user': request.user.username,
+            'text': comment.text,
+            'time': comment.created_at.strftime('%H:%M'),
+            'avatar': avatar_url,
+            'reply_to': reply_obj.id if reply_obj else None,
+            'reply_user': reply_obj.user.username if reply_obj else None,
+        },
+        'total_comments': reel.comments.count(),
+    })
+
+
+
+
+@login_required
+def reel_comments_api(request, reel_id):
+    comments = ReelComment.objects.select_related(
+        'user', 'user__avatar', 'reply_to', 'reply_to__user'
+    ).filter(reel_id=reel_id).order_by('created_at')
+
+    data = []
+    for c in comments:
+        avatar_url = None
+        if getattr(c.user, 'avatar', None) and c.user.avatar.image:
+            avatar_url = c.user.avatar.image.url
+
+        data.append({
+            'id': c.id,
+            'user': c.user.username,
+            'text': c.text,
+            'time': c.created_at.strftime('%H:%M'),
+            'avatar': avatar_url,
+            'reply_to': c.reply_to.id if c.reply_to else None,
+            'reply_user': c.reply_to.user.username if c.reply_to else None,
+            'reply_text': c.reply_to.text[:40] if c.reply_to else None,
+        })
+
+    return JsonResponse({'comments': data})
+
+
+
+
+@login_required
+def reel_share(request, reel_id):
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST talab qilinadi'}, status=405)
+
+    reel = get_object_or_404(Reel, id=reel_id)
+    ReelShare.objects.create(reel=reel, user=request.user)
+    Reel.objects.filter(id=reel_id).update(shares_count=models.F('shares_count') + 1)
+    reel.refresh_from_db()
+
+    return JsonResponse({
+        'status': 'shared',
+        'total_shares': reel.shares_count,
+    })
+
+
+
+
+def story_view(request, story_id):
+    story = get_object_or_404(Story, id=story_id, is_active=True)
+
+    if story.expires_at and story.expires_at < timezone.now():
+        return redirect('home')
+
+    if request.user.is_authenticated:
+        StoryView.objects.get_or_create(user=request.user, story=story)
+
+    return render(request, 'story_view.html', {
+        'story': story
+    })
+
+
+# =======================
+# AJAX: STORY SEEN
+# =======================
+
+
+@login_required
+def mark_story_seen(request, story_id):
+    story = get_object_or_404(Story, id=story_id)
+
+    obj, created = StoryView.objects.get_or_create(
+        user=request.user,
+        story=story
+    )
+
+    return JsonResponse({
+        'status': 'ok',
+        'created': created,
+        'views_count': story.views.count()
+    })
+
+
+
+def next_story_view(request, story_id):
+    stories = get_story_list()
+
+    for i, s in enumerate(stories):
+        if s.id == story_id:
+            if i + 1 < len(stories):
+                return redirect('story_view', story_id=stories[i + 1].id)
+            else:
+                return redirect('home')
+
+    return redirect('home')
+
+
+
+
+def prev_story_view(request, story_id):
+    stories = get_story_list()
+
+    for i, s in enumerate(stories):
+        if s.id == story_id:
+            if i - 1 >= 0:
+                return redirect('story_view', story_id=stories[i - 1].id)
+            else:
+                return redirect('home')
+
+    return redirect('home')
+
+
+
+
+# REELS — views.py ga qo'shing

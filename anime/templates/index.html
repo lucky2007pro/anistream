@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="uz">
 <head>
     <meta charset="UTF-8">
@@ -727,6 +727,7 @@
     <div class="nav-menu">
         <a href="{% url 'catalog' %}">Katalog</a>
         <a href="{% url 'reels_page' %}">Lavhalar</a>
+        <a href="{% url 'chat' %}">Chat</a>
         <a href="{% url 'fandub_projects' %}">Fandub loyihalar</a>
         <a href="{% url 'schedule' %}">Jadval</a>
     </div>
@@ -768,6 +769,43 @@
     </div>
 </div>
 
+<style>
+.stories-wrapper {
+    display: flex;
+    gap: 15px;
+    padding: 20px 5%;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.stories-wrapper::-webkit-scrollbar { display: none; }
+.story-circle {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: transparent;
+    border: 3px solid var(--accent);
+    padding: 2px;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+}
+.story-circle img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+.story-circle:hover { transform: scale(1.1); }
+</style>
+
+<div class="stories-wrapper">
+    <!-- Storylar views orqali contextga qo'shilishi kerak, masalan 'stories' -->
+    {% for story in stories %}
+    <div class="story-circle" onclick="window.location.href='{% url 'story_view' story.id %}'">
+        <img src="{% if story.image %}{{ story.image.url }}{% else %}/static/images/default_story.jpg{% endif %}" alt="Story">
+    </div>
+    {% endfor %}
+</div>
 <div class="container">
     <div class="section-header">
         <div class="section-title">
@@ -943,4 +981,5 @@
 
 </body>
 </html>
+
 
