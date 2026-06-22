@@ -36,3 +36,26 @@ Thumbs.db
 
 # Deployment
 *.pid
+
+# Vaqtinchalik debug/deploy skriptlar
+check_*.py
+deploy_*.py
+update_*.py
+fix_*.py
+setup_*.py
+start_*.py
+restart_*.py
+upload_*.py
+run_*.py
+find_*.py
+drop_*.py
+patch_*.py
+push_*.py
+create_*.py
+copy_*.py
+ls_*.py
+test_*.py
+test_*.html
+*_b64.py
+*_remote*.py
+*_gunicorn*.py
