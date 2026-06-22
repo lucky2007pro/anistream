@@ -70,6 +70,11 @@ urlpatterns = [
 
     path('control-panel/reels/', admin_reels, name='admin_reels'),
     path('control-panel/reels/<int:pk>/delete/', admin_reel_delete, name='admin_reel_delete'),
+    
+    path('control-panel/stories/', admin_stories, name='admin_stories'),
+    path('control-panel/stories/add/', admin_story_form, name='admin_story_form'),
+    path('control-panel/stories/<int:pk>/edit/', admin_story_form, name='admin_story_form'),
+    path('control-panel/stories/<int:pk>/delete/', admin_story_delete, name='admin_story_delete'),
 
     path(
         'sitemap.xml',

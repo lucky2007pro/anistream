@@ -406,3 +406,49 @@ def admin_reel_delete(request, pk):
     reel.delete()
     messages.success(request, "Reel o'chirildi!")
     return redirect('admin_reels')
+
+@user_passes_test(is_admin, login_url='/')
+def admin_stories(request):
+    from .models import Story
+    stories = Story.objects.all().order_by('-created_at')
+    return render(request, 'custom_admin/list_base.html', {
+        'page_title': 'Stories',
+        'items': stories,
+        'type': 'story'
+    })
+
+@user_passes_test(is_admin, login_url='/')
+def admin_story_form(request, pk=None):
+    from .models import Story
+    story = get_object_or_404(Story, pk=pk) if pk else None
+    if request.method == 'POST':
+        title = request.POST.get('title', '')
+        link = request.POST.get('link', '')
+        image = request.FILES.get('image')
+        video = request.FILES.get('video')
+        is_active = request.POST.get('is_active') == 'on'
+
+        if not story:
+            story = Story()
+            
+        story.title = title
+        story.link = link
+        story.is_active = is_active
+        if image:
+            story.image = image
+        if video:
+            story.video = video
+            
+        story.save()
+        messages.success(request, "Story muvaffaqiyatli saqlandi!")
+        return redirect('admin_stories')
+        
+    return render(request, 'custom_admin/story_form.html', {'story': story})
+
+@user_passes_test(is_admin, login_url='/')
+def admin_story_delete(request, pk):
+    from .models import Story
+    story = get_object_or_404(Story, pk=pk)
+    story.delete()
+    messages.success(request, "Story o'chirildi!")
+    return redirect('admin_stories')

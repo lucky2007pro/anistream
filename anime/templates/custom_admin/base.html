@@ -29,7 +29,12 @@
         .sidebar {
             width: 280px; background: #050505;
             border-right: 1px solid var(--border-line); display: flex; flex-direction: column; padding: 30px 20px;
+            overflow-y: auto;
         }
+        /* Custom Scrollbar for sidebar */
+        .sidebar::-webkit-scrollbar { width: 4px; }
+        .sidebar::-webkit-scrollbar-thumb { background: #1e1e24; border-radius: 4px; }
+        .sidebar::-webkit-scrollbar-track { background: transparent; }
         .sidebar-overlay {
             display: none;
             position: fixed;
@@ -173,7 +178,16 @@
             <li><a href="{% url 'admin_subscriptions' %}" class="{% if request.resolver_match.url_name == 'admin_subscriptions' %}active{% endif %}"><i class='bx bx-credit-card-front'></i> Obunalar</a></li>
             <li><a href="{% url 'admin_chat' %}" class="{% if request.resolver_match.url_name == 'admin_chat' %}active{% endif %}"><i class='bx bx-message-dots'></i> Chat</a></li>
             <li><a href="{% url 'admin_comments' %}" class="{% if request.resolver_match.url_name == 'admin_comments' or request.resolver_match.url_name == 'admin_comment_edit' %}active{% endif %}"><i class='bx bx-comment-dots'></i> Izohlar</a></li>
-            <li><a href="{% url 'admin_reels' %}" class="{% if request.resolver_match.url_name == 'admin_reels' %}active{% endif %}"><i class='bx bx-video'></i> Shorts (Reels)</a></li>
+            <li>
+                <a href="{% url 'admin_reels' %}" class="{% if request.resolver_match.url_name == 'admin_reels' %}active{% endif %}">
+                    <i class='bx bx-video'></i> Shorts (Reels)
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'admin_stories' %}" class="{% if request.resolver_match.url_name == 'admin_stories' %}active{% endif %}">
+                    <i class='bx bx-history'></i> Stories (Tarix)
+                </a>
+            </li>
         </ul>
 
         <div class="sidebar-bottom">

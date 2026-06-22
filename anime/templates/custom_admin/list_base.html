@@ -48,6 +48,8 @@
             <button class="btn" style="opacity:0.6; pointer-events:none;" title="Fayllar foydalanuvchilar tomonidan yuklanadi">+ Qo'shish</button>
             {% elif type == 'avatar' %}
             <a href="{% url 'admin_avatar_form' %}" class="btn">+ Qo'shish</a>
+            {% elif type == 'story' %}
+            <a href="{% url 'admin_story_form' %}" class="btn">+ Qo'shish</a>
             {% else %}
             <button class="btn" style="opacity:0.5; pointer-events:none;" title="Keyingi updatelarda qo'shiladi">+ Qo'shish</button>
             {% endif %}
@@ -76,6 +78,8 @@
                 <th>Foydalanuvchi</th><th>Anime</th><th>Izoh</th><th>Sana</th><th>Harakatlar</th>
                 {% elif type == 'reel' %}
                 <th>Foydalanuvchi</th><th>Sarlavha</th><th>Ko'rishlar</th><th>Sana</th><th>Harakatlar</th>
+                {% elif type == 'story' %}
+                <th>Media</th><th>Havola</th><th>Ko'rishlar</th><th>Faol</th><th>Sana</th><th>Harakatlar</th>
                 {% endif %}
             </tr>
         </thead>
@@ -144,6 +148,12 @@
                 <td>{{ item.title|default:"Sarlavha yo'q"|truncatechars:30 }}</td>
                 <td>{{ item.views_count }}</td>
                 <td>{{ item.created_at|date:"d.m.Y H:i" }}</td>
+                {% elif type == 'story' %}
+                <td>{% if item.image %}<img src="{{ item.image.url }}" style="height:30px; border-radius:4px;">{% elif item.video %}<span style="color:var(--accent);">Video</span>{% else %}-{% endif %}</td>
+                <td>{% if item.link %}<a href="{{ item.link }}" target="_blank" style="color:var(--accent);">Ochish</a>{% else %}-{% endif %}</td>
+                <td>{{ item.views.count }}</td>
+                <td>{% if item.is_active %}<span style="color:#34d399; font-weight:700;">Ha</span>{% else %}<span style="color:#f87171; font-weight:700;">Yo'q</span>{% endif %}</td>
+                <td>{{ item.created_at|date:"d.m.Y H:i" }}</td>
                 {% endif %}
                 
                 <td>
@@ -190,11 +200,14 @@
                         <a href="{% url 'admin_comment_delete' item.id %}" class="action-btn delete" onclick="return confirm('Rostdan ham o\'chirmoqchimisiz?');">O'chirish</a>
                     {% elif type == 'reel' %}
                         <a href="{% url 'admin_reel_delete' item.id %}" class="action-btn delete" onclick="return confirm('Rostdan ham o\'chirmoqchimisiz?');">O'chirish</a>
+                    {% elif type == 'story' %}
+                        <a href="{% url 'admin_story_form' item.id %}" class="action-btn">Tahrirlash</a>
+                        <a href="{% url 'admin_story_delete' item.id %}" class="action-btn delete" onclick="return confirm('Rostdan ham o\'chirmoqchimisiz?');">O'chirish</a>
                     {% endif %}
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="{% if type == 'movie' %}4{% elif type == 'genre' %}3{% elif type == 'episode' %}4{% elif type == 'chat' %}4{% elif type == 'user' %}5{% elif type == 'receipt' %}5{% elif type == 'avatar' %}4{% elif type == 'comment' %}5{% elif type == 'reel' %}4{% else %}4{% endif %}" style="text-align:center; padding:30px; color:gray;">Hech narsa topilmadi!</td></tr>
+            <tr><td colspan="{% if type == 'movie' %}4{% elif type == 'genre' %}3{% elif type == 'episode' %}4{% elif type == 'chat' %}4{% elif type == 'user' %}5{% elif type == 'receipt' %}5{% elif type == 'avatar' %}4{% elif type == 'comment' %}5{% elif type == 'reel' %}4{% elif type == 'story' %}6{% else %}4{% endif %}" style="text-align:center; padding:30px; color:gray;">Hech narsa topilmadi!</td></tr>
             {% endfor %}
         </tbody>
     </table>
