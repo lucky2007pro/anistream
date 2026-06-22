@@ -224,9 +224,14 @@
         <button class="day-tab {% if day_key == today_key %}active{% endif %}"
                 data-day="{{ day_key }}"
                 onclick="switchDay('{{ day_key }}')">
-            <i class='bx {{ day_key|slugify }}-icon'
-               style="font-size:1.1rem;">
-            </i>
+            {% if day_key == 'dushanba' %}<i class='bx bx-sun'></i>
+            {% elif day_key == 'seshanba' %}<i class='bx bx-sun'></i>
+            {% elif day_key == 'chorshanba' %}<i class='bx bx-calendar'></i>
+            {% elif day_key == 'payshanba' %}<i class='bx bx-cloud'></i>
+            {% elif day_key == 'juma' %}<i class='bx bx-star'></i>
+            {% elif day_key == 'shanba' %}<i class='bx bx-moon'></i>
+            {% elif day_key == 'yakshanba' %}<i class='bx bx-sun'></i>
+            {% endif %}
             {{ day_name }}
         </button>
         {% endfor %}
