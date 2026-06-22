@@ -1,0 +1,612 @@
+{% extends 'boshqaruv/settings_base.html' %}
+{% load static %}
+
+{% block title %}Umumiy Nazorat — ANI BEST{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+
+/* ==================== SETTINGS CARDS ==================== */
+.s-card {
+    background: var(--bg-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    padding: 24px;
+    margin-bottom: 20px;
+}
+
+.s-card-title {
+    font-size: 0.72rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.s-card-title i {
+    font-size: 1rem;
+    color: var(--accent);
+}
+
+/* ==================== THEME GRID ==================== */
+.theme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
+}
+
+.theme-swatch {
+    position: relative;
+    cursor: pointer;
+}
+
+.theme-swatch input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.theme-swatch-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 10px;
+    border-radius: 14px;
+    border: 2px solid transparent;
+    background: rgba(255,255,255,0.03);
+    cursor: pointer;
+    transition: all 0.22s ease;
+    text-align: center;
+}
+
+.theme-swatch-label:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,255,255,0.15);
+}
+
+.theme-swatch input:checked + .theme-swatch-label {
+    border-color: var(--accent);
+    background: rgba(0,243,255,0.06);
+    box-shadow: 0 0 12px rgba(0,243,255,0.15);
+}
+
+.theme-dot {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 2px solid rgba(255,255,255,0.1);
+    flex-shrink: 0;
+}
+
+.theme-name {
+    font-size: 0.74rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    line-height: 1.3;
+}
+
+.theme-swatch input:checked + .theme-swatch-label .theme-name {
+    color: var(--accent);
+}
+
+/* ==================== BG COLOR GRID ==================== */
+.bg-color-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(68px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.bg-swatch {
+    position: relative;
+    cursor: pointer;
+}
+
+.bg-swatch input[type="radio"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.bg-swatch-label {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+}
+
+.bg-dot {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    border: 2px solid rgba(255,255,255,0.08);
+    transition: all 0.22s;
+    position: relative;
+}
+
+.bg-swatch input:checked + .bg-swatch-label .bg-dot {
+    border-color: var(--accent);
+    box-shadow: 0 0 12px rgba(0,243,255,0.3);
+    transform: scale(1.08);
+}
+
+.bg-swatch input:checked + .bg-swatch-label .bg-dot::after {
+    content: '✓';
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 900;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+.bg-swatch-name {
+    font-size: 0.64rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    text-align: center;
+    line-height: 1.2;
+}
+
+/* ==================== CUSTOM COLOR ==================== */
+.custom-color-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 12px;
+}
+
+.custom-color-row label {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    flex: 1;
+}
+
+input[type="color"] {
+    width: 46px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 2px;
+}
+
+.color-preview-text {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    min-width: 70px;
+    font-family: monospace;
+}
+
+/* ==================== TOGGLE ==================== */
+.toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 4px 0;
+}
+
+.toggle-info h4 {
+    font-size: 0.95rem;
+    font-weight: 800;
+    margin-bottom: 4px;
+}
+
+.toggle-info p {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    flex-shrink: 0;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    position: absolute;
+}
+
+.toggle-track {
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.1);
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background 0.25s ease;
+    border: 1px solid rgba(255,255,255,0.1);
+}
+
+.toggle-track::after {
+    content: '';
+    position: absolute;
+    left: 3px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    background: #fff;
+    border-radius: 50%;
+    transition: left 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.toggle-switch input:checked + .toggle-track {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(0,243,255,0.3);
+}
+
+.toggle-switch input:checked + .toggle-track::after {
+    left: calc(100% - 23px);
+}
+
+/* ==================== SAVE BUTTON ==================== */
+.save-btn-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.btn-save {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 32px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Outfit', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 900;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    box-shadow: 0 6px 20px rgba(0,243,255,0.25);
+    letter-spacing: 0.5px;
+}
+
+.btn-save:hover {
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(255,255,255,0.2);
+}
+
+.btn-save:active {
+    transform: scale(0.97);
+}
+
+.save-status {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-dim);
+    opacity: 0;
+    transition: opacity 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.save-status.show { opacity: 1; }
+.save-status.ok { color: #4ade80; }
+.save-status.err { color: #f87171; }
+
+/* ==================== PREVIEW BADGE ==================== */
+.live-preview-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: rgba(0,243,255,0.06);
+    border: 1px solid rgba(0,243,255,0.15);
+    border-radius: 10px;
+    margin-bottom: 16px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.live-preview-bar i { font-size: 1rem; }
+
+{% endblock %}
+
+{% block settings_content %}
+<div class="settings-page-title">
+    <i class='bx bx-slider-alt'></i>
+    Umumiy Nazorat
+</div>
+
+<form method="POST" id="settingsForm">
+    {% csrf_token %}
+
+    <!-- ==================== TEMA ==================== -->
+    <div class="s-card">
+        <div class="s-card-title">
+            <i class='bx bx-palette'></i>
+            Interfeys Temasi
+        </div>
+
+        <div class="theme-grid">
+
+            <div class="theme-swatch">
+                <input type="radio" name="theme" id="theme_dark" value="dark"
+                       {% if settings.theme == 'dark' %}checked{% endif %}>
+                <label class="theme-swatch-label" for="theme_dark">
+                    <div class="theme-dot" style="background: radial-gradient(circle at 30% 30%, #1a1a24, #0a0a0f);"></div>
+                    <span class="theme-name">Qorong'i</span>
+                </label>
+            </div>
+
+            <div class="theme-swatch">
+                <input type="radio" name="theme" id="theme_white" value="white"
+                       {% if settings.theme == 'white' %}checked{% endif %}>
+                <label class="theme-swatch-label" for="theme_white">
+                    <div class="theme-dot" style="background: radial-gradient(circle at 30% 30%, #ffffff, #e8ecf5); border-color: rgba(0,0,0,0.1);"></div>
+                    <span class="theme-name">Oq</span>
+                </label>
+            </div>
+
+            <div class="theme-swatch">
+                <input type="radio" name="theme" id="theme_rose" value="rose"
+                       {% if settings.theme == 'rose' %}checked{% endif %}>
+                <label class="theme-swatch-label" for="theme_rose">
+                    <div class="theme-dot" style="background: radial-gradient(circle at 30% 30%, #2a0a15, #120a0f);"></div>
+                    <span class="theme-name">Qizil / Ro'za</span>
+                </label>
+            </div>
+
+            <div class="theme-swatch">
+                <input type="radio" name="theme" id="theme_pink" value="pink"
+                       {% if settings.theme == 'pink' %}checked{% endif %}>
+                <label class="theme-swatch-label" for="theme_pink">
+                    <div class="theme-dot" style="background: radial-gradient(circle at 30% 30%, #3a0a35, #1a0818);"></div>
+                    <span class="theme-name">Pushti</span>
+                </label>
+            </div>
+
+            <div class="theme-swatch">
+                <input type="radio" name="theme" id="theme_premium" value="premium"
+                       {% if settings.theme == 'premium' %}checked{% endif %}>
+                <label class="theme-swatch-label" for="theme_premium">
+                    <div class="theme-dot" style="background: radial-gradient(circle at 30% 30%, #1e0a3a, #0a0818);"></div>
+                    <span class="theme-name">Premium</span>
+                </label>
+            </div>
+
+            <div class="theme-swatch">
+                <input type="radio" name="theme" id="theme_ocean" value="ocean"
+                       {% if settings.theme == 'ocean' %}checked{% endif %}>
+                <label class="theme-swatch-label" for="theme_ocean">
+                    <div class="theme-dot" style="background: radial-gradient(circle at 30% 30%, #0a2a3a, #050d1a);"></div>
+                    <span class="theme-name">Okean</span>
+                </label>
+            </div>
+
+            <div class="theme-swatch">
+                <input type="radio" name="theme" id="theme_forest" value="forest"
+                       {% if settings.theme == 'forest' %}checked{% endif %}>
+                <label class="theme-swatch-label" for="theme_forest">
+                    <div class="theme-dot" style="background: radial-gradient(circle at 30% 30%, #0a2a15, #060f0a);"></div>
+                    <span class="theme-name">O'rmon</span>
+                </label>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ==================== FON RANGI ==================== -->
+    <div class="s-card">
+        <div class="s-card-title">
+            <i class='bx bx-color-fill'></i>
+            Fon Rangi
+        </div>
+
+        <div class="live-preview-bar">
+            <i class='bx bx-info-circle'></i>
+            Rang tanlash sahifani darhol yangilaydi
+        </div>
+
+        <div class="bg-color-grid">
+            {% for color in bg_colors %}
+            <div class="bg-swatch">
+                <input type="radio" name="bg_color"
+                       id="bg_{{ forloop.counter }}"
+                       value="{{ color.value }}"
+                       {% if settings.bg_color == color.value %}checked{% endif %}>
+                <label class="bg-swatch-label" for="bg_{{ forloop.counter }}">
+                    <div class="bg-dot" style="background: {{ color.css }};"></div>
+                    <span class="bg-swatch-name">{{ color.name }}</span>
+                </label>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Custom rang -->
+        <div class="custom-color-row">
+            <label for="bg_color_custom">
+                <i class='bx bx-eyedropper' style="margin-right:6px; color:var(--accent);"></i>
+                O'z rangingni tanlang
+            </label>
+            <input type="color" id="bg_color_custom" name="bg_color_custom"
+                   value="{{ settings.bg_color_custom|default:'#0a0a0f' }}">
+            <span class="color-preview-text" id="customColorText">
+                {{ settings.bg_color_custom|default:'#0a0a0f' }}
+            </span>
+        </div>
+    </div>
+
+    <!-- ==================== TAB BAR ==================== -->
+    <div class="s-card">
+        <div class="s-card-title">
+            <i class='bx bx-mobile-alt'></i>
+            Mobil Interfeys
+        </div>
+
+        <div class="toggle-row">
+            <div class="toggle-info">
+                <h4>Pastki Tab Bar</h4>
+                <p>Mobil qurilmalarda ekran pastida navigatsiya panelini ko'rsatish (Bosh, Chat, Qidirish, Profil)</p>
+            </div>
+            <label class="toggle-switch">
+                <input type="checkbox" name="tabbar_on" id="tabbar_on" value="1"
+                       {% if settings.tabbar_on %}checked{% endif %}>
+                <span class="toggle-track"></span>
+            </label>
+        </div>
+
+        <!-- Yashirin input — 0 yuborsih uchun -->
+        <input type="hidden" name="tabbar_on_default" value="0">
+    </div>
+
+    <!-- ==================== SAQLASH ==================== -->
+    <div class="save-btn-row">
+        <button type="submit" class="btn-save" id="saveBtn">
+            <i class='bx bx-save'></i>
+            Saqlash
+        </button>
+        <div class="save-status" id="saveStatus">
+            <i class='bx bx-check-circle'></i>
+            Saqlandi!
+        </div>
+    </div>
+
+</form>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+/* ==================== REAL-TIME PREVIEW ==================== */
+
+/* Tema o'zgarishi */
+document.querySelectorAll('input[name="theme"]').forEach(function(input) {
+    input.addEventListener('change', function() {
+        applyTheme(this.value);
+    });
+});
+
+function applyTheme(theme) {
+    const themes = {
+        dark:    { '--bg-base':'#0a0a0f','--bg-surface':'#111118','--accent':'#ff3366','--text-light':'#ffffff','--text-dim':'#8a8a9d','--glass-border':'rgba(0,243,255,0.1)' },
+        white:   { '--bg-base':'#f0f0f8','--bg-surface':'#e8ecf5','--accent':'#3b82f6','--text-light':'#111118','--text-dim':'#555570','--glass-border':'rgba(59,130,246,0.15)' },
+        rose:    { '--bg-base':'#120a0f','--bg-surface':'#1a0a12','--accent':'#ff3366','--text-light':'#ffffff','--text-dim':'#8a7a7d','--glass-border':'rgba(255,51,102,0.15)' },
+        pink:    { '--bg-base':'#1a0818','--bg-surface':'#280a22','--accent':'#e879f9','--text-light':'#ffffff','--text-dim':'#8a7a8a','--glass-border':'rgba(232,121,249,0.15)' },
+        premium: { '--bg-base':'#0a0818','--bg-surface':'#100820','--accent':'#a78bfa','--text-light':'#ffffff','--text-dim':'#7a7a9d','--glass-border':'rgba(167,139,250,0.15)' },
+        ocean:   { '--bg-base':'#050d1a','--bg-surface':'#081528','--accent':'#38bdf8','--text-light':'#ffffff','--text-dim':'#7a8a9d','--glass-border':'rgba(56,189,248,0.15)' },
+        forest:  { '--bg-base':'#060f0a','--bg-surface':'#091a0f','--accent':'#4ade80','--text-light':'#ffffff','--text-dim':'#7a9a7d','--glass-border':'rgba(74,222,128,0.15)' },
+    };
+    const vars = themes[theme];
+    if (!vars) return;
+    const root = document.documentElement;
+    Object.entries(vars).forEach(function([k, v]) {
+        root.style.setProperty(k, v);
+    });
+    document.body.style.backgroundColor = vars['--bg-base'];
+}
+
+/* Fon rangi (swatch) o'zgarishi */
+document.querySelectorAll('input[name="bg_color"]').forEach(function(input) {
+    input.addEventListener('change', function() {
+        document.documentElement.style.setProperty('--bg-base', this.value);
+        document.body.style.backgroundColor = this.value;
+    });
+});
+
+/* Custom color picker */
+var customColorInput = document.getElementById('bg_color_custom');
+var customColorText  = document.getElementById('customColorText');
+
+if (customColorInput) {
+    customColorInput.addEventListener('input', function() {
+        customColorText.textContent = this.value;
+        document.documentElement.style.setProperty('--bg-base', this.value);
+        document.body.style.backgroundColor = this.value;
+        /* Custom tanlaganda presetlardan belgini olib tashlaymiz */
+        document.querySelectorAll('input[name="bg_color"]').forEach(function(r) {
+            r.checked = false;
+        });
+    });
+}
+
+/* Tab bar real-time */
+var tabbarToggle = document.getElementById('tabbar_on');
+if (tabbarToggle) {
+    tabbarToggle.addEventListener('change', function() {
+        var bar = document.getElementById('bottomTabBar');
+        if (!bar) return;
+        if (this.checked) {
+            bar.classList.remove('tab-hidden');
+            document.body.classList.add('tabbar-on');
+        } else {
+            bar.classList.add('tab-hidden');
+            document.body.classList.remove('tabbar-on');
+        }
+    });
+}
+
+/* ==================== AJAX SAQLASH ==================== */
+var settingsForm = document.getElementById('settingsForm');
+var saveStatus   = document.getElementById('saveStatus');
+
+if (settingsForm) {
+    settingsForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        /* tabbar_on ni to'g'ri yuboring */
+        var formData = new FormData(this);
+        if (!tabbarToggle || !tabbarToggle.checked) {
+            formData.set('tabbar_on', '0');
+        } else {
+            formData.set('tabbar_on', '1');
+        }
+
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: formData,
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+            if (data.ok) {
+                saveStatus.className = 'save-status ok show';
+                saveStatus.innerHTML = "<i class='bx bx-check-circle'></i> Saqlandi!";
+            } else {
+                throw new Error();
+            }
+        })
+        .catch(function() {
+            saveStatus.className = 'save-status err show';
+            saveStatus.innerHTML = "<i class='bx bx-error-circle'></i> Xatolik!";
+        })
+        .finally(function() {
+            setTimeout(function() {
+                saveStatus.className = 'save-status';
+            }, 3000);
+        });
+    });
+}
+</script>
+{% endblock %}

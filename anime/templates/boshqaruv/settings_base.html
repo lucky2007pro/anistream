@@ -1,0 +1,442 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Sozlamalar — ANI BEST{% endblock %}
+
+{% block extra_css %}
+
+/* ==================== SETTINGS SIDEBAR (fixed, chap tomon) ==================== */
+.settings-sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 1500;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.settings-sidebar-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+.settings-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 280px;
+    height: 100%;
+    height: 100dvh;
+    background: var(--bg-surface);
+    border-right: 1px solid var(--glass-border);
+    z-index: 1600;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    scrollbar-width: none;
+    padding: 20px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    box-shadow: 8px 0 32px rgba(0,0,0,0.5), 1px 0 0 rgba(0,243,255,0.06);
+    transform: translateX(-110%);
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+}
+
+.settings-sidebar::-webkit-scrollbar { display: none; }
+
+.settings-sidebar.active {
+    transform: translateX(0);
+}
+
+/* ==================== SIDEBAR HEADER ==================== */
+.settings-sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 10px 14px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    margin-bottom: 8px;
+    flex-shrink: 0;
+}
+
+.settings-sidebar-header .s-brand {
+    font-size: 0.75rem;
+    font-weight: 900;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.settings-sidebar-header .s-brand i {
+    font-size: 1.2rem;
+}
+
+.s-close-btn {
+    background: rgba(255,59,48,0.1);
+    border: none;
+    color: #ff3b30;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 1.3rem;
+    transition: 0.2s;
+    flex-shrink: 0;
+}
+
+.s-close-btn:hover {
+    background: rgba(255,59,48,0.22);
+    transform: scale(1.1);
+}
+
+/* ==================== NAV ITEMS ==================== */
+.settings-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 13px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    transition: all 0.22s ease;
+    position: relative;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.settings-nav-item i {
+    font-size: 1.2rem;
+    width: 22px;
+    text-align: center;
+    flex-shrink: 0;
+    transition: color 0.22s;
+}
+
+.settings-nav-item:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-light);
+    transform: translateX(3px);
+}
+
+.settings-nav-item:hover i {
+    color: var(--accent);
+}
+
+.settings-nav-item.active {
+    background: rgba(255, 51, 102, 0.08);
+    color: var(--accent);
+    border: 1px solid rgba(255, 51, 102, 0.18);
+}
+
+.settings-nav-item.active i {
+    color: var(--accent);
+}
+
+.settings-nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 55%;
+    background: var(--accent);
+    border-radius: 0 3px 3px 0;
+    box-shadow: 0 0 8px rgba(0,243,255,0.5);
+}
+
+.settings-nav-item .s-arrow {
+    margin-left: auto;
+    opacity: 0.3;
+    font-size: 1rem;
+}
+
+.settings-nav-divider {
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+    margin: 6px 4px;
+    flex-shrink: 0;
+}
+
+.settings-nav-section-label {
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    padding: 8px 14px 4px;
+    flex-shrink: 0;
+}
+
+/* Orqaga tugma */
+.settings-back-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 13px;
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 700;
+    transition: all 0.22s ease;
+    margin-top: auto;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255,255,255,0.06);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.settings-back-btn i {
+    font-size: 1.1rem;
+    transition: transform 0.22s;
+}
+
+.settings-back-btn:hover {
+    color: #ff3b30;
+    background: rgba(255,59,48,0.07);
+}
+
+.settings-back-btn:hover i {
+    color: #ff3b30;
+    transform: translateX(-4px);
+}
+
+.settings-sidebar-footer {
+    text-align: center;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: rgba(255,255,255,0.18);
+    padding: 12px 0 4px;
+    flex-shrink: 0;
+}
+
+/* ==================== OPEN BUTTON (navbar ichida ko'rinadigan tugma) ==================== */
+.settings-open-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    background: rgba(0,243,255,0.07);
+    border: 1px solid rgba(0,243,255,0.18);
+    border-radius: 25px;
+    color: var(--accent);
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.settings-open-btn i { font-size: 1.1rem; }
+
+.settings-open-btn:hover {
+    background: rgba(0,243,255,0.14);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 16px rgba(0,243,255,0.15);
+}
+
+/* ==================== SETTINGS MAIN CONTENT ==================== */
+.settings-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.settings-page-title {
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.settings-page-title i {
+    color: var(--accent);
+    font-size: 1.6rem;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+    .settings-sidebar {
+        width: 82%;
+        max-width: 300px;
+    }
+}
+{% endblock %}
+
+{% block content %}
+
+<!-- ==================== SETTINGS SIDEBAR OVERLAY ==================== -->
+<div class="settings-sidebar-overlay" id="settingsSidebarOverlay"
+     onclick="if(event.target===this) closeSettingsSidebar()"></div>
+
+<!-- ==================== SETTINGS SIDEBAR ==================== -->
+<div class="settings-sidebar" id="settingsSidebar"
+     role="dialog" aria-modal="true" aria-label="Sozlamalar menyusi">
+
+    <div class="settings-sidebar-header">
+        <span class="s-brand">
+            <i class='bx bx-cog'></i>
+            Sozlamalar
+        </span>
+        <button class="s-close-btn" onclick="closeSettingsSidebar()" aria-label="Yopish">
+            <i class='bx bx-x'></i>
+        </button>
+    </div>
+
+    <span class="settings-nav-section-label">Sahifalar</span>
+
+    <a href="{% url 'settings_general' %}"
+       class="settings-nav-item {% if active_section == 'general' %}active{% endif %}">
+        <i class='bx bx-slider-alt'></i>
+        Umumiy nazorat
+        <i class='bx bx-chevron-right s-arrow'></i>
+    </a>
+
+    <a href="{% url 'home' %}"
+       class="settings-nav-item {% if active_section == 'main' %}active{% endif %}">
+        <i class='bx bx-home-alt'></i>
+        Asosiy sahifa
+        <i class='bx bx-chevron-right s-arrow'></i>
+    </a>
+
+    <div class="settings-nav-divider"></div>
+    <span class="settings-nav-section-label">Hisob</span>
+
+    <a href="{% url 'settings_privacy' %}"
+       class="settings-nav-item {% if active_section == 'privacy' %}active{% endif %}">
+        <i class='bx bx-shield-alt-2'></i>
+        Maxfiylik siyosati
+        <i class='bx bx-chevron-right s-arrow'></i>
+    </a>
+
+    <a href="{% url 'settings_devices' %}"
+       class="settings-nav-item {% if active_section == 'devices' %}active{% endif %}">
+        <i class='bx bx-devices'></i>
+        Faol qurilmalar
+        <i class='bx bx-chevron-right s-arrow'></i>
+    </a>
+
+    <div class="settings-nav-divider"></div>
+    <span class="settings-nav-section-label">Imkoniyatlar</span>
+
+    <a href="{% url 'premium_page' %}"
+       class="settings-nav-item {% if active_section == 'premium' %}active{% endif %}">
+        <i class='bx bxs-crown' style="color:#fbbf24;"></i>
+        Premium imkoniyatlar
+        <i class='bx bx-chevron-right s-arrow'></i>
+    </a>
+
+    <a href="{% url 'settings_telegram' %}"
+       class="settings-nav-item {% if active_section == 'telegram' %}active{% endif %}">
+        <i class='bx bxl-telegram' style="color:#2aabee;"></i>
+        Telegram hisob
+        <i class='bx bx-chevron-right s-arrow'></i>
+    </a>
+
+    <!-- Orqaga tugma -->
+    <a href="{% url 'home' %}" class="settings-back-btn">
+        <i class='bx bx-arrow-back'></i>
+        Orqaga qaytish
+    </a>
+
+    <div class="settings-sidebar-footer">ANI BEST • V2.1</div>
+</div>
+
+<!-- ==================== PAGE MAIN ==================== -->
+<main class="main-content">
+
+    <!-- Sozlamalar ochish tugmasi -->
+    <div style="margin-bottom: 24px;">
+        <button class="settings-open-btn" onclick="openSettingsSidebar()">
+            <i class='bx bx-menu-alt-left'></i>
+            Sozlamalar bo'limlari
+        </button>
+    </div>
+
+    <div class="settings-content">
+        {% block settings_content %}{% endblock %}
+    </div>
+
+</main>
+
+<script>
+/* ==================== SETTINGS SIDEBAR JS ==================== */
+let _settingsScrollY = 0;
+
+function openSettingsSidebar() {
+    const sidebar = document.getElementById('settingsSidebar');
+    const overlay = document.getElementById('settingsSidebarOverlay');
+    if (!sidebar || !overlay) return;
+
+    sidebar.classList.add('active');
+    overlay.classList.add('active');
+
+    _settingsScrollY = window.scrollY;
+    document.body.style.top = '-' + _settingsScrollY + 'px';
+    document.body.classList.add('nav-open');
+}
+
+function closeSettingsSidebar() {
+    const sidebar = document.getElementById('settingsSidebar');
+    const overlay = document.getElementById('settingsSidebarOverlay');
+    if (!sidebar) return;
+
+    sidebar.classList.remove('active');
+    if (overlay) overlay.classList.remove('active');
+
+    document.body.classList.remove('nav-open');
+    document.body.style.top = '';
+    window.scrollTo(0, _settingsScrollY);
+}
+
+/* ESC tugmasi bilan yopish */
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeSettingsSidebar();
+});
+
+/* Sahifa yuklanganda — agar ushbu settings sahifasida bo'lsa, avtomatik ochish */
+window.addEventListener('DOMContentLoaded', function() {
+    /* Ixtiyoriy: katta ekranda avtomatik ochiq ko'rsatish */
+    if (window.innerWidth >= 1024) {
+        openSettingsSidebar();
+    }
+});
+
+/* Swipe (o'ngdan chapga) bilan yopish */
+(function() {
+    let startX = 0, startY = 0;
+    const sidebar = document.getElementById('settingsSidebar');
+    if (!sidebar) return;
+
+    sidebar.addEventListener('touchstart', function(e) {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+    }, { passive: true });
+
+    sidebar.addEventListener('touchend', function(e) {
+        const dx = startX - e.changedTouches[0].clientX;
+        const dy = Math.abs(startY - e.changedTouches[0].clientY);
+        if (dx > 60 && dy < 40) closeSettingsSidebar();
+    }, { passive: true });
+})();
+</script>
+
+{% endblock %}

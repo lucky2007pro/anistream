@@ -67,12 +67,15 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sitemaps',
 
     # Third party apps
 
     # Local apps
     'anime.apps.AnimeConfig',
 ]
+
+AUTH_USER_MODEL = 'anime.CustomUser'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -83,6 +86,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'anime.middleware.DeviceLimitMiddleware',
 ]
 
 ROOT_URLCONF = 'core.urls'

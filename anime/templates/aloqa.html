@@ -1,0 +1,1900 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AniStream Chat UI</title>
+
+<meta name="description"
+content="AniStream sayt tezkor aloqa va AI rejim">
+
+<meta name="keywords"
+content="anistream sayt tezkor aloqa va AI rejim">
+
+<meta name="author" content="AniStream OFFICIAL">
+
+<meta name="robots" content="index, follow">
+
+
+<!-- GOOGLE -->
+<meta name="googlebot" content="index, follow">
+
+<!-- OPEN GRAPH -->
+<meta property="og:title" content="AniStream ALOQA">
+<meta property="og:description"
+content="sayt tezkor aloqa va AI rejim platformasi">
+
+<meta property="og:image" content="https://i.pinimg.com/736x/21/6f/47/216f4718f7675003001a16e35585975e.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<meta property="og:type" content="website">
+<meta property="og:url = https://anistream-official.uz/aloqa">
+
+<!-- TWITTER -->
+<meta name="twitter:card" content="summary_large_image">
+
+<!-- CANONICAL -->
+<link rel="canonical" href="https://anistream-official.uz/aloqa">
+<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+
+    
+<style>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+/* =========================
+   BODY (MOBILE FIX + FULL HEIGHT)
+========================= */
+html, body {
+    height: 100%;
+}
+
+body {
+    background: url("https://i.pinimg.com/736x/1e/13/bb/1e13bb5921f018295c582c1767923fa7.jpg")
+    no-repeat center center / cover;
+
+    min-height: 100dvh; /* 🔥 mobile fix */
+    display: flex;
+    flex-direction: column;
+
+    background-color: black;
+}
+
+/* =========================
+   NAVBAR
+========================= */
+.navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50px;
+
+    background: rgba(0,0,0,0.65);
+    backdrop-filter: blur(12px);
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 12px;
+    z-index: 1000;
+}
+
+/* TITLE */
+.title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-weight: bold;
+    font-size: 15px;
+}
+
+
+/* FON RASMLAR */
+.bg-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.bg-title {
+    font-size: 14px;
+    color: #ccc;
+    margin-bottom: 5px;
+}
+
+.bg-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+}
+
+/* DEFAULT */
+.bg-img {
+    width: 55px;
+    height: 55px;
+
+    border-radius: 50%;
+    object-fit: cover;
+
+    border: 2px solid rgba(255,255,255,0.2);
+    cursor: pointer;
+
+    transition: 0.25s ease;
+    position: relative;
+}
+
+.bg-img:hover:not(.active-bg) {
+    transform: scale(1.12);
+}
+
+/* SAVE BUTTON */
+.bg-save {
+    margin-top: 5px;
+    padding: 10px;
+
+    text-align: center;
+    border-radius: 10px;
+
+    background: rgba(0,229,255,0.15);
+    color: #00e5ff;
+
+    font-weight: bold;
+    cursor: pointer;
+
+    transition: 0.2s;
+}
+
+.bg-save:hover {
+    background: rgba(0,229,255,0.25);
+    box-shadow: 0 0 10px #00e5ff;
+}
+
+.bg-item {
+    position: relative;
+}
+
+/* ✅ ACTIVE (SELECTED EFFECT) */
+.active-bg {
+    border: 3px solid #00e5ff !important;
+    transform: scale(1.2);
+    box-shadow:
+        0 0 0 3px rgba(0,229,255,0.25),
+        0 0 15px #00e5ff;
+    z-index: 2;
+}
+
+/* 🔵 OUTER RING EFFECT */
+.active-bg::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    border: 2px solid rgba(0,229,255,0.6);
+    animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+    50% {
+        transform: scale(1.15);
+        opacity: 0.2;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 0.7;
+    }
+}
+
+
+
+
+/* BACK BUTTON */
+.back-btn {
+    text-decoration: none;
+    color: white;
+    font-size: 13px;
+
+    padding: 6px 10px;
+    border-radius: 8px;
+
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(8px);
+    transition: 0.2s;
+}
+
+.back-btn:hover {
+    background: rgba(255,255,255,0.2);
+}
+
+.toggle {
+    font-size: 30px;
+    cursor: pointer;
+    color: #bbb;
+    transition: 0.3s;
+}
+
+.toggle.active {
+    color: #00e5ff;
+    text-shadow: 0 0 10px #00e5ff;
+    transform: rotate(180deg) scale(1.15);
+}
+
+/* =========================
+   CHAT AREA (🔥 FIXED MOBILE ISSUE)
+========================= */
+.chat-container {
+    flex: 1;
+    margin-top: 50px;
+
+    /* 🔥 CRITICAL FIX */
+    height: calc(100dvh - 50px - 140px);
+
+    overflow-y: auto;
+    scroll-behavior: smooth;
+
+    display: flex;
+    flex-direction: column;
+
+    padding: 10px;
+    padding-bottom: 200px; /* 🔥 bot panel ustiga chiqmasin */
+}
+
+/* MESSAGE */
+.message {
+    max-width: 75%;
+    padding: 10px 14px;
+    margin: 5px 0;
+
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.user {
+    align-self: flex-end;
+    background: #0088cc;
+    color: white;
+    border-bottom-right-radius: 0;
+}
+
+.bot {
+    align-self: flex-start;
+    background: rgba(0,0,0,0.6);
+    color: white;
+    border-bottom-left-radius: 0;
+}
+
+/* =========================
+   BUTTONS (BOTTOM FIX)
+========================= */
+.buttons {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(12px);
+
+    padding: 10px;
+    padding-bottom: env(safe-area-inset-bottom);
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+
+    z-index: 999;
+}
+
+/* 3 BUTTON ROW */
+.buttons .row3 {
+    grid-column: span 2;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+}
+
+button {
+    border: none;
+    border-radius: 10px;
+
+    background: rgba(0,0,0,0.7);
+    color: white;
+
+    font-size: 18px;
+    padding: 22px;
+
+    transition: 0.2s;
+}
+
+button:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+
+/* =========================
+   TYPING ANIMATION (ROUND DOTS)
+========================= */
+.typing {
+    align-self: flex-start;
+    background: rgba(0,0,0,0.6);
+    color: white;
+
+    border-bottom-left-radius: 0;
+
+    padding: 10px 14px;
+    border-radius: 12px;
+    margin: 5px 0;
+
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+}
+
+/* 🔵 REAL ROUND DOTS */
+.dot {
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+
+    animation: bounce 1.2s infinite;
+}
+
+
+.dot:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dot:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+/* ANIMATION */
+@keyframes bounce {
+    0%, 100% {
+        transform: translateY(0);
+        opacity: 0.3;
+    }
+    50% {
+        transform: translateY(-5px);
+        opacity: 1;
+    }
+}
+
+
+/* Uchish effect */
+.toast {
+    position: fixed;
+    top: 60px; /* 🔥 navbar (50px) + ozgina masofa */
+    left: 50%;
+    transform: translateX(-50%) translateY(-20px);
+
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(10px);
+    color: white;
+
+    padding: 10px 18px;
+    border-radius: 12px;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition: all 0.4s ease;
+    z-index: 9999;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.toast.hide {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+}
+@keyframes toastIn {
+    0% {
+        transform: translateX(-50%) translateY(-30px);
+        opacity: 0;
+    }
+    60% {
+        transform: translateX(-50%) translateY(5px);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+
+/* INPUT PANEL */
+/* INPUT PANEL */
+.chat-input {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(10px);
+
+    z-index: 1000;
+}
+
+/* 🔥 ORQAGA BUTTON (chapda) */
+.back-input-btn {
+    padding: 10px 12px;
+    border-radius: 10px;
+
+    border: none;
+    background: rgba(255,255,255,0.1);
+    color: white;
+
+    font-size: 18px;
+    cursor: pointer;
+}
+
+/* INPUT */
+.chat-input input {
+    flex: 1;
+    padding: 12px;
+
+    border-radius: 10px;
+    border: none;
+    outline: none;
+
+    background: rgba(255,255,255,0.1);
+    color: white;
+}
+
+/* BUTTON */
+.chat-input button {
+    padding: 12px 18px;
+    border-radius: 10px;
+
+    border: none;
+    background: #00e5ff;
+    color: black;
+
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* SEND BUTTON */
+.chat-input button:last-child {
+    padding: 12px 18px;
+    border-radius: 10px;
+
+    border: none;
+    background: #00e5ff;
+    color: black;
+
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* HIDDEN CLASS */
+.hidden {
+    display: none;
+}
+
+
+/* LINK BOX */
+.link-box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* TITLE */
+.link-title {
+    font-size: 14px;
+    color: #ccc;
+}
+
+/* COPY LINK */
+.copy-link {
+    padding: 8px;
+    border-radius: 8px;
+
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(8px);
+
+    font-size: 13px;
+    color: #00e5ff;
+    cursor: pointer;
+
+    border: 1px solid rgba(255,255,255,0.1);
+    transition: 0.2s;
+}
+
+.copy-link:hover {
+    background: rgba(0,229,255,0.15);
+}
+
+.settings-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-top: 5px;
+}
+
+.settings-btn {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(10px);
+
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 14px;
+
+    padding: 18px 10px;
+
+    text-align: center;
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+
+    cursor: pointer;
+    transition: 0.2s;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    gap: 6px;
+}
+
+.settings-btn:hover {
+    transform: scale(1.05);
+    background: rgba(0,229,255,0.15);
+    border-color: #00e5ff;
+    box-shadow: 0 0 10px #00e5ff;
+}
+
+/* BUTTON (BLUR) */
+.link-btn {
+    text-decoration: none;
+    text-align: center;
+
+    padding: 10px;
+    border-radius: 10px;
+
+    background: rgba(255,255,255,0.1);
+    backdrop-filter: blur(10px);
+
+    color: white;
+    font-weight: bold;
+
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: 0.3s;
+}
+
+.link-btn:hover {
+    background: rgba(0,229,255,0.2);
+    border-color: #00e5ff;
+    box-shadow: 0 0 10px #00e5ff;
+}
+
+@media (max-width: 600px) {
+
+    /* =========================
+       NAVBAR
+    ========================= */
+    .navbar {
+        height: 45px;
+    }
+
+    .title {
+        font-size: 13px;
+    }
+
+    .back-btn {
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+
+    /* =========================
+       CHAT AREA
+    ========================= */
+    .chat-container {
+        padding-bottom: 200px; /* button bosib ketmasin */
+        -webkit-overflow-scrolling: touch; /* smooth scroll */
+    }
+
+    /* =========================
+       MESSAGE
+    ========================= */
+    .message {
+        font-size: 13px;
+        max-width: 85%;
+        animation: msgIn 0.25s ease;
+    }
+
+    @keyframes msgIn {
+        from {
+            transform: translateY(10px);
+            opacity: 0;
+        }
+        to {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    /* =========================
+       BUTTONS
+    ========================= */
+    .buttons {
+        gap: 12px;
+        padding: 12px;
+        padding-bottom: calc(env(safe-area-inset-bottom) + 10px);
+    }
+
+    .buttons .row3 {
+        gap: 12px;
+    }
+
+    button {
+        padding: 18px 10px;
+        font-size: 15px;
+        border-radius: 14px;
+        min-height: 65px;
+        transition: 0.15s;
+    }
+
+    /* tap effect */
+    button:active {
+        transform: scale(0.95);
+        background: rgba(0,229,255,0.2);
+    }
+
+    button:focus {
+        outline: none;
+        box-shadow: 0 0 10px #00e5ff;
+    }
+
+    /* =========================
+       TOAST
+    ========================= */
+    .toast {
+        width: 85%;
+        text-align: center;
+        border-radius: 16px;
+        backdrop-filter: blur(20px);
+        font-size: 13px;
+    }
+
+    .toast.show {
+        animation: toastIn 0.5s ease;
+    }
+
+    .chat-input button,
+    .back-input-btn {
+        padding: 8px 10px !important;
+        font-size: 12px !important;
+        min-width: 45px;
+        min-height: 38px;
+        border-radius: 8px;
+    }
+
+    /* ORQAGA button */
+    .back-input-btn {
+        font-size: 13px !important;
+        padding: 8px 10px !important;
+    }
+
+    /* YUBORISH button (oxirgi button) */
+    .chat-input button:last-child {
+        padding: 8px 12px !important;
+        font-size: 12px !important;
+        min-width: 55px;
+    }
+}
+@media (min-width: 768px) {
+
+    /* =========================
+       BUTTONS
+    ========================= */
+    .buttons {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 18px;
+        gap: 15px;
+
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+
+    .buttons .row3 {
+        gap: 15px;
+    }
+
+    button {
+        padding: 16px;
+        font-size: 15px;
+        border-radius: 14px;
+        min-height: 60px;
+        transition: 0.25s ease;
+    }
+
+    button:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 0 15px rgba(0,229,255,0.4);
+    }
+
+    /* =========================
+       CHAT CONTAINER (FIXED)
+    ========================= */
+    .chat-container {
+        max-width: 800px;
+        margin: 60px auto 0 auto;
+
+        /* ❌ DUDE: eski conflict lar olib tashlandi */
+        padding-top: 20px;
+        padding-bottom: 190px;
+
+        /* ❌ justify-content duplicate o‘chirildi */
+
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+
+        overflow-y: auto;
+
+        border-radius: 20px;
+
+        background: rgba(0,0,0,0.55);
+        backdrop-filter: blur(5px);
+
+        box-shadow: 0 0 30px rgba(0,0,0,0.6);
+    }
+
+    /* =========================
+       MESSAGE HOVER
+    ========================= */
+    .message {
+        transition: 0.25s ease;
+    }
+
+    .message:hover {
+        transform: scale(1.02);
+        box-shadow: 0 0 15px rgba(0,229,255,0.25);
+    }
+
+    /* =========================
+       NAVBAR
+    ========================= */
+    .navbar {
+        max-width: 800px;
+        margin: 0 auto;
+        left: 0;
+        right: 0;
+
+        border-radius: 0 0 15px 15px;
+
+        background: rgba(0,0,0,0.5);
+        backdrop-filter: blur(10px);
+
+        box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+    }
+
+    /* =========================
+       TOAST
+    ========================= */
+    .toast {
+        top: 80px;
+        padding: 12px 22px;
+        font-size: 14px;
+
+        backdrop-filter: blur(12px);
+        border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* =========================
+       INPUT BUTTONS (DESKTOP FIX)
+    ========================= */
+    .chat-input {
+        max-width: 800px;
+        margin: 0 auto;
+
+        left: 0;
+        right: 0;
+
+        padding: 12px 14px;
+        gap: 12px;
+
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(12px);
+
+        border-top: 1px solid rgba(255,255,255,0.08);
+        border-radius: 16px 16px 0 0;
+
+        box-shadow: 0 -5px 20px rgba(0,0,0,0.4);
+    }
+
+    /* =========================
+       BACK BUTTON (⬅ ORQAGA)
+    ========================= */
+    .back-input-btn {
+        padding: 10px 14px;
+        min-width: 44px;
+
+        border-radius: 12px;
+
+        background: rgba(255,255,255,0.08);
+        border: 1px solid rgba(255,255,255,0.1);
+
+        color: white;
+        font-size: 16px;
+
+        cursor: pointer;
+
+        transition: 0.25s ease;
+    }
+
+    .back-input-btn:hover {
+        background: rgba(0,229,255,0.15);
+        border-color: #00e5ff;
+        transform: scale(1.05);
+        box-shadow: 0 0 12px rgba(0,229,255,0.3);
+    }
+
+    /* =========================
+       INPUT FIELD
+    ========================= */
+    .chat-input input {
+        flex: 1;
+
+        padding: 12px 14px;
+
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.08);
+
+        background: rgba(255,255,255,0.06);
+        color: white;
+
+        font-size: 14px;
+
+        outline: none;
+
+        transition: 0.2s;
+    }
+
+    .chat-input input:focus {
+        border-color: #00e5ff;
+        box-shadow: 0 0 10px rgba(0,229,255,0.25);
+    }
+
+    /* =========================
+       SEND BUTTON (YUBORISH)
+    ========================= */
+    .chat-input button {
+        padding: 10px 16px;
+
+        border-radius: 12px;
+
+        background: linear-gradient(135deg, #00e5ff, #00bcd4);
+        color: black;
+
+        font-weight: bold;
+        font-size: 14px;
+
+        border: none;
+
+        cursor: pointer;
+
+        transition: 0.25s ease;
+    }
+
+    .chat-input button:hover {
+        transform: scale(1.08);
+        box-shadow: 0 0 15px rgba(0,229,255,0.5);
+    }
+
+    /* CLICK EFFECT */
+    .chat-input button:active {
+        transform: scale(0.95);
+    }
+
+}
+
+.ADMIN_SHKOYAT_USTUN {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    padding: 15px;
+    border-radius: 15px;
+
+    /* Blur effekt */
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+    border: 1px solid rgba(255, 255, 255, 0.15);
+
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
+}
+
+/* Button style */
+.settings-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 12px 14px;
+    border-radius: 12px;
+
+    cursor: pointer;
+    transition: 0.25s ease;
+
+    color: #fff;
+    font-size: 15px;
+    font-weight: 500;
+
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Hover effekt */
+.settings-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateX(5px);
+    border-color: rgba(255, 255, 255, 0.25);
+}
+
+/* Click effect */
+.settings-btn:active {
+    transform: scale(0.98);
+}
+
+/* ANIMATION */
+@keyframes menuIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+/* =========================
+   BIG DESKTOP (1024px+)
+========================= */
+@media (min-width: 1024px) {
+
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        background-attachment: fixed;
+    }
+
+    .chat-container {
+        max-width: 850px;
+        padding-bottom: 280px; /* 🔥 ULTRA FIX (safe area) */
+
+        background: rgba(0,0,0,0.45);
+        backdrop-filter: blur(6px);
+
+        box-shadow:
+            0 10px 40px rgba(0,0,0,0.7),
+            0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    .message {
+        transition: 0.25s ease;
+    }
+
+    .message:hover {
+        transform: scale(1.03);
+        box-shadow: 0 0 15px rgba(0,229,255,0.3);
+    }
+
+    /* SCROLL STYLE */
+    .chat-container::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .chat-container::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.2);
+        border-radius: 10px;
+    }
+
+    .chat-container::-webkit-scrollbar-thumb:hover {
+        background: rgba(0,229,255,0.5);
+    }
+
+    /* BUTTONS */
+    .buttons {
+        max-width: 850px;
+        margin: 0 auto;
+
+        background: rgba(0,0,0,0.6);
+        backdrop-filter: blur(10px);
+
+        box-shadow: 0 5px 25px rgba(0,0,0,0.6);
+    }
+
+    .navbar {
+        max-width: 850px;
+    }
+}
+
+
+/* =========================
+   POPUP
+========================= */
+.popup {
+    position: fixed;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    background: rgba(0,0,0,0.8);
+    color: white;
+
+    padding: 10px 20px;
+    border-radius: 10px;
+
+    display: none;
+    z-index: 2000;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="toast" class="toast"></div>
+<div class="navbar">
+    <a href="{% url 'home' %}" class="back-btn">
+        <i class='bx bx-arrow-back'></i> ORQAGA
+    </a>
+
+    <div class="title">AniStream UI</div>
+
+    <i id="toggleBtn"
+       class="bx bxs-toggle-left toggle"
+       onclick="togglePC()"
+       title="Rejimni almashtirish"></i>
+</div>
+
+
+
+<div id="popup" class="popup">
+    kompyuter holatga o‘tdingiz
+</div>
+
+<div class="chat-container" id="chat"></div>
+
+<!-- 🔻 INPUT (default hidden) -->
+<div id="chatInputBox" class="chat-input hidden">
+
+    <!-- 🔥 ORQAGA -->
+    <button class="back-input-btn" onclick="closeChatInput()">
+        ⬅ ORQAGA
+    </button>
+
+    <input type="text" id="userInput" placeholder="Xabar yozing...">
+
+    <button onclick="sendUserMessage()">Yuborish</button>
+
+</div>
+
+<div class="buttons" id="mainButtons">
+
+    <button onclick="sendMsg('ega')">
+        <i class='bx bx-user'></i><br>Ega
+    </button>
+
+    <button onclick="sendMsg('kanal')">
+        <i class='bx bxl-telegram'></i><br>Kanal
+    </button>
+
+    <div class="row3">
+
+        <!-- 🔥 YOZISH -->
+        <button onclick="openChatInput()">
+            <i class='bx bx-edit'></i><br>Yozish
+        </button>
+
+        <button onclick="sendMsg('saytsozlamalari')">
+            <i class='bx bx-cog'></i><br>Sayt sozlamalari
+        </button>
+
+        <button onclick="sendMsg('aloqa')">
+            <i class='bx bx-message-dots'></i><br>Aloqa
+        </button>
+
+    </div>
+</div>
+
+<audio id="msgSound"
+       preload="auto"
+       src="https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3">
+</audio>
+
+<script>
+
+let settingsMenu = false;
+let selectedBg = null;
+let activeBg = null;
+let lastBgMsg = null;
+let adminState = {
+    active: false,
+    step: null, // "name" | "message"
+    name: "",
+    message: ""
+};
+
+
+/* =========================
+   PAGE OPEN AUTO MESSAGE
+========================= */
+window.addEventListener("load", () => {
+
+    // 🔥 1. SAVE qilingan fonni qayta yuklash
+    const savedBg = localStorage.getItem("chat_bg");
+    if (savedBg) {
+        document.body.style.backgroundImage = `url('${savedBg}')`;
+    }
+
+    // 🔥 2. Auto welcome message
+    setTimeout(() => {
+        showTyping(() => {
+            addMessage(
+`Assalomu alaykum 👋
+
+bu AniStream UI sizga yordam berish maqsadida yaratilgan,
+sizga qanday yordam bera olaman 😊`,
+            "bot");
+
+            playSound(); // 🔊 ovoz ham chiqadi
+        });
+    }, 600);
+
+});
+
+
+
+let pcMode = false;
+
+/* =========================
+   TYPING EFFECT
+========================= */
+function showTyping(callback) {
+    const chat = document.getElementById("chat");
+
+    const typing = document.createElement("div");
+    typing.classList.add("message", "bot");
+
+    typing.innerHTML = `
+        <span class="dot">●</span>
+        <span class="dot">●</span>
+        <span class="dot">●</span>
+    `;
+
+    chat.appendChild(typing);
+
+    chat.scrollTo({
+        top: chat.scrollHeight,
+        behavior: "smooth"
+    });
+
+    setTimeout(() => {
+        typing.remove();
+        callback();
+    }, 900);
+}
+
+/* =========================
+   TOGGLE PC MODE
+========================= */
+function togglePC() {
+    const body = document.body;
+    const icon = document.getElementById("toggleBtn");
+    const popup = document.getElementById("popup");
+    const BOT_AVATAR = `
+        <img src="https://i.pinimg.com/736x/21/6f/47/216f4718f7675003001a16e35585975e.jpg"
+            class="bot-avatar">
+    `;
+
+    pcMode = !pcMode;
+
+    if (pcMode) {
+
+        icon.classList.remove("bxs-toggle-left");
+        icon.classList.add("bxs-toggle-right");
+        icon.classList.add("active");
+
+        body.style.backgroundImage =
+            "url('https://i.pinimg.com/736x/87/18/2b/87182be3e5d4a482a0f10083131aab6e.jpg')";
+        body.style.backgroundRepeat = "no-repeat";
+        body.style.backgroundPosition = "center";
+        body.style.backgroundSize = "cover";
+        body.style.backgroundColor = "black";
+
+        popup.style.display = "block";
+        popup.innerText = "kompyuter holatga o‘tdingiz";
+
+        showTyping(() => addMessage("diqqat", "bot"));
+
+        setTimeout(() => {
+            showTyping(() =>
+                addMessage("hozir siz mobil holatdan pc holatga o‘tdingiz", "bot")
+            );
+        }, 1300);
+
+        setTimeout(() => {
+            showTyping(() =>
+                addMessage("💻 kompyuter holatga o‘tish tamomlandi", "bot")
+            );
+        }, 2600);
+
+    } else {
+
+        icon.classList.remove("bxs-toggle-right");
+        icon.classList.add("bxs-toggle-left");
+        icon.classList.remove("active");
+
+        body.style.backgroundImage =
+            "url('https://i.pinimg.com/736x/1e/13/bb/1e13bb5921f018295c582c1767923fa7.jpg')";
+        body.style.backgroundRepeat = "no-repeat";
+        body.style.backgroundPosition = "center";
+        body.style.backgroundSize = "cover";
+        body.style.backgroundColor = "black";
+
+        popup.style.display = "none";
+    }
+
+    setTimeout(() => {
+        popup.style.display = "none";
+    }, 2000);
+}
+
+/* =========================
+   ADD MESSAGE
+========================= */
+function addMessage(text, type) {
+    const chat = document.getElementById("chat");
+
+    const div = document.createElement("div");
+    div.classList.add("message", type);
+    div.innerHTML = text;
+
+    chat.appendChild(div);
+
+    chat.scrollTo({
+        top: chat.scrollHeight,
+        behavior: "smooth"
+    });
+
+    scrollToBottom(); // 🔥 FIX
+
+    return div; // 🔥 MUHIM
+}
+
+/* =========================
+   SOUND
+========================= */
+function playSound() {
+    const sound = document.getElementById("msgSound");
+    sound.currentTime = 0;
+    sound.play();
+}
+
+ /* =========================
+    SEND MESSAGE (WITH TYPING)
+ ========================= */
+function sendMsg(type) {
+
+    if (type === "kanal") {
+        addMessage("kanal", "user");
+
+        showTyping(() => {
+            addMessage(`
+                <div class="link-box">
+
+                    <div style="display:flex; align-items:center; gap:10px;">
+
+                        <img src="https://i.pinimg.com/736x/21/6f/47/216f4718f7675003001a16e35585975e.jpg"
+                            style="
+                                    width: 40px;
+                                    height: 40px;
+                                    border-radius: 50%;
+                                    object-fit: cover;
+                                    border: 2px solid #00e5ff;
+                            ">
+
+                        <div class="link-title">
+                            📢 Ani Best kanal
+                        </div>
+
+                    </div>
+
+                    <div class="copy-link" data-link="https://t.me/ani_best_uzb_anime" onclick="copyLink(this)">
+                        https://t.me/ani_best_uzb_anime
+                    </div>
+
+                    <a href="https://t.me/ani_best_uzb_anime" target="_blank" class="link-btn">
+                        👉 Kanalga kirish
+                    </a>
+
+                </div>
+            `, "bot");
+
+            playSound();
+        });
+    }
+
+    else if (type === "ega") {
+        addMessage("ega", "user");
+
+        showTyping(() => {
+            addMessage(`
+                <div style="display:flex; align-items:center; gap:10px;">
+
+                    <img src="https://i.pinimg.com/736x/72/96/23/729623fbacd8ba543de82d132b026a7a.jpg"
+                        style="
+                            width:38px;
+                            height:38px;
+                            border-radius:50%;
+                            object-fit:cover;
+                            border:2px solid #00e5ff;
+                            flex-shrink:0;
+                        ">
+
+                    <div>
+                        <div style="font-size:14px; color:#00e5ff; font-weight:bold;">
+                            Ega
+                        </div>
+
+                        <div style="font-size:14px; color:white;">
+                            Only_me_subaru tomonidan boshqariladi
+                        </div>
+                    </div>
+
+                </div>
+            `, "bot");
+
+            playSound();
+        });
+    }
+
+    else if (type === "guruh") {
+        addMessage("guruh", "user");
+
+        showTyping(() => {
+            addMessage(`
+                <div class="link-box">
+
+                    <div class="link-title">👥 Ani Best guruh</div>
+
+                    <div class="copy-link" data-link="https://t.me/ani_best_chat" onclick="copyLink(this)">
+                        https://t.me/ani_best_chat
+                    </div>
+
+                    <a href="https://t.me/ani_best_chat" target="_blank" class="link-btn">
+                        👉 Guruhga kirish
+                    </a>
+
+                </div>
+            `, "bot");
+
+            playSound();
+        });
+    }
+
+    else if (type === "sayt") {
+        addMessage("sayt haqida", "user");
+
+        showTyping(() => {
+            addMessage("🌐 bu sayt UI tizimga moslashgan holda ishlanmoqda", "bot");
+            playSound();
+        });
+    }
+
+    else if (type === "aloqa") {
+        addMessage("aloqa", "user");
+
+            showTyping(() => {
+                addMessage(`
+                    <div class="ADMIN_SHKOYAT_USTUN">
+
+                        <div class="settings-btn" onclick="sendMsg('aloqa2')">
+                            📩 Aloqa
+                        </div>
+
+                        <div class="settings-btn" onclick="sendAdmin('admin')">
+                            👨‍💻 Adminga xabar yuborish
+                        </div>
+
+                        <div class="settings-btn" onclick="sendAdmin('shikoyat')">
+                            ⚠️ Shikoyat
+                        </div>
+                `, "bot");
+
+            playSound();
+        });
+    }
+
+    else if (type === "saytsozlamalari") {
+
+        // 🔥 USER MESSAGE (so‘rov sifatida)
+        addMessage("Sayt sozlamalari", "user");
+
+        showTyping(() => {
+
+            settingsMenu = true;
+
+            addMessage(`
+                <div class="settings-grid">
+
+                    <div class="settings-btn" onclick="settingsAction('mute')">
+                        🔇 <br> Sukut qilish
+                    </div>
+
+                    <div class="settings-btn" onclick="settingsAction('bg')">
+                        🖼️ <br> Fon o‘zgartirish
+                    </div>
+
+                    <div class="settings-btn" onclick="settingsAction('rate')">
+                        ⭐ <br> Baholash
+                    </div>
+
+                    <div class="settings-btn" onclick="settingsAction('premium')">
+                        💎 <br> Premium
+                    </div>
+
+                </div>
+            `, "bot");
+
+            playSound();
+        });
+    }
+        else if (type === "aloqa2") {
+        addMessage("aloqa2", "user");
+
+        showTyping(() => {
+            addMessage(`
+                <div class="link-box">
+
+                    <div class="link-title">📩 Admin bilan aloqa</div>
+
+                    <div class="copy-link" data-link="https://t.me/Only_me_subaru" onclick="copyLink(this)">
+                        @Only_me_subaru
+                    </div>
+
+                    <a href="https://t.me/Only_me_subaru" target="_blank" class="link-btn">
+                        👉 Yozish
+                    </a>
+
+                </div>
+            `, "bot");
+
+            playSound();
+        });
+    }
+}
+
+
+
+
+function applyBg() {
+    if (!selectedBg) return;
+
+    document.body.style.backgroundImage = `url('${selectedBg}')`;
+    localStorage.setItem("chat_bg", selectedBg);
+
+    addMessage("🖼 Fon o‘rnatildi", "bot");
+}
+
+function muteToggle(type) {
+
+    if (type === "on") {
+        addMessage("sukut qilish", "user");
+
+        showTyping(() => {
+            addMessage("🔇 Bot sukut qilindi", "bot");
+            playSound();
+        });
+    }
+
+    else if (type === "off") {
+        addMessage("sukutdan chiqarish", "user");
+
+        showTyping(() => {
+            addMessage("🔊 Bot sukutdan chiqarildi", "bot");
+            playSound();
+        });
+    }
+}
+
+function settingsAction(type) {
+
+    // 🔇 MUTE MENU
+    if (type === "mute") {
+
+        addMessage("sukut qilish", "user");
+
+        showTyping(() => {
+            addMessage(`
+                <div class="link-box">
+                    <div class="copy-link" onclick="muteToggle('on')">|| Sukut qilish ||</div>
+                    <div class="copy-link" onclick="muteToggle('off')">|| Sukunatdan chiqarish ||</div>
+                </div>
+            `, "bot");
+
+            playSound();
+        });
+    }
+
+    // 🖼 BACKGROUND MENU
+    else if (type === "bg") {
+
+        addMessage("fon o‘zgartirish", "user");
+
+        showTyping(() => {
+
+            addMessage(`
+                <div class="bg-grid">
+
+                    <div class="bg-title">🖼 Rasm tanlang</div>
+
+                    <div class="bg-row">
+
+                        <img src="https://i.pinimg.com/736x/77/3c/eb/773cebfabe446b2ecd7d5cc65f765eb0.jpg"
+                             onclick="selectBg(this.src, this)" class="bg-img">
+
+                        <img src="https://i.pinimg.com/736x/1e/13/bb/1e13bb5921f018295c582c1767923fa7.jpg"
+                             onclick="selectBg(this.src, this)" class="bg-img">
+
+                        <img src="https://i.pinimg.com/736x/7b/4f/30/7b4f30ddddedd15537d3c742fa7c8d7c.jpg"
+                             onclick="selectBg(this.src, this)" class="bg-img">
+
+                        <img src="https://i.pinimg.com/736x/49/26/85/492685785b09d8ef14a4ca36c1b7fabc.jpg"
+                             onclick="selectBg(this.src, this)" class="bg-img">
+
+                    </div>
+
+                    <div class="bg-row">
+
+                        <img src="https://i.pinimg.com/736x/6c/e7/34/6ce73446be46060b4ae96dad04c45569.jpg"
+                             onclick="selectBg(this.src, this)" class="bg-img">
+
+                        <img src="https://i.pinimg.com/736x/9a/20/8d/9a208dc8e4d8e6e79358e61875da1bc3.jpg"
+                             onclick="selectBg(this.src, this)" class="bg-img">
+
+                        <img src="https://i.pinimg.com/1200x/aa/dd/3e/aadd3e9eba0d019d26c54573ca7d4021.jpg"
+                             onclick="selectBg(this.src, this)" class="bg-img">
+
+                        <img src="https://i.pinimg.com/control1/1200x/b6/d1/d9/b6d1d964a55045124cb27a1c6b898c2c.jpg"
+                             onclick="selectBg(this.src, this)" class="bg-img">
+
+                    </div>
+
+                </div>
+            `, "bot");
+
+            playSound();
+        });
+    }
+
+    // ⭐ RATING
+    else if (type === "rate") {
+        addMessage("baholash", "user");
+
+        showTyping(() => {
+            addMessage("⭐ Bu funksiya tez orada qo‘shiladi", "bot");
+            playSound();
+        });
+    }
+
+    // 💎 PREMIUM
+    else if (type === "premium") {
+        addMessage("premium", "user");
+
+        showTyping(() => {
+            addMessage("💎 Premium tizim tez orada qo‘shiladi", "bot");
+            playSound();
+        });
+    }
+}
+
+/* =========================
+   COPY LINK (FIXED)
+========================= */
+function copyLink(el) {
+    const text = el.getAttribute("data-link");
+
+    navigator.clipboard.writeText(text).then(() => {
+        el.innerText = "✅ Nusxa olindi!";
+
+        setTimeout(() => {
+            el.innerText = text;
+        }, 1500);
+    });
+}
+
+function selectBg(url, el) {
+
+    selectedBg = url;
+
+    document.querySelectorAll(".bg-img").forEach(img => {
+        img.classList.remove("active-bg");
+    });
+
+    if (el) el.classList.add("active-bg");
+
+    document.body.style.backgroundImage = `url('${url}')`;
+    localStorage.setItem("chat_bg", url);
+
+    showToast("🖼 Fon o‘rnatildi");
+}
+
+function showToast(text) {
+    const toast = document.getElementById("toast");
+
+    toast.innerText = text;
+    toast.classList.add("show");
+    toast.classList.remove("hide");
+
+    setTimeout(() => {
+        toast.classList.add("hide");
+        toast.classList.remove("show");
+    }, 2000);
+}
+
+// 🔥 INPUTNI OCHISH
+function openChatInput() {
+    document.getElementById("mainButtons").style.display = "none";
+    document.getElementById("chatInputBox").classList.remove("hidden");
+
+    addMessage("💬 Yozish rejimi yoqildi", "bot");
+}
+
+// 🔥 USER XABAR YUBORISH
+function sendUserMessage() {
+    const input = document.getElementById("userInput");
+    const text = input.value.trim().toLowerCase();
+
+    if (!text) return;
+
+    addMessage(text, "user");
+    input.value = "";
+
+    // =========================
+    // SALOM
+    // =========================
+    if (text === "salom") {
+
+        showTyping(() => {
+            addMessage(
+                `👋 Valaykum assalom!
+
+Sizga qanday yordam bera olaman 😊
+
+Agar admin bilan bog‘lanmoqchi bo‘lsangiz, "yordam" deb yozing.`,
+                "bot"
+            );
+        });
+    }
+    // =========================
+    // SALOM / HOL SO‘RASH (RANDOM JAVOB)
+    // =========================
+    else if (
+        text.includes("qalaysiz") ||
+        text.includes("qalaysan") ||
+        text.includes("yaxshimisiz") ||
+        text.includes("yaxshimisan") ||
+        text.includes("yahshimisan")
+    ) {
+        const replies = [
+            "😊 Yaxshi rahmat! Siz-chi, qalaysiz?",
+            "👍 Zo‘rman, rahmat! O‘zingiz qanday?",
+            "😄 Juda yaxshi, sizga ham omad!",
+            "✨ Ajoyib, rahmat! Sizda nima gaplar?",
+            "🙂 Yaxshiman, rahmat so‘raganingiz uchun!"
+        ];
+
+        const randomReply = replies[Math.floor(Math.random() * replies.length)];
+
+        showTyping(() => {
+            addMessage(randomReply, "bot");
+        });
+    }
+    // =========================
+    // ANIME (RANDOM JAVOB)
+    // =========================
+    else if (text.includes("anime")) {
+        const replies = [
+            "🎬 Anime haqida nima kerak? Tavsiya, ma’lumot yoki qidiruv?",
+            "🍥 Anime dunyosi juda katta! Qaysi tur qiziq: action, romance yoki isekai?",
+            "🎥 Anime tavsiya berishimni xohlaysizmi?",
+            "😄 Anime yoqadimi? Sizga eng yaxshilarini topib beraman!"
+        ];
+
+        const randomReply = replies[Math.floor(Math.random() * replies.length)];
+
+        showTyping(() => {
+            addMessage(randomReply, "bot");
+        });
+    }
+    // =========================
+    // EMOJI JAVOB
+    // =========================
+    else if (text.match(/[\u{1F300}-\u{1FAFF}]/u)) {
+        const replies = [
+            "😊 Emojilarni ko‘rdim!",
+            "👍 Yaxshi kayfiyat ekan!",
+            "😄 Emoji yubordingiz!",
+            "✨ Chiroyli emoji!",
+            "🙂 Qiziq emoji 😄"
+        ];
+
+        const randomReply = replies[Math.floor(Math.random() * replies.length)];
+
+        showTyping(() => {
+            addMessage(randomReply, "bot");
+        });
+    }
+    // =========================
+    // OK / YAXSHI JAVOB
+    // =========================
+    else if (
+        text.includes("ok") ||
+        text.includes("yaxshi") ||
+        text.includes("xo'p") ||
+        text.includes("ha") ||
+
+        text.includes("hop")
+    ) {
+        const replies = [
+            "👌 Yaxshi! davom etamiz!",
+            "👍 Tushunarli!  davom etamiz!",
+            "🙂 Mayli, davom etamiz!",
+            "😄 Zo‘r!  davom etamiz!",
+            "✨ Ajoyib!  davom etamiz!"
+        ];
+
+        const randomReply = replies[Math.floor(Math.random() * replies.length)];
+
+        showTyping(() => {
+            addMessage(randomReply, "bot");
+        });
+    }
+
+    // =========================
+    // YORDAM
+    // =========================
+    // =========================
+    // YORDAM
+    // =========================
+    else if (text === "yordam") {
+
+        showTyping(() => {
+            addMessage(`
+                <div class="ADMIN_SHKOYAT_USTUN">
+
+                    <div class="settings-btn" onclick="sendMsg('aloqa2')">
+                        📩 Aloqa
+                    </div>
+
+                    <div class="settings-btn" onclick="sendAdmin('admin')">
+                        👨‍💻 Adminga xabar yuborish
+                    </div>
+
+                    <div class="settings-btn" onclick="sendAdmin('shikoyat')">
+                        ⚠️ Shikoyat
+                    </div>
+
+                </div>
+            `, "bot");
+        });
+    }
+
+
+    // =========================
+    // DEFAULT REPLY
+    // =========================
+    else {
+
+        showTyping(() => {
+            addMessage("🤖 Tushunmadim yozgan habarizni: " + text, "bot");
+        });
+    }
+}
+
+// 🔥 ENTER BOSILSA HAM YUBORADI
+document.addEventListener("DOMContentLoaded", () => {
+    const input = document.getElementById("userInput");
+
+    input.addEventListener("keypress", function(e) {
+        if (e.key === "Enter") {
+            sendUserMessage();
+        }
+    });
+});
+
+function closeChatInput() {
+    document.getElementById("chatInputBox").classList.add("hidden");
+    document.getElementById("mainButtons").style.display = "grid";
+
+    addMessage("⬅️ Asosiy menyuga qaytdingiz", "bot");
+}
+
+// =========================
+// MOBILE KEYBOARD FIX
+// =========================
+const input = document.getElementById("userInput");
+
+input.addEventListener("focus", () => {
+    setTimeout(() => {
+        window.scrollTo(0, document.body.scrollHeight);
+    }, 300);
+});
+
+function sendAdmin(type) {
+
+    if (type === "admin") {
+        showTyping(() => {
+            addMessage(
+                "📩 Sizning so‘rovingiz qabul qilindi. Adminga yuboramiz.",
+                "bot"
+            );
+        });
+    }
+
+    else if (type === "shikoyat") {
+        showTyping(() => {
+            addMessage(
+                "⚠️ Shikoyatingiz qabul qilindi. Tez orada ko‘rib chiqamiz.",
+                "bot"
+            );
+        });
+    }
+}
+
+function scrollToBottom() {
+    const chat = document.getElementById("chat");
+
+    setTimeout(() => {
+        chat.scrollTop = chat.scrollHeight;
+    }, 50);
+}
+
+
+
+</script>
+
+</body>
+</html>
+
+

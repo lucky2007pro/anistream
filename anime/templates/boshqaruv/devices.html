@@ -1,0 +1,414 @@
+{% extends 'boshqaruv/settings_base.html' %}
+{% load static %}
+
+{% block settings_content %}
+
+<style>
+.devices-summary {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 28px;
+}
+
+.devices-stat {
+    flex: 1;
+    min-width: 110px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    padding: 16px 18px;
+    text-align: center;
+}
+
+.devices-stat .stat-num {
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+}
+
+.devices-stat .stat-label {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 5px;
+}
+
+.logout-all-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: rgba(255,59,48,0.1);
+    border: 1px solid rgba(255,59,48,0.25);
+    border-radius: 12px;
+    color: #ff3b30;
+    font-size: 0.85rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.22s;
+    margin-bottom: 24px;
+}
+
+.logout-all-btn:hover {
+    background: rgba(255,59,48,0.2);
+    transform: translateY(-1px);
+}
+
+.devices-section-label {
+    font-size: 0.7rem;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    margin-top: 8px;
+    padding-left: 4px;
+}
+
+/* ===== SESSION CARD ===== */
+.session-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 18px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.session-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px 0 0 3px;
+}
+
+.session-card.current-device {
+    border-color: rgba(0,243,255,0.2);
+    background: rgba(0,243,255,0.04);
+}
+
+.session-card.current-device::before {
+    background: var(--accent);
+    box-shadow: 0 0 8px rgba(0,243,255,0.4);
+}
+
+.device-icon-wrap {
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+    color: var(--text-dim);
+}
+
+.session-card.current-device .device-icon-wrap {
+    background: rgba(0,243,255,0.1);
+    color: var(--accent);
+}
+
+.device-info { flex: 1; min-width: 0; }
+
+.device-name-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.device-name {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 220px;
+}
+
+.current-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(0,243,255,0.15);
+    color: var(--accent);
+    border: 1px solid rgba(0,243,255,0.3);
+    border-radius: 20px;
+    font-size: 0.65rem;
+    font-weight: 800;
+    padding: 2px 8px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.device-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.device-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+}
+
+.device-meta-row i {
+    font-size: 0.95rem;
+    width: 15px;
+    flex-shrink: 0;
+    color: rgba(255,255,255,0.2);
+}
+
+.device-meta-row span { font-weight: 600; }
+
+.session-logout-btn {
+    background: rgba(255,59,48,0.08);
+    border: 1px solid rgba(255,59,48,0.18);
+    border-radius: 10px;
+    color: #ff3b30;
+    padding: 8px 12px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.session-logout-btn:hover {
+    background: rgba(255,59,48,0.2);
+    transform: scale(1.04);
+}
+
+.current-label {
+    padding: 8px 12px;
+    font-size: 0.75rem;
+    color: var(--accent);
+    font-weight: 800;
+    align-self: center;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.devices-empty {
+    text-align: center;
+    padding: 50px 20px;
+    color: var(--text-dim);
+}
+
+.devices-empty i {
+    font-size: 3.5rem;
+    margin-bottom: 14px;
+    display: block;
+    color: rgba(255,255,255,0.08);
+}
+
+.devices-empty p {
+    font-size: 0.88rem;
+    font-weight: 700;
+}
+
+.devices-info-box {
+    margin-top: 24px;
+    padding: 14px 16px;
+    background: rgba(255,255,255,0.03);
+    border-radius: 14px;
+    border: 1px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    font-weight: 700;
+    line-height: 1.5;
+}
+
+.devices-info-box i {
+    font-size: 1.1rem;
+    color: var(--accent);
+    flex-shrink: 0;
+}
+
+@media (max-width: 480px) {
+    .session-card { flex-wrap: wrap; }
+    .session-logout-btn {
+        width: 100%;
+        justify-content: center;
+        margin-top: 6px;
+    }
+    .current-label { width: 100%; justify-content: center; }
+    .device-name { max-width: 160px; }
+}
+</style>
+
+<!-- ===== SAHIFA SARLAVHASI ===== -->
+<div class="settings-page-title">
+    <i class='bx bx-devices'></i>
+    Faol qurilmalar
+</div>
+
+<!-- ===== STATISTIKA ===== -->
+<div class="devices-summary">
+    <div class="devices-stat">
+        <div class="stat-num">{{ sessions.count }}</div>
+        <div class="stat-label">Jami faol</div>
+    </div>
+    <div class="devices-stat">
+        <div class="stat-num">
+            {% with c=0 %}
+            {% for s in sessions %}{% if s.device_type == 'mobile' or s.device_type == 'tablet' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% empty %}0{% endfor %}
+            {% endwith %}
+        </div>
+        <div class="stat-label">Mobil</div>
+    </div>
+    <div class="devices-stat">
+        <div class="stat-num">
+            {% for s in sessions %}{% if s.device_type == 'desktop' %}{% if forloop.last %}{{ forloop.counter }}{% endif %}{% endif %}{% empty %}0{% endfor %}
+        </div>
+        <div class="stat-label">Kompyuter</div>
+    </div>
+</div>
+
+<!-- ===== BARCHANI CHIQARISH ===== -->
+{% if sessions.count > 1 %}
+<form method="POST"
+      onsubmit="return confirm('Joriy qurilmadan tashqari barchasi chiqariladi. Davom etasizmi?')">
+    {% csrf_token %}
+    <input type="hidden" name="action" value="logout_all">
+    <button type="submit" class="logout-all-btn">
+        <i class='bx bx-log-out'></i>
+        Boshqa barcha qurilmalardan chiqish
+    </button>
+</form>
+{% endif %}
+
+<!-- ===== QURILMALAR RO'YXATI ===== -->
+{% if sessions %}
+
+<div class="devices-section-label">Barcha faol qurilmalar</div>
+
+{% for session in sessions %}
+<div class="session-card {% if session.session_key == current_session %}current-device{% endif %}">
+
+    <!-- Ikonka -->
+    <div class="device-icon-wrap">
+        {% if session.device_type == 'mobile' %}
+            <i class='bx bx-mobile-alt'></i>
+        {% elif session.device_type == 'tablet' %}
+            <i class='bx bx-tab'></i>
+        {% elif session.device_type == 'desktop' %}
+            <i class='bx bx-desktop'></i>
+        {% else %}
+            <i class='bx bx-question-mark'></i>
+        {% endif %}
+    </div>
+
+    <!-- Ma'lumotlar -->
+    <div class="device-info">
+        <div class="device-name-row">
+            <span class="device-name">
+                {{ session.browser|default:"Noma'lum brauzer" }}
+            </span>
+            {% if session.session_key == current_session %}
+            <span class="current-badge">
+                <i class='bx bx-radio-circle-marked' style="font-size:0.8rem;"></i>
+                Joriy qurilma
+            </span>
+            {% endif %}
+        </div>
+
+        <div class="device-meta">
+
+            <div class="device-meta-row">
+                <i class='bx bx-chip'></i>
+                <span>{{ session.os_name|default:"Noma'lum OS" }}</span>
+            </div>
+
+            {% if session.ip_address %}
+            <div class="device-meta-row">
+                <i class='bx bx-wifi'></i>
+                <span>{{ session.ip_address }}</span>
+            </div>
+            {% endif %}
+
+            {% if session.location %}
+            <div class="device-meta-row">
+                <i class='bx bx-map-pin'></i>
+                <span>{{ session.location }}</span>
+            </div>
+            {% endif %}
+
+            <div class="device-meta-row">
+                <i class='bx bx-log-in-circle'></i>
+                <span>Kirgan: {{ session.created_at|date:"d.m.Y — H:i" }}</span>
+            </div>
+
+            <div class="device-meta-row">
+                <i class='bx bx-time-five'></i>
+                <span>So'ngi faollik: {{ session.last_activity|date:"d.m.Y — H:i" }}</span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Chiqarish / Joriy belgisi -->
+    {% if session.session_key != current_session %}
+    <form method="POST">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="logout_single">
+        <input type="hidden" name="session_key" value="{{ session.session_key }}">
+        <button type="submit" class="session-logout-btn"
+                onclick="return confirm('Bu qurilmani chiqarasizmi?')">
+            <i class='bx bx-log-out'></i>
+            Chiqarish
+        </button>
+    </form>
+    {% else %}
+    <div class="current-label">
+        <i class='bx bx-check-shield'></i> Siz
+    </div>
+    {% endif %}
+
+</div>
+{% endfor %}
+
+{% else %}
+<div class="devices-empty">
+    <i class='bx bx-ghost'></i>
+    <p>Hech qanday faol qurilma topilmadi</p>
+</div>
+{% endif %}
+
+<!-- ===== IZOH ===== -->
+<div class="devices-info-box">
+    <i class='bx bx-info-circle'></i>
+    Noma'lum qurilmani ko'rsangiz — darhol "Chiqarish" tugmasini bosing va parolingizni almashtiring.
+</div>
+
+{% endblock %}

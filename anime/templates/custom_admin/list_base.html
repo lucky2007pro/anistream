@@ -1,0 +1,194 @@
+{% extends 'custom_admin/base.html' %}
+
+{% block page_title %}{{ page_title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .glass-panel { padding: 30px; }
+    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+    .panel-header h2 { font-size: 1.5rem; font-weight: 800; color: white; text-transform: uppercase; letter-spacing: 1px; }
+    .header-actions .btn { background: var(--accent); color: #000; border: none; padding: 10px 20px; border-radius: 4px; font-weight: 800; cursor: pointer; text-decoration: none; text-transform: uppercase; box-shadow: 0 0 10px var(--accent-glow); transition: 0.3s;}
+    .header-actions .btn:hover { background: white; box-shadow: 0 0 15px rgba(255,255,255,0.5); }
+    
+    table { width: 100%; border-collapse: collapse; }
+    th { text-align: left; padding: 15px; font-size: 0.75rem; color: var(--accent); text-transform: uppercase; border-bottom: 1px solid var(--border-line); letter-spacing: 1px;}
+    td { padding: 15px; font-size: 0.95rem; border-bottom: 1px solid #111; }
+    tr:hover td { background: #111; }
+
+    .action-btn { background: #1e1e24; color: white; border: 1px solid #333; padding: 5px 10px; border-radius: 4px; cursor: pointer; text-decoration: none; font-size: 0.8rem; transition: 0.3s;}
+    .action-btn:hover { background: var(--accent); color: black; border-color: var(--accent); }
+    .action-btn.delete { background: #fee2e2; color: #ef4444; border-color: #fca5a5;}
+    .action-btn.delete:hover { background: #ef4444; color: white; }
+
+    .table-wrap { width: 100%; overflow-x: auto; }
+    .table-wrap table { min-width: 720px; }
+
+    @media (max-width: 768px) {
+        .glass-panel { padding: 18px; }
+        .panel-header { flex-direction: column; align-items: flex-start; gap: 12px; }
+        .panel-header h2 { font-size: 1.2rem; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="glass-panel">
+    <div class="panel-header">
+        <h2>{{ page_title }} ro'yxati</h2>
+        <div class="header-actions">
+            {% if type == 'movie' %}
+            <a href="{% url 'admin_movie_form' %}" class="btn">+ Qo'shish</a>
+            {% elif type == 'episode' %}
+            <a href="/control-panel/episodes/add/" class="btn">+ Qo'shish</a>
+            {% elif type == 'genre' %}
+            <a href="/control-panel/genres/add/" class="btn">+ Qo'shish</a>
+            {% elif type == 'user' %}
+            <button class="btn" style="opacity:0.6; pointer-events:none;" title="Vakolatlar ro'yxatdan boshqariladi">+ Qo'shish</button>
+            {% elif type == 'receipt' %}
+            <button class="btn" style="opacity:0.6; pointer-events:none;" title="Fayllar foydalanuvchilar tomonidan yuklanadi">+ Qo'shish</button>
+            {% elif type == 'avatar' %}
+            <a href="{% url 'admin_avatar_form' %}" class="btn">+ Qo'shish</a>
+            {% else %}
+            <button class="btn" style="opacity:0.5; pointer-events:none;" title="Keyingi updatelarda qo'shiladi">+ Qo'shish</button>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                {% if type == 'movie' %}
+                <th>Nom</th><th>Rasmi</th><th>Sana</th><th>Harakatlar</th>
+                {% elif type == 'genre' %}
+                <th>Nomi</th><th>Sana</th><th>Harakatlar</th>
+                {% elif type == 'episode' %}
+                <th>Anime</th><th>Qism No</th><th>Nomi</th><th>Harakatlar</th>
+                {% elif type == 'chat' %}
+                <th>Foydalanuvchi</th><th>Xabar</th><th>Sana</th><th>Harakatlar</th>
+                {% elif type == 'user' %}
+                <th>Username</th><th>Email</th><th>Vakolat</th><th>Holat</th><th>Harakatlar</th>
+                {% elif type == 'receipt' %}
+                <th>Foydalanuvchi</th><th>Obuna reja</th><th>Chek rasmi</th><th>Holat</th><th>Harakatlar</th>
+                {% elif type == 'avatar' %}
+                <th>Nomi</th><th>Rasm</th><th>Sana</th><th>Harakatlar</th>
+                {% elif type == 'comment' %}
+                <th>Foydalanuvchi</th><th>Anime</th><th>Izoh</th><th>Sana</th><th>Harakatlar</th>
+                {% endif %}
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+            <tr>
+                {% if type == 'movie' %}
+                <td style="font-weight:600;">{{ item.title }}</td>
+                <td>{% if item.image %}<img src="{{ item.image.url }}" alt="{{ item.title }} poster" style="height:30px; border-radius:4px;">{% else %}-{% endif %}</td>
+                <td>{{ item.created_at|date:"d.m.Y" }}</td>
+                {% elif type == 'genre' %}
+                <td style="font-weight:600;">{{ item.name }}</td>
+                <td>{{ item.created_at|date:"d.m.Y" }}</td>
+                {% elif type == 'episode' %}
+                <td style="font-weight:600;">{{ item.movie.title }}</td>
+                <td>{{ item.episode_number }}</td>
+                <td>{{ item.title|default:"-" }}</td>
+                {% elif type == 'chat' %}
+                <td style="font-weight:600;">{{ item.user.username }}</td>
+                <td>{{ item.message|truncatechars:50 }}</td>
+                <td>{{ item.created_at|date:"d.m.Y H:i" }}</td>
+                {% elif type == 'user' %}
+                <td style="font-weight:600;">{{ item.username }}</td>
+                <td>{{ item.email|default:"-" }}</td>
+                <td>
+                    {% if item.is_superuser %}
+                        <span style="display:inline-block; padding:4px 8px; border-radius:999px; background: rgba(176,0,255,0.15); color:#d8b4fe; margin:2px 4px 2px 0;">Superadmin</span>
+                    {% endif %}
+                    {% if item.is_staff %}
+                        <span style="display:inline-block; padding:4px 8px; border-radius:999px; background: rgba(0,243,255,0.12); color: var(--accent); margin:2px 4px 2px 0;">Staff</span>
+                    {% endif %}
+                    {% if item.is_admin_user %}
+                        <span style="display:inline-block; padding:4px 8px; border-radius:999px; background: rgba(16,185,129,0.12); color:#34d399; margin:2px 4px 2px 0;">Kontent admin</span>
+                    {% endif %}
+                    {% if not item.is_superuser and not item.is_staff and not item.is_admin_user %}
+                        <span style="color: var(--text-dim);">Oddiy user</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if item.is_active %}
+                        <span style="color:#34d399; font-weight:700;">Faol</span>
+                    {% else %}
+                        <span style="color:#f87171; font-weight:700;">Nofaol</span>
+                    {% endif %}
+                </td>
+                {% elif type == 'receipt' %}
+                <td style="font-weight:600;">{{ item.user.username }}</td>
+                <td>{{ item.get_plan_display }}</td>
+                <td><a href="{{ item.image.url }}" target="_blank" style="color:var(--accent);">Ko'rish</a></td>
+                <td>
+                    {% if item.is_approved %}<span style="color:#34d399; font-weight:700;">Tasdiqlangan</span>
+                    {% elif item.is_rejected %}<span style="color:#f87171; font-weight:700;">Rad etilgan</span>
+                    {% else %}<span style="color:yellow; font-weight:700;">Kutmoqda</span>{% endif %}
+                </td>
+                {% elif type == 'avatar' %}
+                <td style="font-weight:600;">{{ item.name|default:"Avatar" }}</td>
+                <td><img src="{{ item.image.url }}" alt="avatar" style="width:50px; height:50px; border-radius:50%; object-fit:cover;"></td>
+                <td>{{ item.created_at|date:"d.m.Y H:i" }}</td>
+                {% elif type == 'comment' %}
+                <td style="font-weight:600;">{{ item.user.username }}</td>
+                <td style="font-weight:600;">{{ item.movie.title }}</td>
+                <td>{{ item.text|truncatechars:50 }}</td>
+                <td>{{ item.created_at|date:"d.m.Y H:i" }}</td>
+                {% endif %}
+                
+                <td>
+                    {% if type == 'movie' %}
+                    <a href="{% url 'admin_movie_form' item.id %}" class="action-btn">Tahrirlash</a>
+                    <a href="{% url 'admin_movie_delete' item.id %}" class="action-btn delete" onclick="return confirm('Rostdan ham o\'chirmoqchimisiz?');">O'chirish</a>
+                    {% elif type == 'genre' %}
+                    <a href="{% url 'admin_genre_form' item.id %}" class="action-btn">Tahrirlash</a>
+                    <a href="{% url 'admin_genre_delete' item.id %}" class="action-btn delete" onclick="return confirm('Rostdan ham o\'chirmoqchimisiz?');">O'chirish</a>
+                    {% elif type == 'episode' %}
+                    <a href="{% url 'admin_episode_form' item.id %}" class="action-btn">Tahrirlash</a>
+                    <a href="{% url 'admin_episode_delete' item.id %}" class="action-btn delete" onclick="return confirm('Rostdan ham o\'chirmoqchimisiz?');">O'chirish</a>
+                    {% elif type == 'user' %}
+                    <form method="post" action="{% url 'admin_user_role' item.id %}" style="display:inline; margin-right:6px;">
+                        {% csrf_token %}
+                        <input type="hidden" name="role" value="content_admin">
+                        <input type="hidden" name="value" value="{% if item.is_admin_user %}0{% else %}1{% endif %}">
+                        <button type="submit" class="action-btn">{% if item.is_admin_user %}Adminni olish{% else %}Admin berish{% endif %}</button>
+                    </form>
+                    <form method="post" action="{% url 'admin_user_role' item.id %}" style="display:inline; margin-right:6px;">
+                        {% csrf_token %}
+                        <input type="hidden" name="role" value="staff">
+                        <input type="hidden" name="value" value="{% if item.is_staff %}0{% else %}1{% endif %}">
+                        <button type="submit" class="action-btn">{% if item.is_staff %}Staffni olish{% else %}Staff berish{% endif %}</button>
+                    </form>
+                    <form method="post" action="{% url 'admin_user_role' item.id %}" style="display:inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="role" value="superuser">
+                        <input type="hidden" name="value" value="{% if item.is_superuser %}0{% else %}1{% endif %}">
+                        <button type="submit" class="action-btn delete" onclick="return confirm('Superadmin vakolatini o‘zgartirishga ishonchingiz komilmi?');">{% if item.is_superuser %}Superadminni olish{% else %}Superadmin qilish{% endif %}</button>
+                    </form>
+                    {% elif type == 'chat' %}
+                    <a href="{% url 'admin_message_edit' item.id %}" class="action-btn">Tahrirlash</a>
+                    <a href="{% url 'admin_message_delete' item.id %}" class="action-btn delete" onclick="return confirm('Rostdan ham o\'chirmoqchimisiz?');">O'chirish</a>
+                    {% elif type == 'receipt' %}
+                        {% if not item.is_approved and not item.is_rejected %}
+                        <a href="{% url 'admin_subscription_action' item.id 'approve' %}" class="action-btn" style="background:#34d399; color:black; border:none; margin-right:5px;">Tasdiqlash</a>
+                        <a href="{% url 'admin_subscription_action' item.id 'reject' %}" class="action-btn delete">Rad etish</a>
+                        {% endif %}
+                    {% elif type == 'avatar' %}
+                        <a href="{% url 'admin_avatar_delete' item.id %}" class="action-btn delete" onclick="return confirm('Rostdan ham o\'chirmoqchimisiz?');">O'chirish</a>
+                    {% elif type == 'comment' %}
+                        <a href="{% url 'admin_comment_edit' item.id %}" class="action-btn">Tahrirlash</a>
+                        <a href="{% url 'admin_comment_delete' item.id %}" class="action-btn delete" onclick="return confirm('Rostdan ham o\'chirmoqchimisiz?');">O'chirish</a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="{% if type == 'movie' %}4{% elif type == 'genre' %}3{% elif type == 'episode' %}4{% elif type == 'chat' %}4{% elif type == 'user' %}5{% elif type == 'receipt' %}5{% elif type == 'avatar' %}4{% elif type == 'comment' %}5{% else %}4{% endif %}" style="text-align:center; padding:30px; color:gray;">Hech narsa topilmadi!</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,96 +1,59 @@
-﻿from django.contrib import admin
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
 from .models import (
-    Genre, Anime, Episode, UserProfile,
-    WatchHistory, Comment, NewsPost, Reel, Story, ChatMessage, SiteSettings, UserSettings
+    CustomUser, VipUser, Category, Movie, MovieEpisode,
+    SiteSettings, MP3, ChatMessage, ProfileAvatar,
+    SubscriptionReceipt, FavoriteAnime, WatchHistory,
+    MovieComment, ActiveSession, AnimeNews, NewsLike,
+    Story, StoryView, Reel, ReelLike, ReelComment, ReelShare,
+    UserSettings
 )
 
-@admin.register(Genre)
-class GenreAdmin(admin.ModelAdmin):
-    list_display = ('name', 'slug')
-    prepopulated_fields = {'slug': ('name',)}
-    search_fields = ('name',)
 
-@admin.register(Anime)
-class AnimeAdmin(admin.ModelAdmin):
-    list_display = ('title', 'anime_type', 'status', 'release_year', 'rating', 'views_count', 'created_at')
-    list_filter = ('anime_type', 'status', 'release_year', 'genres')
-    search_fields = ('title', 'description', 'studio')
-    prepopulated_fields = {'slug': ('title',)}
-    filter_horizontal = ('genres',)
-    ordering = ('-created_at',)
-    list_per_page = 20
-    readonly_fields = ('views_count', 'created_at', 'updated_at')
-
-@admin.register(Episode)
-class EpisodeAdmin(admin.ModelAdmin):
-    list_display = ('anime', 'episode_number', 'title', 'created_at')
-    list_filter = ('anime', 'created_at')
-    search_fields = ('title', 'anime__title')
-    ordering = ('anime', 'episode_number')
-    list_per_page = 50
-    readonly_fields = ('created_at', 'updated_at')
-    
-    fieldsets = (
-        ('Asosiy', {
-            'fields': ('anime', 'episode_number', 'title')
-        }),
-        ('Video Manbasi', {
-            'fields': ('video_file', 'video_url'),
-            'description': "Video faylini yuklang yoki video URL yozing."
-        }),
-        ('Sana', {
-            'fields': ('created_at', 'updated_at'),
-            'classes': ('collapse',)
-        }),
+@admin.register(CustomUser)
+class CustomUserAdmin(UserAdmin):
+    list_display = ('username', 'email', 'is_staff', 'is_admin_user', 'is_banned')
+    list_filter = ('is_staff', 'is_admin_user', 'is_banned', 'is_superuser')
+    fieldsets = UserAdmin.fieldsets + (
+        ('Qo\'shimcha', {'fields': ('phone', 'is_banned', 'is_admin_user', 'avatar')}),
     )
 
-    def get_queryset(self, request):
-        return super().get_queryset(request).select_related('anime')
 
-@admin.register(UserProfile)
-class UserProfileAdmin(admin.ModelAdmin):
-    list_display = ('user', 'is_premium', 'premium_until')
-    list_filter = ('is_premium',)
-    search_fields = ('user__username', 'user__email')
-    filter_horizontal = ('favorites', 'watchlist')
+@admin.register(VipUser)
+class VipUserAdmin(admin.ModelAdmin):
+    list_display = ('user', 'tier', 'is_vip', 'vip_expire')
+    list_filter = ('tier', 'is_vip')
 
-@admin.register(WatchHistory)
-class WatchHistoryAdmin(admin.ModelAdmin):
-    list_display = ('user', 'anime', 'episode', 'watch_progress', 'last_watched')
-    list_filter = ('last_watched',)
-    search_fields = ('user__username', 'anime__title')
-    readonly_fields = ('last_watched',)
 
-@admin.register(Comment)
-class CommentAdmin(admin.ModelAdmin):
-    list_display = ('user', 'anime', 'text_short', 'created_at')
-    list_filter = ('created_at',)
-    search_fields = ('user__username', 'anime__title', 'text')
-    readonly_fields = ('created_at', 'updated_at')
+@admin.register(Category)
+class CategoryAdmin(admin.ModelAdmin):
+    list_display = ('name', 'created_at')
+    search_fields = ('name',)
 
-    def text_short(self, obj):
-        return obj.text[:50] + '...' if len(obj.text) > 50 else obj.text
-    text_short.short_description = 'Izoh'
 
-@admin.register(NewsPost)
-class NewsPostAdmin(admin.ModelAdmin):
-    list_display = ('title', 'author', 'views', 'is_published', 'created_at')
-    list_filter = ('is_published', 'created_at')
-    search_fields = ('title', 'content', 'tags')
-    prepopulated_fields = {'slug': ('title',)}
-    readonly_fields = ('views', 'created_at', 'updated_at')
+@admin.register(Movie)
+class MovieAdmin(admin.ModelAdmin):
+    list_display = ('title', 'category', 'minimum_tier', 'views_count', 'is_home_featured', 'created_at')
+    list_filter = ('minimum_tier', 'is_home_featured', 'category')
+    search_fields = ('title', 'description')
 
-@admin.register(Reel)
-class ReelAdmin(admin.ModelAdmin):
-    list_display = ('title', 'user', 'anime', 'created_at')
-    list_filter = ('created_at',)
-    search_fields = ('title', 'anime__title')
 
-@admin.register(Story)
-class StoryAdmin(admin.ModelAdmin):
-    list_display = ('title', 'is_active', 'expires_at', 'created_at')
-    list_filter = ('is_active', 'created_at')
-    search_fields = ('title',)
+@admin.register(MovieEpisode)
+class MovieEpisodeAdmin(admin.ModelAdmin):
+    list_display = ('movie', 'episode_number', 'title', 'created_at')
+    list_filter = ('movie',)
+    search_fields = ('title', 'movie__title')
+
+
+@admin.register(SiteSettings)
+class SiteSettingsAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'updated_at')
+
+
+@admin.register(MP3)
+class MP3Admin(admin.ModelAdmin):
+    list_display = ('title', 'created_at')
+
 
 @admin.register(ChatMessage)
 class ChatMessageAdmin(admin.ModelAdmin):
@@ -98,13 +61,58 @@ class ChatMessageAdmin(admin.ModelAdmin):
     list_filter = ('created_at', 'is_banned', 'is_admin')
     search_fields = ('user__username', 'message')
 
-@admin.register(SiteSettings)
-class SiteSettingsAdmin(admin.ModelAdmin):
-    list_display = ('__str__', 'updated_at')
+
+@admin.register(ProfileAvatar)
+class ProfileAvatarAdmin(admin.ModelAdmin):
+    list_display = ('name', 'created_at')
+
+
+@admin.register(SubscriptionReceipt)
+class SubscriptionReceiptAdmin(admin.ModelAdmin):
+    list_display = ('user', 'plan', 'is_approved', 'is_rejected', 'created_at')
+    list_filter = ('is_approved', 'is_rejected')
+
+
+@admin.register(FavoriteAnime)
+class FavoriteAnimeAdmin(admin.ModelAdmin):
+    list_display = ('user', 'movie', 'created_at')
+
+
+@admin.register(WatchHistory)
+class WatchHistoryAdmin(admin.ModelAdmin):
+    list_display = ('user', 'movie', 'last_watched')
+
+
+@admin.register(MovieComment)
+class MovieCommentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'movie', 'text', 'created_at')
+    list_filter = ('created_at',)
+
+
+@admin.register(ActiveSession)
+class ActiveSessionAdmin(admin.ModelAdmin):
+    list_display = ('user', 'device_name', 'ip_address', 'created_at')
+
+
+@admin.register(AnimeNews)
+class AnimeNewsAdmin(admin.ModelAdmin):
+    list_display = ('title', 'author', 'created_at')
+    search_fields = ('title', 'description')
+
+
+@admin.register(Story)
+class StoryAdmin(admin.ModelAdmin):
+    list_display = ('title', 'is_active', 'expires_at', 'created_at')
+    list_filter = ('is_active',)
+
+
+@admin.register(Reel)
+class ReelAdmin(admin.ModelAdmin):
+    list_display = ('title', 'user', 'views_count', 'created_at')
+    list_filter = ('created_at',)
+
 
 @admin.register(UserSettings)
 class UserSettingsAdmin(admin.ModelAdmin):
     list_display = ('user', 'theme', 'tabbar_on')
     list_filter = ('theme', 'tabbar_on')
-    search_fields = ('user__username',)
-

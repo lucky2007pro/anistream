@@ -5,25 +5,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#0d0d1a">
-    <title>BESTMEDIA Chat — Jonli muloqot | bestmedia-official.uz</title>
+    <title>AniStream Chat — Jonli muloqot | anistream-official.uz</title>
 
     <!-- SEO -->
-    <meta name="description" content="BESTMEDIA rasmiy chat xonasi. Jonli muloqot, emoji va stikerlar bilan xabar almashing. bestmedia-official.uz/chat">
-    <meta name="keywords" content="BESTMEDIA chat, bestmedia uz chat, jonli chat, online chat uzbekistan">
+    <meta name="description" content="AniStream rasmiy chat xonasi. Jonli muloqot, emoji va stikerlar bilan xabar almashing. anistream-official.uz/chat">
+    <meta name="keywords" content="AniStream chat, anistream uz chat, jonli chat, online chat uzbekistan">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://bestmedia-official.uz/chat">
+    <link rel="canonical" href="https://anistream-official.uz/chat">
 
     <!-- Open Graph -->
-    <meta property="og:title" content="BESTMEDIA Chat">
-    <meta property="og:description" content="BESTMEDIA rasmiy jonli chat xonasi. Muloqot qiling!">
-    <meta property="og:url" content="https://bestmedia-official.uz/chat">
+    <meta property="og:title" content="AniStream Chat">
+    <meta property="og:description" content="AniStream rasmiy jonli chat xonasi. Muloqot qiling!">
+    <meta property="og:url" content="https://anistream-official.uz/chat">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://i.pinimg.com/736x/16/aa/d7/16aad7f5390ff2e41f03b2f8f66d6db1.jpg">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="BESTMEDIA Chat">
-    <meta name="twitter:description" content="BESTMEDIA rasmiy jonli chat xonasi.">
+    <meta name="twitter:title" content="AniStream Chat">
+    <meta name="twitter:description" content="AniStream rasmiy jonli chat xonasi.">
     <meta name="twitter:image" content="https://i.pinimg.com/736x/16/aa/d7/16aad7f5390ff2e41f03b2f8f66d6db1.jpg">
 
     <!-- Boxicons -->
@@ -50,7 +50,7 @@
     html, body {
         height: 100%;
         overflow: hidden;
-        font-family: 'Outfit', sans-serif;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
         color: var(--text-light);
         background: var(--bg-base);
     }
@@ -97,7 +97,7 @@
             max-height: 900px;
             border-radius: 20px;
             border: 1px solid var(--glass-border);
-            box-shadow: 0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,51,102,0.08);
+            box-shadow: 0 24px 64px rgba(0,0,0,0.7), 0 0 0 1px rgba(0,243,255,0.08);
             background: rgba(13,13,26,0.82);
             backdrop-filter: blur(24px);
             -webkit-backdrop-filter: blur(24px);
@@ -136,7 +136,7 @@
         padding: 0 6px;
         height: 58px;
         background: linear-gradient(135deg, rgba(0,6,24,0.97) 0%, rgba(0,18,55,0.95) 60%, rgba(0,10,35,0.97) 100%);
-        border-bottom: 1px solid rgba(255,51,102,0.18);
+        border-bottom: 1px solid rgba(0,243,255,0.18);
         backdrop-filter: blur(28px) saturate(1.6);
         -webkit-backdrop-filter: blur(28px) saturate(1.6);
         position: relative;
@@ -147,7 +147,7 @@
         /* safe area — iPhone notch */
         padding-top: env(safe-area-inset-top, 0px);
         box-sizing: content-box;
-        box-shadow: 0 4px 24px rgba(0,0,0,0.55), 0 1px 0 rgba(255,51,102,0.14);
+        box-shadow: 0 4px 24px rgba(0,0,0,0.55), 0 1px 0 rgba(0,243,255,0.14);
     }
     /* Accent glow line at bottom */
     .chat-nav::after {
@@ -156,7 +156,7 @@
         bottom: -1px;
         left: 50%; transform: translateX(-50%);
         width: 60%; height: 2px;
-        background: linear-gradient(90deg, transparent, rgba(255,51,102,0.55), transparent);
+        background: linear-gradient(90deg, transparent, rgba(0,243,255,0.55), transparent);
         border-radius: 2px;
         pointer-events: none;
     }
@@ -174,14 +174,14 @@
         border-radius: 12px;
         transition: background 0.15s, box-shadow 0.15s;
         flex-shrink: 0;
-        font-family: 'Outfit', sans-serif;
+        font-family: inherit;
         font-weight: 700;
         text-decoration: none;
         white-space: nowrap;
         letter-spacing: 0.2px;
         -webkit-tap-highlight-color: transparent;
     }
-    .chat-nav-back:hover { background: rgba(255,51,102,0.1); box-shadow: 0 0 12px rgba(255,51,102,0.15); }
+    .chat-nav-back:hover { background: rgba(0,243,255,0.1); box-shadow: 0 0 12px rgba(0,243,255,0.15); }
     .chat-nav-back i { font-size: 1.4rem; }
 
     .chat-nav-center {
@@ -199,12 +199,12 @@
         letter-spacing: 1.5px;
         text-transform: uppercase;
         color: var(--text-light);
-        text-shadow: 0 0 18px rgba(255,51,102,0.45), 0 0 40px rgba(255,51,102,0.2);
+        text-shadow: 0 0 18px rgba(0,243,255,0.45), 0 0 40px rgba(0,243,255,0.2);
         line-height: 1;
     }
     .chat-nav-subtitle {
         font-size: 0.65rem;
-        color: rgba(255,51,102,0.6);
+        color: rgba(0,243,255,0.6);
         letter-spacing: 0.8px;
         font-weight: 500;
     }
@@ -226,10 +226,10 @@
     }
     .chat-nav-settings:hover,
     .chat-nav-settings.active {
-        background: rgba(255,51,102,0.12);
-        border-color: rgba(255,51,102,0.3);
+        background: rgba(0,243,255,0.12);
+        border-color: rgba(0,243,255,0.3);
         color: var(--accent);
-        box-shadow: 0 0 12px rgba(255,51,102,0.25);
+        box-shadow: 0 0 12px rgba(0,243,255,0.25);
     }
     .chat-nav-settings.active { transform: rotate(60deg); }
 
@@ -288,7 +288,7 @@
         cursor: pointer;
         transition: 0.2s;
         display: none;
-        font-family: 'Outfit', sans-serif;
+        font-family: inherit;
     }
     #loadMoreBtn:hover { border-color: var(--accent); color: var(--accent); }
     #loadMoreBtn.loading { opacity: 0.45; pointer-events: none; }
@@ -343,8 +343,8 @@
         -webkit-backdrop-filter: blur(8px);
     }
     .message-wrapper[data-own="true"] .message {
-        background: rgba(255,51,102,0.14);
-        border-color: rgba(255,51,102,0.22);
+        background: rgba(0,243,255,0.14);
+        border-color: rgba(0,243,255,0.22);
         border-radius: 18px 18px 4px 18px;
     }
 
@@ -455,7 +455,7 @@
         border-radius: 8px;
         flex-shrink: 0;
         display: none;
-        border: 1px solid rgba(255,51,102,0.3);
+        border: 1px solid rgba(0,243,255,0.3);
     }
 
     /* =====================================================
@@ -469,7 +469,7 @@
         background: var(--bg-base);
         border: 1px solid var(--glass-border);
         color: white; border-radius: 6px;
-        font-family: 'Outfit', sans-serif; font-size: 0.88rem; outline: none;
+        font-family: inherit; font-size: 0.88rem; outline: none;
     }
     .edit-form input:focus { border-color: var(--accent); }
     .edit-form button {
@@ -477,7 +477,7 @@
         background: var(--glass-bg); color: white;
         border: 1px solid var(--glass-border);
         border-radius: 6px; cursor: pointer;
-        font-family: 'Outfit', sans-serif; font-size: 0.82rem;
+        font-family: inherit; font-size: 0.82rem;
     }
     .edit-form button[type="submit"] {
         background: var(--accent); border-color: var(--accent);
@@ -517,13 +517,13 @@
         padding: 12px 18px;
         cursor: pointer;
         color: var(--text-light);
-        font-size: 0.76rem; font-family: 'Outfit', sans-serif;
+        font-size: 0.76rem; font-family: inherit;
         transition: background 0.2s, border-color 0.2s;
         min-width: 80px;
     }
     .settings-action-btn i { font-size: 1.35rem; color: var(--accent); }
     .settings-action-btn:hover, .settings-action-btn.active {
-        background: rgba(255,51,102,0.1);
+        background: rgba(0,243,255,0.1);
         border-color: var(--accent);
         color: var(--accent);
     }
@@ -543,8 +543,8 @@
         flex-shrink: 0;
     }
     .bg-img-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-    .bg-img-btn:hover { border-color: var(--accent); transform: scale(1.08); box-shadow: 0 0 12px rgba(255,51,102,0.4); }
-    .bg-img-btn.selected { border-color: var(--accent); box-shadow: 0 0 16px rgba(255,51,102,0.55); }
+    .bg-img-btn:hover { border-color: var(--accent); transform: scale(1.08); box-shadow: 0 0 12px rgba(0,243,255,0.4); }
+    .bg-img-btn.selected { border-color: var(--accent); box-shadow: 0 0 16px rgba(0,243,255,0.55); }
 
     .bg-remove-btn {
         width: 64px; height: 64px;
@@ -557,7 +557,7 @@
         align-items: center; justify-content: center;
         gap: 2px;
         transition: border-color 0.2s, color 0.2s;
-        font-family: 'Outfit', sans-serif;
+        font-family: inherit;
     }
     .bg-remove-btn i { font-size: 1rem; }
     .bg-remove-btn:hover { border-color: #ef4444; color: #ef4444; }
@@ -578,13 +578,13 @@
         padding: 10px 20px;
         cursor: pointer;
         color: var(--text-dim);
-        font-size: 0.76rem; font-family: 'Outfit', sans-serif;
+        font-size: 0.76rem; font-family: inherit;
         transition: background 0.2s, border-color 0.2s, color 0.2s;
         min-width: 90px;
     }
     .sound-option-btn i { font-size: 1.4rem; }
     .sound-option-btn.active {
-        background: rgba(255,51,102,0.1);
+        background: rgba(0,243,255,0.1);
         border-color: var(--accent);
         color: var(--accent);
     }
@@ -605,13 +605,13 @@
         padding: 10px 24px;
         cursor: pointer;
         color: var(--text-dim);
-        font-size: 0.76rem; font-family: 'Outfit', sans-serif;
+        font-size: 0.76rem; font-family: inherit;
         transition: background 0.2s, border-color 0.2s, color 0.2s;
         min-width: 90px;
     }
     .dark-mode-btn i { font-size: 1.4rem; }
     .dark-mode-btn.on-btn.active {
-        background: rgba(255,51,102,0.1);
+        background: rgba(0,243,255,0.1);
         border-color: var(--accent);
         color: var(--accent);
     }
@@ -657,7 +657,7 @@
         padding: 10px 0;
         background: transparent; border: none;
         color: var(--text-dim);
-        font-size: 0.8rem; font-family: 'Outfit', sans-serif;
+        font-size: 0.8rem; font-family: inherit;
         cursor: pointer;
         display: flex; align-items: center; justify-content: center;
         gap: 5px;
@@ -702,7 +702,7 @@
     .sticker-img-item:hover {
         border-color: var(--accent);
         transform: scale(1.06);
-        box-shadow: 0 0 12px rgba(255,51,102,0.35);
+        box-shadow: 0 0 12px rgba(0,243,255,0.35);
     }
 
     /* =====================================================
@@ -710,9 +710,9 @@
        ===================================================== */
     .reply-preview {
         flex-shrink: 0;
-        background: rgba(255,51,102,0.07);
+        background: rgba(0,243,255,0.07);
         padding: 7px 14px;
-        border-top: 1px solid rgba(255,51,102,0.15);
+        border-top: 1px solid rgba(0,243,255,0.15);
         display: none;
         align-items: center;
         gap: 10px;
@@ -770,7 +770,7 @@
     }
     .emoji-toggle:hover, .emoji-toggle.active {
         border-color: var(--accent);
-        background: rgba(255,51,102,0.1);
+        background: rgba(0,243,255,0.1);
         color: var(--accent);
     }
 
@@ -784,7 +784,7 @@
         border-radius: 22px;
         color: white;
         outline: none;
-        font-family: 'Outfit', sans-serif;
+        font-family: inherit;
         font-size: 0.93rem;
         line-height: 1.4;
         transition: border-color 0.2s, box-shadow 0.2s;
@@ -796,7 +796,7 @@
     }
     .chat-form textarea:focus {
         border-color: var(--accent);
-        box-shadow: 0 0 0 3px rgba(255,51,102,0.07);
+        box-shadow: 0 0 0 3px rgba(0,243,255,0.07);
     }
     .chat-form textarea:disabled { opacity: 0.4; cursor: not-allowed; }
 
@@ -825,7 +825,7 @@
         display: flex; align-items: center; justify-content: center;
         font-weight: 800;
     }
-    .send-btn:hover { transform: scale(1.08); box-shadow: 0 0 12px rgba(255,51,102,0.5); }
+    .send-btn:hover { transform: scale(1.08); box-shadow: 0 0 12px rgba(0,243,255,0.5); }
     .send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
 
     /* =====================================================
@@ -899,7 +899,7 @@
             background: rgba(0,4,18,0.88);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(255,51,102,0.12);
+            border-top: 1px solid rgba(0,243,255,0.12);
             gap: 6px;
         }
         .chat-form textarea {
@@ -919,7 +919,7 @@
             backdrop-filter: blur(36px) saturate(2.2);
             -webkit-backdrop-filter: blur(36px) saturate(2.2);
             border-bottom: 1px solid rgba(0, 243, 255, 0.22);
-            box-shadow: 0 4px 28px rgba(0,0,0,0.35), 0 1px 0 rgba(255,51,102,0.18);
+            box-shadow: 0 4px 28px rgba(0,0,0,0.35), 0 1px 0 rgba(0,243,255,0.18);
         }
         .chat-nav-title { font-size: 0.9rem; letter-spacing: 1px; }
         .chat-nav-subtitle { display: none; }
@@ -966,7 +966,7 @@
             Orqaga
         </a>
         <div class="chat-nav-center">
-            <div class="chat-nav-title">BESTMEDIA CHAT</div>
+            <div class="chat-nav-title">AniStream CHAT</div>
             <div class="chat-nav-subtitle">● online</div>
         </div>
         <button type="button"

@@ -1,83 +1,10 @@
 from django import forms
-from django.utils.text import slugify
+from .models import Profile
 
-from .models import Genre, Anime, Episode, NewsPost, Reel
-
-class GenreForm(forms.ModelForm):
+class ProfileImageForm(forms.ModelForm):
     class Meta:
-        model = Genre
-        fields = ["name", "slug", "description"]
-
-    def clean_slug(self):
-        slug = self.cleaned_data.get("slug")
-        name = self.cleaned_data.get("name") or ""
-        if not slug and name:
-            slug = slugify(name)
-        return slug
-
-class AnimeForm(forms.ModelForm):
-    class Meta:
-        model = Anime
-        fields = [
-            "title",
-            "description",
-            "genres",
-            "anime_type",
-            "status",
-            "release_year",
-            "rating",
-            "image",
-            "banner",
-            "trailer",
-            "studio",
-            "age_rating",
-        ]
+        model = Profile
+        fields = ['profile_image']
         widgets = {
-            "genres": forms.CheckboxSelectMultiple,
-            "description": forms.Textarea(attrs={"rows": 4}),
-        }
-
-class EpisodeForm(forms.ModelForm):
-    class Meta:
-        model = Episode
-        fields = [
-            "anime",
-            "episode_number",
-            "title",
-            "video_file",
-        ]
-
-    def clean(self):
-        cleaned_data = super().clean()
-        video_file = cleaned_data.get("video_file")
-
-        if not video_file:
-            raise forms.ValidationError(
-                "Kamida bitta maydonni to'ldiring: video fayl."
-            )
-
-        return cleaned_data
-
-class NewsPostForm(forms.ModelForm):
-    class Meta:
-        model = NewsPost
-        fields = ["title", "slug", "content", "image", "tags", "is_published"]
-        widgets = {
-            "content": forms.Textarea(attrs={"rows": 6}),
-        }
-
-    def clean_slug(self):
-        slug = self.cleaned_data.get("slug")
-        title = self.cleaned_data.get("title") or ""
-        if not slug and title:
-            slug = slugify(title)
-        return slug
-
-class ReelForm(forms.ModelForm):
-    class Meta:
-        model = Reel
-        fields = ['title', 'anime', 'video_file', 'thumbnail']
-        widgets = {
-            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Masalan: Treyler'}),
-            'anime': forms.Select(attrs={'class': 'form-control'}),
+            'profile_image': forms.HiddenInput(),  # Tanlash JS orqali bo‘ladi
         }

@@ -1,129 +1,106 @@
-"""
-URL configuration for core project.
-
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
-"""
 from django.contrib import admin
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from anime import views
+from anime.admin_views import *
+from anime.sitemaps import NewsSitemap
+from django.contrib.sitemaps.views import sitemap
+
+sitemaps = {
+    'news': NewsSitemap,
+}
 
 urlpatterns = [
-    # Custom content admin dashboard (faqat staff uchun)
-    path('admin-dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    path('', views.home, name='home'),
+    path('login/', views.login, name='login'),
+    path('accounts/login/', views.login, name='login_legacy'),
+    path('register/', views.register, name='register'),
+    path('logout/', views.logout_view, name='logout'),
+    path('movie/<int:id>/', views.movie_detail, name='movie_detail'),
+    path('toggle-favorite/<int:movie_id>/', views.toggle_favorite, name='toggle_favorite'),
+    path('favorites/', views.favorites_page, name='favorites_page'),
+    path('history/', views.watch_history_page, name='watch_history_page'),
+    path('catalog/', views.anime_catalog, name='anime_catalog'),
+    path('search/', views.search, name='search'),
+    path('profile/', views.profile, name='profile'),
+    path('premium/', views.premium_page, name='premium_page'),
+    path('news/', views.news_feed, name='news_feed'),
+    path('news/<int:pk>/', views.news_detail, name='news_detail'),
+    path('news/<int:pk>/like/', views.toggle_like, name='toggle_like'),
+    path('reels/', views.reels_feed, name='reels'),
+    path('aloqa/', views.aloqa, name='aloqa'),
 
-    # Custom content admin (URL nomlari Django admin'dan oldin turishi kerak)
-    path('admin/genres/', views.admin_genre_list, name='admin_genre_list'),
-    path('admin/genres/create/', views.admin_genre_create, name='admin_genre_create'),
-    path('admin/genres/<int:pk>/edit/', views.admin_genre_edit, name='admin_genre_edit'),
-    path('admin/genres/<int:pk>/delete/', views.admin_genre_delete, name='admin_genre_delete'),
+    path('chat/', views.chat, name='chat'),
+    path('chat/messages/', views.chat_messages_api, name='chat_messages_api'),
+    path('ban_user/<int:user_id>/', views.ban_user, name='ban_user'),
+    path('edit_message/<int:message_id>/', views.edit_message, name='edit_message'),
+    path('delete_message/<int:message_id>/', views.delete_message, name='delete_message'),
+    path('make-vip/<int:user_id>/', views.make_vip, name='make_vip'),
 
-    path('admin/animes/', views.admin_anime_list, name='admin_anime_list'),
-    path('admin/animes/create/', views.admin_anime_create, name='admin_anime_create'),
-    path('admin/animes/<int:pk>/edit/', views.admin_anime_edit, name='admin_anime_edit'),
-    path('admin/animes/<int:pk>/delete/', views.admin_anime_delete, name='admin_anime_delete'),
+    # Admin Panel
+    path('control-panel/', admin_dashboard, name='admin_dashboard'),
+    path('control-panel/users/', admin_users, name='admin_users'),
+    path('control-panel/users/<int:user_id>/role/', admin_user_role, name='admin_user_role'),
+    path('control-panel/movies/', admin_movies, name='admin_movies'),
+    path('control-panel/movies/add/', admin_movie_form, name='admin_movie_form'),
+    path('control-panel/movies/<int:pk>/edit/', admin_movie_form, name='admin_movie_form'),
+    path('control-panel/movies/<int:pk>/delete/', admin_movie_delete, name='admin_movie_delete'),
+    path('control-panel/genres/', admin_genres, name='admin_genres'),
+    path('control-panel/genres/add/', admin_genre_form, name='admin_genre_form'),
+    path('control-panel/genres/<int:pk>/edit/', admin_genre_form, name='admin_genre_form'),
+    path('control-panel/genres/<int:pk>/delete/', admin_genre_delete, name='admin_genre_delete'),
+    path('control-panel/episodes/', admin_episodes, name='admin_episodes'),
+    path('control-panel/episodes/add/', admin_episode_form, name='admin_episode_form'),
+    path('control-panel/episodes/<int:pk>/edit/', admin_episode_form, name='admin_episode_form'),
+    path('control-panel/episodes/<int:pk>/delete/', admin_episode_delete, name='admin_episode_delete'),
+    path('control-panel/chat/', admin_chat, name='admin_chat'),
+    path('control-panel/chat/edit/<int:pk>/', admin_message_edit, name='admin_message_edit'),
+    path('control-panel/chat/delete/<int:pk>/', admin_message_delete, name='admin_message_delete'),
 
-    path('admin/episodes/', views.admin_episode_list, name='admin_episode_list'),
-    path('admin/episodes/create/', views.admin_episode_create, name='admin_episode_create'),
-    path('admin/episodes/<int:pk>/edit/', views.admin_episode_edit, name='admin_episode_edit'),
-    path('admin/episodes/<int:pk>/delete/', views.admin_episode_delete, name='admin_episode_delete'),
+    path('control-panel/subscriptions/', admin_subscriptions, name='admin_subscriptions'),
+    path('control-panel/subscriptions/<int:pk>/<str:action>/', admin_subscription_action,
+         name='admin_subscription_action'),
+    path('control-panel/avatars/', admin_avatars, name='admin_avatars'),
+    path('control-panel/avatars/add/', admin_avatar_form, name='admin_avatar_form'),
+    path('control-panel/avatars/<int:pk>/delete/', admin_avatar_delete, name='admin_avatar_delete'),
 
-    path('admin/news/', views.admin_news_list, name='admin_news_admin_list'),
-    path('admin/news/create/', views.admin_news_create, name='admin_news_create'),
-    path('admin/news/<int:pk>/edit/', views.admin_news_edit, name='admin_news_edit'),
-    path('admin/news/<int:pk>/delete/', views.admin_news_delete, name='admin_news_delete'),
+    path('control-panel/comments/', admin_comments, name='admin_comments'),
+    path('control-panel/comments/<int:pk>/edit/', admin_comment_edit, name='admin_comment_edit'),
+    path('control-panel/comments/<int:pk>/delete/', admin_comment_delete, name='admin_comment_delete'),
 
-    path('admin/shorts/', views.admin_short_list, name='admin_short_list'),
-    path('admin/shorts/create/', views.admin_short_create, name='admin_short_create'),
-    path('admin/shorts/<int:pk>/edit/', views.admin_short_edit, name='admin_short_edit'),
-    path('admin/shorts/<int:pk>/delete/', views.admin_short_delete, name='admin_short_delete'),
+    path(
+        'sitemap.xml',
+        sitemap,
+        {'sitemaps': sitemaps},
+        name='django.contrib.sitemaps.views.sitemap'
+    ),
 
-    # Django default admin (umumiy /admin/ prefiksidan keyin)
+    # Django default admin
     path('admin/', admin.site.urls),
 
-    # Asosiy sahifalar
-    path('', views.home_page, name='home'),
-    path('catalog/', views.catalog_page, name='catalog'),
-    path('search/', views.search_page, name='search'),
+    # STORY VIEW
+    path('story/<int:story_id>/', views.story_view, name='story_view'),
+    path('story/seen/<int:story_id>/', views.mark_story_seen, name='mark_story_seen'),
+    path('story/<int:story_id>/next/', views.next_story_view, name='next_story'),
+    path('story/<int:story_id>/prev/', views.prev_story_view, name='prev_story'),
 
-    # Anime
-    path('anime/<int:anime_id>/', views.anime_detail, name='detail'),
-    path('episode/<int:episode_id>/stream/', views.episode_stream, name='episode_stream'),
-    # Reels
-    path('reels/', views.reels_feed, name='reels_page'),
+    # REELS
     path('reels/<int:reel_id>/', views.reel_detail, name='reel_detail'),
     path('reels/<int:reel_id>/like/', views.toggle_reel_like, name='toggle_reel_like'),
     path('reels/<int:reel_id>/comment/', views.add_reel_comment, name='add_reel_comment'),
     path('reels/<int:reel_id>/comments/', views.reel_comments_api, name='reel_comments_api'),
     path('reels/<int:reel_id>/share/', views.reel_share, name='reel_share'),
 
-    # Chat
-    path('chat/', views.chat, name='chat'),
-    path('chat/messages/', views.chat_messages_api, name='chat_messages_api'),
-    path('ban_user/<int:user_id>/', views.ban_user, name='ban_user'),
-    path('edit_message/<int:message_id>/', views.edit_message, name='edit_message'),
-    path('delete_message/<int:message_id>/', views.delete_message, name='delete_message'),
-
-    # Story
-    path('story/<int:story_id>/', views.story_view, name='story_view'),
-    path('story/seen/<int:story_id>/', views.mark_story_seen, name='mark_story_seen'),
-    path('story/<int:story_id>/next/', views.next_story_view, name='next_story'),
-    path('story/<int:story_id>/prev/', views.prev_story_view, name='prev_story'),
-
-    # Janrlar
-    path('genres/', views.genres_page, name='genres'),
-    path('genre/<slug:slug>/', views.genre_detail, name='genre_detail'),
-
-    # Jadval
-    path('schedule/', views.schedule_page, name='schedule'),
-
-    # Auth
-    path('auth/', views.auth_view, name='auth_page'),
-    path('logout/', views.logout_view, name='logout'),
-
-    # User
-    path('profile/', views.profile_page, name='profile'),
-    path('favorites/', views.favorites_page, name='favorites'),
-    path('watchlist/', views.watchlist_page, name='watchlist'),
-    path('history/', views.history_page, name='history'),
-    path('settings/', views.settings_page, name='settings'),
-
-    # Actions
-    path('anime/<int:anime_id>/favorite/', views.add_to_favorites, name='add_favorite'),
-    path('anime/<int:anime_id>/comment/', views.add_comment, name='add_comment'),
-
-    # Yangiliklar
-    path('news/', views.news_list, name='news_list'),
-    path('news/<slug:slug>/', views.news_detail, name='news_detail'),
-
-    # Info pages
-    path('about/', views.about_page, name='about'),
-    path('contact/', views.contact_page, name='contact'),
-    path('faq/', views.faq_page, name='faq'),
-    path('premium/', views.premium_page, name='premium'),
-    path('fandub-projects/', views.fandub_projects_page, name='fandub_projects'),
-    path('live-streams/', views.live_streams_page, name='live_streams'),
-    path('billing/', views.billing_page, name='billing'),
-    path('password-help/', views.password_reset_help_page, name='password_help'),
+    # SETTINGS
+    path('settings/', views.settings_general, name='settings_general'),
+    path('settings/telegram/', views.settings_telegram, name='settings_telegram'),
+    path('settings/premium/', views.settings_premium, name='settings_premium'),
+    path('settings/devices/', views.settings_devices, name='settings_devices'),
+    path('settings/privacy/', views.settings_privacy, name='settings_privacy'),
 ]
 
-# Custom error handlers
-handler404 = 'anime.views.custom_404'
-handler500 = 'anime.views.custom_500'
 
-# Media fayllar
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

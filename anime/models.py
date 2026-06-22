@@ -1,171 +1,416 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.core.exceptions import ValidationError
-from django.contrib.auth.models import User
-from django.urls import reverse
 from django.utils import timezone
+from zoneinfo import ZoneInfo
 
-class Genre(models.Model):
-    """Anime janrlari"""
-    name = models.CharField(max_length=100, unique=True, verbose_name="Janr nomi")
-    slug = models.SlugField(max_length=100, unique=True)
-    description = models.TextField(blank=True, verbose_name="Tavsif")
 
-    class Meta:
-        verbose_name = "Janr"
-        verbose_name_plural = "Janrlar"
-        ordering = ['name']
+
+# =======================
+# CATEGORY
+# =======================
+class Category(models.Model):
+    name = models.CharField(max_length=100)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
 
-class Anime(models.Model):
-    STATUS_CHOICES = [
-        ('ongoing', 'Davom etmoqda'),
-        ('completed', 'Yakunlangan'),
-        ('upcoming', 'Tez orada'),
-    ]
 
-    TYPE_CHOICES = [
-        ('tv', 'TV Serial'),
-        ('movie', 'Film'),
-        ('ova', 'OVA'),
-        ('special', 'Maxsus'),
-    ]
-    title = models.CharField(
-        max_length=200,
-        verbose_name="Anime nomi",
-        help_text="Anime nomini kiriting"
-    )
-    slug = models.SlugField(max_length=200, unique=True, blank=True)
-    description = models.TextField(
-        verbose_name="Qisqacha ta'rifi",
-        help_text="Anime haqida qisqacha ma'lumot"
-    )
-    genres = models.ManyToManyField(Genre, related_name='animes', verbose_name="Janrlar")
-    anime_type = models.CharField(
-        max_length=20,
-        choices=TYPE_CHOICES,
-        default='tv',
-        verbose_name="Anime turi"
-    )
-    status = models.CharField(
-        max_length=20,
-        choices=STATUS_CHOICES,
-        default='ongoing',
-        verbose_name="Holati"
-    )
-    release_year = models.IntegerField(
-        verbose_name="Chiqarilgan yili",
-        validators=[MinValueValidator(1960), MaxValueValidator(2030)],
-        help_text="1960 dan 2030 gacha"
-    )
-    rating = models.FloatField(
-        default=0.0,
-        verbose_name="Reyting",
-        validators=[MinValueValidator(0.0), MaxValueValidator(10.0)],
-        help_text="0.0 dan 10.0 gacha"
-    )
-    views_count = models.IntegerField(default=0, verbose_name="Ko'rishlar soni")
-    image = models.ImageField(
-        upload_to='anime/images/',
-        verbose_name="Rasm",
-        help_text="Anime rasmi yuklang",
-        blank=True, null=True
-    )
-    banner = models.ImageField(
-        upload_to='anime/banners/',
-        blank=True,
-        null=True,
-        verbose_name="Banner rasm",
-        help_text="Katta banner rasm (ixtiyoriy)"
-    )
-    trailer = models.FileField(
-        upload_to='anime/trailers/',
-        blank=True,
-        null=True,
-        verbose_name="Trailer video",
-        help_text="Trailer fayli (ixtiyoriy)"
-    )
-    studio = models.CharField(max_length=200, blank=True, verbose_name="Studiya")
-    age_rating = models.CharField(max_length=10, default='13+', verbose_name="Yosh chegarasi")
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+# =======================
+# CUSTOM USER
+# =======================
+class CustomUser(AbstractUser):
+    phone = models.CharField(max_length=15, blank=True, null=True)
+    is_banned = models.BooleanField(default=False)
+    is_admin_user = models.BooleanField(default=False)
+    avatar = models.ForeignKey('ProfileAvatar', on_delete=models.SET_NULL, null=True, blank=True, related_name='users')
 
-    class Meta:
-        verbose_name = "Anime"
-        verbose_name_plural = "Animelar"
-        ordering = ['-created_at']
-        indexes = [
-            models.Index(fields=['-created_at']),
-            models.Index(fields=['rating']),
-        ]
+    def active_tier(self):
+        if not hasattr(self, 'vip_data'):
+            return 'basic'
+        return self.vip_data.get_tier()
 
     def __str__(self):
-        return f"{self.title} ({self.release_year})"
+        return self.username if self.username else f"User-{self.id}"
 
-    def clean(self):
-        if self.rating < 0 or self.rating > 10:
-            raise ValidationError("Reyting 0 dan 10 gacha bo'lishi kerak")
 
-class Episode(models.Model):
-    anime = models.ForeignKey(
-        'Anime',
+class VipUser(models.Model):
+    TIER_CHOICES = [
+        ('basic', 'Asosiy (Free)'),
+        ('premium', 'Premium'),
+        ('vip', 'VIP'),
+    ]
+    user = models.OneToOneField(
+        CustomUser,
         on_delete=models.CASCADE,
-        related_name='episodes',
-        verbose_name="Anime"
+        related_name='vip_data'
     )
-    episode_number = models.IntegerField(
-        verbose_name="Qism raqami",
-        validators=[MinValueValidator(1)],
-        help_text="1 dan boshlanadi"
+    is_vip = models.BooleanField(default=False)
+    tier = models.CharField(max_length=10, choices=TIER_CHOICES, default='basic')
+    vip_expire = models.DateTimeField(null=True, blank=True)
+
+    def vip_active(self):
+        return self.is_vip and self.vip_expire and self.vip_expire > timezone.now()
+
+    def get_tier(self):
+        if not self.vip_active():
+            return 'basic'
+        return self.tier
+
+    def has_access(self, required_tier):
+        current = self.get_tier()
+        tiers = ['basic', 'premium', 'vip']
+        return tiers.index(current) >= tiers.index(required_tier)
+
+    def __str__(self):
+        return f"{self.user.username} - VIP" if self.user.username else f"User-{self.user.id} - VIP"
+
+
+# =======================
+# MOVIE
+# =======================
+class Movie(models.Model):
+    TIER_CHOICES = [
+        ('basic', 'Asosiy (Free)'),
+        ('premium', 'Premium'),
+        ('vip', 'VIP'),
+    ]
+    title = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='movies/')
+    description = models.TextField(blank=True, null=True)
+    is_premium = models.BooleanField(
+        default=False,
+        help_text="Faqat premium obunachilar ko'ra oladi (Eski tizim)"
     )
-    title = models.CharField(
-        max_length=200,
-        verbose_name="Qism nomi",
+    minimum_tier = models.CharField(
+        max_length=10,
+        choices=TIER_CHOICES,
+        default='basic',
+        help_text="Qaysi tarifdan boshlab ko'rish mumkin"
+    )
+    is_home_featured = models.BooleanField(
+        default=False,
+        help_text="Bosh sahifa hero fonida ko'rsatish uchun belgilang"
+    )
+    home_featured_order = models.PositiveSmallIntegerField(
+        default=0,
+        help_text="Kichik raqam avval ko'rsatiladi"
+    )
+    hero_media = models.FileField(
+        upload_to='movies/hero/',
         blank=True,
         null=True,
-        help_text="Qismning nomi (ixtiyoriy)"
+        help_text="Bosh sahifa slideri uchun maxsus rasm yoki video (Ixtiyoriy)"
     )
+
+    views_count = models.PositiveIntegerField(default=0, help_text="Umumiy ko'rishlar soni")
+    release_year = models.CharField(max_length=20, blank=True, null=True, help_text="Chiqarilgan yili, masalan: 2026")
+
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="movies"
+    )
+
+    video_url = models.URLField(
+        blank=True,
+        null=True,
+        help_text="Asosiy video URL (mp4 yoki CDN linki)"
+    )
+
     video_file = models.FileField(
-        upload_to='videos/',
+        upload_to='movies/videos/',
         blank=True,
         null=True,
-        verbose_name="Videoni kompyuterdan yuklash",
-        help_text="Kompyuterdan video yuklash"
+        help_text="Yoki video faylni yuklang (mp4, mkv va b.)"
     )
+
+    telegram_link = models.URLField(
+        blank=True,
+        null=True,
+        help_text="Telegram post linki (ixtiyoriy)"
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+
+# =======================
+# MOVIE EPISODES
+# =======================
+class MovieEpisode(models.Model):
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='episodes')
+    episode_number = models.PositiveIntegerField(default=1)
+    title = models.CharField(max_length=200)
+    video_url = models.URLField(blank=True, null=True, help_text="Bunny.net iframe yoki mp4 linkini yozing")
+    video_file = models.FileField(upload_to='videos/', blank=True, null=True,
+                                  help_text="Yoki video faylni yuklang (mp4, mkv va b.)")
+    description = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['episode_number']
+
+    def __str__(self):
+        return f"{self.movie.title} - {self.episode_number}-qism - {self.title}"
+
+
+# =======================
+# SITE SETTINGS
+# =======================
+class SiteSettings(models.Model):
+    background_video = models.FileField(
+        upload_to='backgrounds/',
+        blank=True,
+        null=True
+    )
+    background_image = models.ImageField(
+        upload_to='backgrounds/',
+        blank=True,
+        null=True
+    )
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return "Sayt Sozlamalari"
+
+
+# =======================
+# MP3 FILES
+# =======================
+class MP3(models.Model):
+    title = models.CharField(max_length=200)
+    file = models.FileField(upload_to='mp3/')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.title
+
+
+# =======================
+# CHAT MESSAGES
+# =======================
+class ChatMessage(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    edited = models.BooleanField(default=False)
+    is_banned = models.BooleanField(default=False)
+    is_admin = models.BooleanField(default=False)
+    reply_to = models.ForeignKey(
+        'self',
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='replies'
+    )
+
+    def local_created_at(self):
+        from django.utils.timezone import localtime
+        uz_time = ZoneInfo('Asia/Tashkent')
+        return localtime(self.created_at, uz_time)
+
+    def can_delete(self, current_user):
+        return self.user == current_user or current_user.is_admin_user
+
+    def can_reply(self, current_user):
+        return not current_user.is_banned
+
+    def __str__(self):
+        return f"{self.user.username}: {self.message[:20]}"
+
+
+# =======================
+# PROFILE AVATAR
+# =======================
+class ProfileAvatar(models.Model):
+    name = models.CharField(max_length=100, blank=True, null=True)
+    image = models.ImageField(upload_to='avatars/')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Avatar {self.id}"
+
+
+# =======================
+# SUBSCRIPTION RECEIPTS
+# =======================
+class SubscriptionReceipt(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='receipts')
+    plan = models.CharField(max_length=50)
+    image = models.ImageField(upload_to='receipts/%Y/%m/')
+    is_approved = models.BooleanField(default=False)
+    is_rejected = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.plan} ({'Tasdiqlangan' if self.is_approved else 'Rad etish' if self.is_rejected else 'Kutilmoqda'})"
+
+
+# =======================
+# FAVORITE & HISTORY
+# =======================
+class FavoriteAnime(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='favorites')
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='favorited_by')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'movie')
+
+
+class WatchHistory(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='watch_history')
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='watched_by')
+    last_watched = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('user', 'movie')
+
+
+# =======================
+# MOVIE COMMENTS
+# =======================
+class MovieComment(models.Model):
+    movie = models.ForeignKey(Movie, on_delete=models.CASCADE, related_name='comments')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='movie_comments')
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} - {self.movie.title} - {self.text[:20]}"
+
+
+# =======================
+# ACTIVE SESSIONS (DEVICE LIMITS)
+# =======================
+class ActiveSession(models.Model):
+    DEVICE_CHOICES = [
+        ('mobile', 'Mobil'),
+        ('tablet', 'Planshet'),
+        ('desktop', 'Kompyuter'),
+        ('unknown', "Noma'lum"),
+    ]
+
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='active_sessions')
+    session_key = models.CharField(max_length=40, unique=True)
+
+    device_type = models.CharField(max_length=20, choices=DEVICE_CHOICES, default='unknown')
+    device_name = models.CharField(max_length=200, blank=True, null=True, help_text="Browser + OS")
+    ip_address = models.GenericIPAddressField(blank=True, null=True)
+    user_agent = models.TextField(blank=True, null=True)
+    browser = models.CharField(max_length=100, blank=True, null=True)
+    os_name = models.CharField(max_length=100, blank=True, null=True)
+    location = models.CharField(max_length=200, blank=True, null=True, help_text="Taxminiy joylashuv")
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_activity = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.username} — {self.device_name or 'Nomalum qurilma'} ({self.ip_address})"
+
+
+class AnimeNews(models.Model):
+    title = models.CharField(max_length=255)
+    image = models.ImageField(upload_to='news/')
+    description = models.TextField()
+
+    video = models.FileField(upload_to='news/videos/', null=True, blank=True)
+    link = models.URLField(null=True, blank=True)
+
+    author = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='news_posts',
+        null=True,
+        blank=True
+    )
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        verbose_name = "Qism (Episode)"
-        verbose_name_plural = "Qismlar (Episodes)"
-        ordering = ['anime', 'episode_number']
-        unique_together = [['anime', 'episode_number']]
-        indexes = [
-            models.Index(fields=['anime', 'episode_number']),
-        ]
+    def total_likes(self):
+        return self.likes.count()
 
     def __str__(self):
-        return f"{self.anime.title} - {self.episode_number}-qism"
+        return self.title
 
-    def clean(self):
-        if not self.video_file:
-            raise ValidationError("Video faylni kiriting")
-        if self.episode_number < 1:
-            raise ValidationError("Qism raqami 1 dan kichik bo'lishi mumkin emas")
 
-    def get_video_source(self):
-        if self.video_file:
-            return reverse('episode_stream', args=[self.id])
-        return ""
+# =======================
+# NEWS LIKE SYSTEM
+# =======================
+class NewsLike(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE)
+    news = models.ForeignKey(
+        AnimeNews,
+        on_delete=models.CASCADE,
+        related_name='likes'
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
 
+    class Meta:
+        unique_together = ('user', 'news')
+        verbose_name = "News Like"
+        verbose_name_plural = "News Likes"
+
+    def __str__(self):
+        return f"{self.user.username} liked {self.news.title}"
+
+
+# =======================
+# STORY
+# =======================
+class Story(models.Model):
+    title = models.CharField(max_length=200)
+
+    image = models.ImageField(upload_to='stories/', blank=True, null=True)
+    video = models.FileField(upload_to='stories/videos/', blank=True, null=True)
+
+    description = models.TextField(blank=True, null=True)
+    link = models.URLField(blank=True, null=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField(blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+
+    def is_expired(self):
+        return self.expires_at and timezone.now() > self.expires_at
+
+    def __str__(self):
+        return self.title
+
+
+# =======================
+# STORY VIEW
+# =======================
+class StoryView(models.Model):
+    user = models.ForeignKey('CustomUser', on_delete=models.CASCADE)
+    story = models.ForeignKey(Story, on_delete=models.CASCADE, related_name='views')
+    viewed_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ('user', 'story')
+
+    def __str__(self):
+        return f"{self.user.username} -> {self.story.title}"
+
+
+# =======================
+# REELS
+# =======================
 class Reel(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reels', null=True, blank=True)
-    anime = models.ForeignKey(Anime, on_delete=models.CASCADE, related_name='reels', null=True, blank=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='reels')
     title = models.CharField(max_length=200, blank=True, null=True)
     description = models.TextField(blank=True, null=True)
     video_file = models.FileField(upload_to='reels/videos/', blank=True, null=True)
+    video_url = models.URLField(blank=True, null=True)
     thumbnail = models.ImageField(upload_to='reels/thumbnails/', blank=True, null=True)
     views_count = models.PositiveIntegerField(default=0)
     shares_count = models.PositiveIntegerField(default=0)
@@ -183,22 +428,27 @@ class Reel(models.Model):
     def get_video_src(self):
         if self.video_file:
             return self.video_file.url
-        return ''
+        return self.video_url or ''
 
     def __str__(self):
-        return f"Reel #{self.id} - {self.title or 'No title'}"
+        return f"Reel #{self.id} - {self.user.username}"
+
 
 class ReelLike(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reel_likes')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='reel_likes')
     reel = models.ForeignKey(Reel, on_delete=models.CASCADE, related_name='likes')
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
         unique_together = ('user', 'reel')
 
+    def __str__(self):
+        return f"{self.user.username} liked Reel#{self.reel.id}"
+
+
 class ReelComment(models.Model):
     reel = models.ForeignKey(Reel, on_delete=models.CASCADE, related_name='comments')
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='reel_comments')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='reel_comments')
     text = models.TextField()
     reply_to = models.ForeignKey(
         'self',
@@ -212,185 +462,66 @@ class ReelComment(models.Model):
     class Meta:
         ordering = ['created_at']
 
+    def __str__(self):
+        return f"{self.user.username}: {self.text[:30]}"
+
+
 class ReelShare(models.Model):
     reel = models.ForeignKey(Reel, on_delete=models.CASCADE, related_name='shares')
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
     shared_at = models.DateTimeField(auto_now_add=True)
 
-class Story(models.Model):
-    title = models.CharField(max_length=200)
-    image = models.ImageField(upload_to='stories/', blank=True, null=True)
-    video = models.FileField(upload_to='stories/videos/', blank=True, null=True)
-    description = models.TextField(blank=True, null=True)
-    link = models.URLField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    expires_at = models.DateTimeField(blank=True, null=True)
-    is_active = models.BooleanField(default=True)
-
-    def is_expired(self):
-        return self.expires_at and timezone.now() > self.expires_at
-
     def __str__(self):
-        return self.title
+        return f"Reel#{self.reel.id} shared"
 
-class StoryView(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    story = models.ForeignKey(Story, on_delete=models.CASCADE, related_name='views')
-    viewed_at = models.DateTimeField(auto_now_add=True)
 
-    class Meta:
-        unique_together = ('user', 'story')
-
-class ChatMessage(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    message = models.TextField()
-    created_at = models.DateTimeField(auto_now_add=True)
-    edited = models.BooleanField(default=False)
-    is_banned = models.BooleanField(default=False)
-    is_admin = models.BooleanField(default=False)
-    reply_to = models.ForeignKey(
-        'self',
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='replies'
-    )
-
-    def can_delete(self, current_user):
-        return self.user == current_user or current_user.is_superuser
-
-    def __str__(self):
-        return f"{self.user.username}: {self.message[:20]}"
-
-class SiteSettings(models.Model):
-    background_video = models.FileField(
-        upload_to='backgrounds/',
-        blank=True,
-        null=True
-    )
-    background_image = models.ImageField(
-        upload_to='backgrounds/',
-        blank=True,
-        null=True
-    )
-    updated_at = models.DateTimeField(auto_now=True)
-
-    def __str__(self):
-        return "Sayt Sozlamalari"
+# ========================
+# USER SETTINGS
+# ========================
 
 class UserSettings(models.Model):
     THEME_CHOICES = [
-        ('dark', 'Qorong''i'),
+        ('dark', "Qorong'i"),
         ('white', 'Oq'),
-        ('rose', 'Qizil / Ro''za'),
-        ('premium', 'Premium (To''q binafsha)'),
+        ('rose', "Qizil / Ro'za"),
+        ('premium', "Premium (To'q binafsha)"),
     ]
+
     user = models.OneToOneField(
-        User,
+        'CustomUser',
         on_delete=models.CASCADE,
         related_name='settings'
     )
+
     theme = models.CharField(
         max_length=20,
         choices=THEME_CHOICES,
         default='dark'
     )
-    bg_color = models.CharField(max_length=30, default='#0a0a0f')
+
+    bg_color = models.CharField(
+        max_length=30,
+        default='#0a0a0f',
+        help_text="Hex yoki gradient kalit so'z"
+    )
+
+    bg_color_custom = models.CharField(
+        max_length=30,
+        default='#0a0a0f',
+        blank=True, null=True
+    )
+
     tabbar_on = models.BooleanField(default=True)
+
+    telegram_username = models.CharField(max_length=100, blank=True, null=True)
+    telegram_chat_id = models.CharField(max_length=50, blank=True, null=True)
+    telegram_bot_token = models.CharField(max_length=200, blank=True, null=True)
+    telegram_notify_on = models.BooleanField(
+        default=False,
+        help_text="Yangi epizod yoki xabar bo'lganda Telegram orqali xabar yuborish"
+    )
+
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"{self.user.username} - sozlamalar"
-
-class ActiveSession(models.Model):
-    DEVICE_CHOICES = [
-        ('mobile', 'Mobil'),
-        ('tablet', 'Planshet'),
-        ('desktop', 'Kompyuter'),
-        ('unknown', 'Noma''lum'),
-    ]
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='active_sessions')
-    session_key = models.CharField(max_length=40, unique=True)
-    device_type = models.CharField(max_length=20, choices=DEVICE_CHOICES, default='unknown')
-    device_name = models.CharField(max_length=200, blank=True, null=True)
-    ip_address = models.GenericIPAddressField(blank=True, null=True)
-    user_agent = models.TextField(blank=True, null=True)
-    created_at = models.DateTimeField(auto_now_add=True)
-    last_activity = models.DateTimeField(auto_now=True)
-
-class UserProfile(models.Model):
-    """Foydalanuvchi profili"""
-    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile')
-    avatar = models.ImageField(upload_to='avatars/', blank=True, null=True)
-    bio = models.TextField(max_length=500, blank=True, verbose_name="Bio")
-    birth_date = models.DateField(blank=True, null=True, verbose_name="Tug'ilgan kun")
-    favorites = models.ManyToManyField(Anime, related_name='favorited_by', blank=True)
-    watchlist = models.ManyToManyField(Anime, related_name='in_watchlist', blank=True)
-    is_premium = models.BooleanField(default=False, verbose_name="Premium")
-    premium_until = models.DateTimeField(blank=True, null=True)
-
-    class Meta:
-        verbose_name = "Foydalanuvchi Profili"
-        verbose_name_plural = "Foydalanuvchi Profillari"
-
-    def __str__(self):
-        return f"{self.user.username} profili"
-
-class WatchHistory(models.Model):
-    """Ko'rish tarixi"""
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='watch_history')
-    anime = models.ForeignKey(Anime, on_delete=models.CASCADE)
-    episode = models.ForeignKey(Episode, on_delete=models.CASCADE, null=True, blank=True)
-    watch_progress = models.IntegerField(default=0, help_text="Daqiqalarda")
-    last_watched = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = "Ko'rish Tarixi"
-        verbose_name_plural = "Ko'rish Tarixi"
-        ordering = ['-last_watched']
-        unique_together = ['user', 'anime', 'episode']
-
-    def __str__(self):
-        return f"{self.user.username} - {self.anime.title}"
-
-class Comment(models.Model):
-    """Izohlar"""
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='comments')
-    anime = models.ForeignKey(Anime, on_delete=models.CASCADE, related_name='comments')
-    text = models.TextField(max_length=1000)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    likes = models.ManyToManyField(User, related_name='liked_comments', blank=True)
-
-    class Meta:
-        verbose_name = "Izoh"
-        verbose_name_plural = "Izohlar"
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.user.username}: {self.text[:50]}"
-
-    def likes_count(self):
-        return self.likes.count()
-
-class NewsPost(models.Model):
-    """Yangiliklar va Blog"""
-    title = models.CharField(max_length=200, verbose_name="Sarlavha")
-    slug = models.SlugField(max_length=200, unique=True)
-    content = models.TextField(verbose_name="Matn")
-    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='news_posts')
-    image = models.ImageField(upload_to='news/images/', blank=True, null=True)
-    tags = models.CharField(max_length=200, blank=True, help_text="Vergul bilan ajrating")
-    views = models.IntegerField(default=0)
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    is_published = models.BooleanField(default=True)
-
-    class Meta:
-        verbose_name = "Yangilik"
-        verbose_name_plural = "Yangiliklar"
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return self.title
+        return f"{self.user.username} – sozlamalar"

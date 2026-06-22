@@ -1,350 +1,354 @@
-﻿<!DOCTYPE html>
-<html lang="uz">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Anime Qidirish | AniStream</title>
+{% extends 'base.html' %}
+{% load static %}
 
-    <!-- ===== SEO META TAGS ===== -->
-    <meta name="description" content="AniStream'da istalgan animeni qidiring. Nom, janr yoki yil bo'yicha qidiruv.">
-    <meta name="keywords" content="anime qidirish, anime search, anime topish">
-    <meta name="author" content="AniStream">
-    <meta name="robots" content="index, follow">
-    <meta name="language" content="Uzbek">
-    <meta name="revisit-after" content="7 days">
-    <link rel="canonical" href="https://anistream.uz/search">
+{% static 'images/default.svg' as default_movie_poster %}
 
-    <!-- Open Graph (Facebook, Telegram, WhatsApp preview) -->
-    <meta property="og:type" content="website">
-    <meta property="og:title" content="Anime Qidirish | AniStream">
-    <meta property="og:description" content="AniStream'da istalgan animeni qidiring. Nom, janr yoki yil bo'yicha qidiruv.">
-    <meta property="og:image" content="https://anistream.uz/static/og-image.jpg">
-    <meta property="og:image:width" content="1200">
-    <meta property="og:image:height" content="630">
-    <meta property="og:url" content="https://anistream.uz/search">
-    <meta property="og:site_name" content="AniStream">
-    <meta property="og:locale" content="uz_UZ">
+{% block title %}Qidiruv | AniStream{% endblock %}
 
-    <!-- Twitter Card -->
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="Anime Qidirish | AniStream">
-    <meta name="twitter:description" content="AniStream'da istalgan animeni qidiring. Nom, janr yoki yil bo'yicha qidiruv.">
-    <meta name="twitter:image" content="https://anistream.uz/static/og-image.jpg">
-    <meta name="twitter:site" content="@anistream_uz">
+{% block extra_css %}
+<style>
+.search-wrapper {
+    max-width: 800px;
+    margin: 20px auto 40px auto;
+    text-align: center;
+}
 
-    <!-- PWA / Mobile -->
-    <meta name="theme-color" content="#ff3366">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="AniStream">
-    <link rel="apple-touch-icon" href="/static/icons/apple-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/icons/favicon-32x32.png">
-    <link rel="icon" type="image/png" sizes="16x16" href="/static/icons/favicon-16x16.png">
-    <link rel="manifest" href="/static/manifest.json">
-    <meta name="robots" content="noindex, follow">
+.search-wrapper form {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    background: var(--glass-bg);
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
 
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "AniStream",
-      "url": "https://anistream.uz",
-      "description": "O'zbekistondagi eng yaxshi anime streaming platformasi. 1000+ anime uzbek tilida bepul tomosha qiling.",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://anistream.uz/search?q={search_term_string}",
-        "query-input": "required name=search_term_string"
-      },
-      "publisher": {
-        "@type": "Organization",
-        "name": "AniStream",
-        "logo": {
-          "@type": "ImageObject",
-          "url": "https://anistream.uz/static/logo.png"
-        }
-      }
-    }
-    </script>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800;900&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --bg-base: #0f0f13;
-            --bg-surface: #1a1a24;
-            --accent: #ff3366;
-            --accent-hover: #ff003c;
-            --text-light: #ffffff;
-            --text-dim: #8a8a9d;
-            --glass-bg: rgba(26, 26, 36, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.05);
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
-        body { background-color: var(--bg-base); color: var(--text-light); overflow-x: hidden; padding-top: 80px; min-height: 100vh; }
+.search-wrapper input {
+    flex: 1;
+    padding: 15px 25px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: white;
+    font-size: 1.1rem;
+    font-family: inherit;
+    outline: none;
+    transition: 0.3s;
+}
 
-        .navbar { position: fixed; top: 0; left: 0; width: 100%; padding: 15px 5%; display: flex; justify-content: space-between; align-items: center; z-index: 1000; background: rgba(15, 15, 19, 0.98); backdrop-filter: blur(10px); box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-        .nav-brand { font-size: 1.8rem; font-weight: 900; color: var(--text-light); text-decoration: none; display: flex; align-items: center; gap: 10px; }
-        .nav-brand span { color: var(--accent); }
-        .nav-menu { display: flex; gap: 35px; }
-        .nav-menu a { color: var(--text-light); text-decoration: none; font-weight: 600; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 1px; position: relative; transition: color 0.3s; }
-        .nav-menu a:hover { color: var(--accent); }
-        .nav-actions { display: flex; gap: 15px; }
-        .action-icon { background: transparent; border: none; color: var(--text-light); width: 45px; height: 45px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; transition: background 0.2s ease; font-size: 1.4rem; text-decoration: none; }
-        .action-icon:hover { background: rgba(255, 255, 255, 0.1); }
-        .profile-btn { background: var(--glass-bg); border: 1px solid var(--glass-border); }
-        .profile-btn:hover { background: var(--accent); border-color: var(--accent); transform: translateY(-2px); }
+.search-wrapper input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 15px rgba(255, 51, 102, 0.2);
+}
 
-        .container { max-width: 1200px; margin: 0 auto; padding: 60px 5%; }
-        .search-hero { text-align: center; margin-bottom: 50px; }
-        .search-hero h1 { font-size: 4rem; font-weight: 900; margin-bottom: 20px; }
-        .search-hero h1 span { color: var(--accent); }
-        .search-hero p { color: var(--text-dim); font-size: 1.2rem; font-weight: 600; }
+.btn-search {
+    padding: 15px 35px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 800;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: 0.3s;
+    font-family: inherit;
+}
 
-        .search-box-large { display: flex; gap: 15px; max-width: 700px; margin: 0 auto 40px auto; }
-        .search-input-large { flex: 1; background: var(--bg-surface); border: 2px solid var(--glass-border); border-radius: 16px; padding: 20px 25px; color: var(--text-light); font-size: 1.1rem; outline: none; transition: all 0.3s; }
-        .search-input-large:focus { border-color: var(--accent); box-shadow: 0 0 20px rgba(255, 51, 102, 0.2); }
-        .search-btn-large { background: var(--accent); color: white; border: none; border-radius: 16px; padding: 20px 40px; font-weight: 800; font-size: 1.1rem; cursor: pointer; transition: all 0.3s; }
-        .search-btn-large:hover { background: var(--accent-hover); transform: translateY(-3px); box-shadow: 0 10px 30px rgba(255, 51, 102, 0.5); }
+.btn-search:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 51, 102, 0.4);
+}
 
-        .trending-section { margin-bottom: 50px; }
-        .section-title { font-size: 1.5rem; font-weight: 800; margin-bottom: 20px; color: var(--text-dim); }
-        .trending-tags { display: flex; flex-wrap: wrap; gap: 12px; }
-        .trending-tag { background: var(--bg-surface); border: 1px solid var(--glass-border); color: var(--text-light); padding: 12px 20px; border-radius: 12px; font-weight: 700; font-size: 0.95rem; cursor: pointer; transition: all 0.3s; text-decoration: none; display: inline-block; }
-        .trending-tag:hover { background: var(--accent); border-color: var(--accent); color: white; transform: translateY(-2px); }
+/* Cards reuse existing AniStream grid */
+.cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 25px;
+    padding-bottom: 50px;
+}
 
-        .results-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 25px; margin-top: 40px; }
-        .card-wrapper { text-decoration: none; color: inherit; display: flex; flex-direction: column; gap: 10px; }
-        .anime-card { width: 100%; height: 310px; border-radius: 12px; position: relative; overflow: hidden; cursor: pointer; border: 2px solid transparent; transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; }
-        .card-wrapper:hover .anime-card { transform: scale(1.05); border-color: var(--accent); box-shadow: 0 10px 20px rgba(255, 51, 102, 0.2); }
-        .anime-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
-        .card-wrapper:hover .anime-card img { transform: scale(1.1); }
-        .anime-card::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to top, rgba(15,15,19,0.9) 0%, rgba(15,15,19,0.2) 50%, transparent 100%); transition: background 0.3s; }
-        .card-wrapper:hover .anime-card::after { background: linear-gradient(to top, rgba(255, 51, 102, 0.6) 0%, rgba(15,15,19,0.4) 60%, transparent 100%); }
-        .top-badge { position: absolute; top: 10px; left: 10px; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: 800; color: #FFC107; z-index: 10; }
-        .badge-quality { position: absolute; top: 10px; right: 10px; background: var(--accent); padding: 4px 6px; border-radius: 4px; font-size: 0.65rem; font-weight: 900; color: white; z-index: 10; }
-        .card-info-bottom { display: flex; flex-direction: column; gap: 4px; }
-        .card-title { font-size: 1rem; font-weight: 800; color: var(--text-light); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.3s ease; }
-        .card-wrapper:hover .card-title { color: var(--accent); }
-        .card-meta { display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-weight: 700; color: var(--text-dim); }
-        .tag-jp { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.65rem; }
+.card-wrapper {
+     text-decoration: none;
+     color: inherit;
+     display: flex;
+     flex-direction: column;
+     gap: 10px;
+}
 
-        @media (max-width: 768px) {
-            .nav-menu { display: none; }
-            .search-hero h1 { font-size: 2.5rem; }
-            .search-box-large { flex-direction: column; }
-            .results-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
-            .anime-card { height: 230px; }
-        }
+.anime-card {
+    width: 100%;
+    height: 300px;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
 
-        /* ===== HAMBURGER MENU ===== */
-        .hamburger {
-            display: none;
-            flex-direction: column;
-            gap: 5px;
-            cursor: pointer;
-            background: transparent;
-            border: none;
-            padding: 5px;
-            z-index: 10001;
-        }
-        .hamburger span {
-            display: block;
-            width: 25px;
-            height: 2px;
-            background: #fff;
-            border-radius: 2px;
-            transition: all 0.3s ease;
-        }
-        .hamburger.active span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-        .hamburger.active span:nth-child(2) { opacity: 0; }
-        .hamburger.active span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+.card-wrapper:hover .anime-card {
+    transform: scale(1.05);
+    border-color: var(--accent);
+    box-shadow: 0 10px 20px rgba(255, 51, 102, 0.2);
+}
 
-        .mobile-nav-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(15,15,19,0.98);
-            z-index: 10000;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            gap: 0;
-        }
-        .mobile-nav-overlay.open { display: flex; }
-        .mobile-nav-overlay a {
-            color: #fff;
-            text-decoration: none;
-            font-size: 1.4rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            padding: 18px 40px;
-            width: 100%;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            transition: color 0.2s, background 0.2s;
-        }
-        .mobile-nav-overlay a:hover { color: #ff3366; background: rgba(255,51,102,0.05); }
-        .mobile-nav-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: transparent;
-            border: none;
-            color: white;
-            font-size: 1.8rem;
-            cursor: pointer;
-        }
+.anime-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s ease;
+}
 
-        /* ===== RESPONSIVE: UMUMIY ===== */
-        @media (max-width: 1024px) {
-            .container { padding: 0 4%; }
-        }
-        @media (max-width: 768px) {
-            .navbar, nav.navbar { padding: 12px 4%; }
-            .nav-menu { display: none !important; }
-            .hamburger { display: flex !important; }
-            .nav-brand { font-size: 1.4rem; }
-            .nav-actions .action-icon:not(.profile-btn):not(.search-icon) { display: none; }
-            .container { padding: 0 4%; }
+.card-wrapper:hover .anime-card img {
+    transform: scale(1.1);
+}
 
-            .page-header { padding: 80px 4% 30px; text-align: center; }
-            .page-title { font-size: 2rem !important; }
+.anime-card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to top, rgba(15,15,19,0.9) 0%, rgba(15,15,19,0.2) 50%, transparent 100%);
+    transition: background 0.3s;
+}
 
-            .anime-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important; gap: 12px !important; }
-            .anime-card { height: 210px !important; }
+.card-wrapper:hover .anime-card::after {
+    background: linear-gradient(to top, rgba(255, 51, 102, 0.6) 0%, rgba(15,15,19,0.4) 60%, transparent 100%);
+}
 
-            .genres-grid, .features-grid, .stats-grid {
-                grid-template-columns: 1fr 1fr !important;
-                gap: 15px;
-            }
-            .filters-grid { grid-template-columns: 1fr !important; }
+.top-badge {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #FFC107;
+    z-index: 10;
+}
 
-            .profile-sidebar { width: 100%; right: -100%; border-left: none; }
-            .profile-sidebar.active { right: 0; }
+.top-badge-group {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    display: flex;
+    gap: 4px;
+    z-index: 10;
+}
 
-            /* Auth */
-            .auth-wrapper { flex-direction: column; min-height: auto; }
-            .auth-left { display: none; }
-            .auth-right { width: 100%; padding: 20px; }
-            .auth-card { padding: 30px 20px; max-width: 100%; }
+.top-badge-episode {
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #FFC107;
+}
 
-            /* Premium */
-            .pricing-grid { grid-template-columns: 1fr !important; max-width: 400px; margin: 0 auto; }
+.top-badge-year {
+    background: #eab308;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: #000;
+}
 
-            /* Schedule */
-            .schedule-grid { grid-template-columns: 1fr !important; }
+.fav-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(4px);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff;
+    font-size: 1.1rem;
+    z-index: 10;
+    transition: 0.3s;
+}
+.fav-badge:hover {
+    background: rgba(255,255,255,0.2);
+    color: #ff3366;
+}
+.fav-badge i.bxs-star {
+    color: #ff3366;
+}
 
-            /* News */
-            .news-grid { grid-template-columns: 1fr !important; }
+.card-info-bottom {
+     display: flex;
+     flex-direction: column;
+     gap: 4px;
+}
 
-            /* Search */
-            .search-hero { padding: 80px 4% 30px; }
+.card-title {
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: var(--text-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
 
-            /* Contact */
-            .contact-grid { grid-template-columns: 1fr !important; }
-            .contact-form-wrapper { padding: 25px 20px; }
+.card-wrapper:hover .card-title {
+     color: var(--accent);
+}
 
-            /* Settings */
-            .settings-layout { flex-direction: column !important; }
-            .settings-sidebar-nav { width: 100% !important; }
+.card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--text-dim);
+}
 
-            /* Profile */
-            .profile-header { flex-direction: column; text-align: center; gap: 20px; }
-            .profile-stats { justify-content: center; }
+.tag-jp { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; color: white; font-size: 0.7rem; }
 
-            /* FAQ */
-            .faq-grid { grid-template-columns: 1fr !important; }
+.hide-cards { display: none !important; }
 
-            /* History */
-            .history-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)) !important; }
-        }
-        @media (max-width: 480px) {
-            .page-title { font-size: 1.6rem !important; }
-            .nav-brand { font-size: 1.2rem; }
-            .anime-grid { grid-template-columns: repeat(2, 1fr) !important; }
-            .genres-grid, .features-grid, .stats-grid { grid-template-columns: 1fr !important; }
-            .section-title h3, .section-title { font-size: 1.3rem !important; }
-        }
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0,0,0,0);
+    border: 0;
+}
 
-    </style>
-</head>
-<body>
+@media (max-width: 768px) {
+    .search-wrapper { margin: 10px auto 28px; }
+    .search-wrapper form { flex-direction: column; padding: 14px; }
+    .search-wrapper input, .btn-search { width: 100%; }
+    .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+    .anime-card { height: 220px; }
+}
 
-<nav class="navbar">
-    <a href="{% url 'home' %}" class="nav-brand">Ani<span>Stream</span></a>
-    <div class="nav-menu">
-        <a href="{% url 'catalog' %}">Katalog</a>
-        <a href="{% url 'genres' %}">Janrlar</a>
-        <a href="{% url 'schedule' %}">Jadval</a>
-        <a href="{% url 'news_list' %}">Yangiliklar</a>
-    </div>
-    <div class="nav-actions">
-        <a href="{% url 'search' %}" class="action-icon search-icon" style="background: var(--accent);">🔍</a>
-        <div class="action-icon">🔔</div>
-        <a href="{% if request.user.is_authenticated %}{% url 'profile' %}{% else %}{% url 'auth_page' %}{% endif %}" class="action-icon profile-btn">👤</a>
-    </div>
-</nav>
+@media (max-width: 480px) {
+    .search-wrapper h2 { font-size: 1.15rem; }
+    .search-wrapper input { font-size: 0.95rem; padding: 12px 14px; }
+    .btn-search { font-size: 0.95rem; padding: 12px 16px; }
+    .cards-grid { gap: 12px; }
+    .anime-card { height: 180px; }
+    .card-title { font-size: 0.9rem; }
+    .card-meta { font-size: 0.72rem; }
+}
+</style>
+{% endblock %}
 
-<div class="container">
-    <div class="search-hero">
-        <h1>Anime <span>Qidiruv</span></h1>
-        <p>O'zingizga yoqqan animeni toping</p>
+{% block content %}
+<main class="main-content">
+    <a href="javascript:history.back()" style="display:inline-flex; align-items:center; gap:5px; margin-bottom: 20px; color: var(--accent); text-decoration: none; font-weight: 800; background: rgba(0,243,255,0.1); padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(0,243,255,0.2); transition: 0.3s;" onmouseover="this.style.background='rgba(0,243,255,0.2)'" onmouseout="this.style.background='rgba(0,243,255,0.1)'"><i class='bx bx-arrow-back'></i> Orqaga</a>
+    <div class="search-header">
+        <h1 class="search-title">Qidiruv</h1>
+        <p class="search-subtitle">Anime, serial yoki filmlarni toping...</p>
     </div>
 
-    <form class="search-box-large" method="get" action="{% url 'search' %}">
-        <input type="text" name="q" value="{{ query }}" class="search-input-large" placeholder="Anime nomini kiriting...">
-        <button type="submit" class="search-btn-large">QIDIRISH</button>
-    </form>
-
-    <div class="trending-section">
-        <h2 class="section-title">MASHHUR QIDIRUVLAR</h2>
-        <div class="trending-tags">
-            <a href="{% url 'catalog' %}?q=naruto" class="trending-tag">Naruto</a>
-            <a href="{% url 'catalog' %}?q=one piece" class="trending-tag">One Piece</a>
-            <a href="{% url 'catalog' %}?q=demon slayer" class="trending-tag">Demon Slayer</a>
-            <a href="{% url 'catalog' %}?q=attack on titan" class="trending-tag">Attack on Titan</a>
-            <a href="{% url 'catalog' %}?q=jujutsu kaisen" class="trending-tag">Jujutsu Kaisen</a>
-            <a href="{% url 'catalog' %}?q=my hero academia" class="trending-tag">My Hero Academia</a>
-            <a href="{% url 'catalog' %}?q=spy family" class="trending-tag">Spy x Family</a>
-            <a href="{% url 'catalog' %}?q=chainsaw man" class="trending-tag">Chainsaw Man</a>
-        </div>
+    <div class="search-wrapper">
+        <h2 style="margin-bottom: 20px; font-weight: 800;">Barcha animelar</h2>
+        <form method="GET" action="{% url 'search' %}" onsubmit="return false;">
+            <label class="sr-only" for="search-input">Anime nomini yozing</label>
+            <input type="text" id="search-input" placeholder="Anime nomini yozing..." aria-label="Anime nomini yozing" autocomplete="off">
+            <button type="submit" class="btn-search">Qidirish</button>
+        </form>
     </div>
 
-    <div class="trending-section">
-        <h2 class="section-title">{% if query %}Qidiruv natijalari{% else %}TAVSIYA ETILADIGAN{% endif %}</h2>
-        <div class="results-grid">
-            {% for anime in results %}
-            <a href="{% url 'detail' anime.id %}" class="card-wrapper">
-                <div class="anime-card">
-                    <div class="top-badge">★ {{ anime.rating|floatformat:1 }}</div>
-                    <div class="badge-quality">HD</div>
-                    <img src="{{ anime.image.url }}" alt="{{ anime.title }}">
+    <div class="cards-grid" id="mainGrid">
+        {% for anime in movies %}
+        <div class="card-wrapper search-card" data-title="{{ anime.title|lower }}">
+            <div class="anime-card" onclick="window.location.href='{% url 'movie_detail' anime.id %}'" style="cursor:pointer;">
+                <div class="top-badge-group">
+                    {% if anime.release_year %}
+                    <div class="top-badge-year">{{ anime.release_year }}</div>
+                    {% endif %}
+                    {% if anime.episodes.count > 0 %}
+                    <div class="top-badge-episode">{{ anime.episodes.count }} qism</div>
+                    {% else %}
+                    <div class="top-badge-episode">Film</div>
+                    {% endif %}
                 </div>
-                <div class="card-info-bottom">
-                    <h4 class="card-title">{{ anime.title }}</h4>
-                    <div class="card-meta"><span class="tag-jp">JP</span><span>{{ anime.release_year }}</span></div>
-                </div>
-            </a>
-            {% empty %}
-            <p style="color: var(--text-dim);">{% if query %}Hech narsa topilmadi.{% else %}Qidiruv so'zini kiriting.{% endif %}</p>
-            {% endfor %}
-        </div>
-    </div>
-</div>
 
+                <div class="fav-badge" onclick="toggleFavorite(event, {{ anime.id }})">
+                    {% if anime.id in fav_ids %}
+                        <i class='bx bxs-star' id="fav-icon-{{ anime.id }}"></i>
+                    {% else %}
+                        <i class='bx bx-star' id="fav-icon-{{ anime.id }}"></i>
+                    {% endif %}
+                </div>
+
+                <img src="{% if anime.image_url %}{{ anime.image_url }}{% elif anime.image %}{{ anime.image.url }}{% else %}{{ default_movie_poster }}{% endif %}" alt="{{ anime.title }}" loading="lazy">
+            </div>
+
+            <div class="card-info-bottom" style="margin-top:8px;">
+                 <a href="{% url 'movie_detail' anime.id %}" style="text-decoration:none; color:inherit;">
+                     <h4 class="card-title">{{ anime.title }}</h4>
+                 </a>
+                 <div class="card-meta" style="margin-top:4px;">
+                      {% if anime.category %}<span class="tag-jp">{{ anime.category.name }}</span>{% endif %}
+                      <span style="font-weight:800; color:var(--text-dim);">{{ anime.release_year|default:anime.created_at|date:"Y" }}</span>
+                 </div>
+                 <div class="card-meta" style="margin-top:6px; display:flex; justify-content:space-between; align-items:center;">
+                      <span style="display:flex; align-items:center; gap:4px; font-size:0.8rem; color:var(--text-dim);"><i class='bx bx-show'></i> {{ anime.views_count|default:"0" }}</span>
+                       {% if anime.minimum_tier == 'vip' %}
+                       <span style="display:flex; align-items:center; gap:3px; font-size:0.8rem; color:#f43f5e; font-weight:800;"><i class='bx bxs-diamond'></i> VIP</span>
+                       {% elif anime.minimum_tier == 'premium' or anime.is_premium %}
+                       <span style="display:flex; align-items:center; gap:3px; font-size:0.8rem; color:#fbbf24; font-weight:800;"><i class='bx bxs-crown'></i> Premium</span>
+                       {% else %}
+                       <span style="font-size:0.8rem; color:#4ade80; font-weight:800;">Bepul</span>
+                       {% endif %}
+                 </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</main>
 
 <script>
-    function toggleMobileNav() {
-        const overlay = document.getElementById('mobileNavOverlay');
-        const btn = document.getElementById('hamburgerBtn');
-        if (overlay && btn) {
-            overlay.classList.toggle('open');
-            btn.classList.toggle('active');
-            document.body.style.overflow = overlay.classList.contains('open') ? 'hidden' : '';
+const searchInput = document.getElementById('search-input');
+const cards = document.querySelectorAll('.search-card');
+const container = document.getElementById('mainGrid');
+
+searchInput.addEventListener('input', () => {
+    const query = searchInput.value.toLowerCase().trim();
+
+    let anyVisible = false;
+    cards.forEach(card => {
+        const title = card.getAttribute('data-title');
+        if(query.length === 0 || title.includes(query)){
+            card.style.display = 'flex';
+            anyVisible = true;
+        } else {
+            card.style.display = 'none';
         }
+    });
+
+    let existingMsg = document.getElementById('no-results-msg');
+    if(!anyVisible && query.length > 0){
+        if(!existingMsg){
+            const msg = document.createElement('p');
+            msg.id = 'no-results-msg';
+            msg.textContent = `"${query}" bo‘yicha hech narsa topilmadi ❌`;
+            msg.style.gridColumn = '1 / -1';
+            msg.style.textAlign = 'center';
+            msg.style.fontSize = '1.2rem';
+            msg.style.color = 'var(--text-dim)';
+            msg.style.marginTop = '40px';
+            container.appendChild(msg);
+        }
+    } else if(existingMsg){
+        existingMsg.remove();
     }
+});
 </script>
-
-</body>
-</html>
-
+{% endblock %}

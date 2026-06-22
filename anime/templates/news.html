@@ -1,0 +1,595 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<title>AniStream NEWS - Anime va kanal Yangiliklari</title>
+
+<meta name="description"
+content="AniStream NEWS — Anime, manga,trend yangiliklarini o‘qing. Eng yangi anime xabarlari va media kontentlar.">
+
+<meta name="keywords"
+content="anime news, anime uzbek, manga, news, anistream, anime yangiliklari">
+
+<meta name="author" content="AniStream OFFICIAL">
+
+<meta name="robots" content="index, follow">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- GOOGLE -->
+<meta name="googlebot" content="index, follow">
+
+<!-- OPEN GRAPH -->
+<meta property="og:title" content="AniStream NEWS">
+<meta property="og:description"
+content="Anime va gaming yangiliklari platformasi">
+
+<meta property="og:image" content="https://i.pinimg.com/736x/21/6f/47/216f4718f7675003001a16e35585975e.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+
+<meta property="og:type" content="website">
+
+<!-- TWITTER -->
+<meta name="twitter:card" content="summary_large_image">
+
+<!-- CANONICAL -->
+<link rel="canonical" href="https://anistream-official.uz/news">
+
+<!-- FAVICON -->
+<link rel="icon"
+href="https://anistream-official.uz/favicon.ico"
+type="image/x-icon">
+
+
+<link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+<link rel="icon"
+href="{% static 'images/favicon.svg' %}"
+type="image/svg+xml">
+
+<style>
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    color: #fff;
+
+    background-image: url("https://i.pinimg.com/736x/1d/6a/08/1d6a08d9b18f16cc49cdaddfa878e8a0.jpg");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    background-attachment: fixed;
+}
+
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 12px 14px;
+    background: rgba(20,20,20,0.8);
+    backdrop-filter: blur(12px);
+
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+/* CENTER TITLE */
+.nav-title {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+/* BUTTONS */
+.nav-btn {
+    background: rgba(255,255,255,0.08);
+    border: none;
+    color: white;
+    padding: 6px 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+/* SETTINGS PANEL */
+.settings-wrapper {
+    position: relative;
+}
+
+.settings-panel {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 40px;
+
+    background: #1c1c1c;
+    padding: 10px;
+    border-radius: 12px;
+    width: 180px;
+
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.bg-list {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.settings-panel img {
+    width: 55px;
+    height: 55px;
+    object-fit: cover;
+
+    border-radius: 50%;
+    cursor: pointer;
+
+    border: 2px solid rgba(255,255,255,0.15);
+    transition: 0.2s ease;
+}
+
+.settings-panel img:hover {
+    transform: scale(1.1);
+    border-color: #ff3b5c;
+}
+
+.reset-btn {
+    width: 100%;
+    padding: 6px;
+    border: none;
+    background: #ff3b5c;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+/* CARD */
+.card {
+    background: rgba(26, 26, 26, 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+
+
+    margin: 10px;
+    border-radius: 16px;
+    overflow: hidden;
+
+    border: 1px solid rgba(255, 255, 255, 0.08);
+
+    box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    position: relative;
+}
+
+/* butun card bosiladigan bo‘lsin */
+.card-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+}
+
+/* boshqa buttonlar ustida ishlashi uchun */
+.actions {
+    position: relative;
+    z-index: 2;
+}
+
+/* hover effect (desktop) */
+.card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 35px rgba(0,0,0,0.6);
+}
+
+.card img {
+    width: 100%;
+    aspect-ratio: 16 / 9;   /* bir xil format */
+    object-fit: contain;
+    background: #111;
+}
+
+/* CONTENT */
+.content {
+    padding: 10px;
+}
+
+.title {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 5px;
+}
+
+.desc {
+    font-size: 14px;
+    color: #bbb;
+}
+
+/* BUTTONS */
+.actions {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    border-top: 1px solid #333;
+}
+
+.btn {
+    cursor: pointer;
+    font-size: 14px;
+    color: #fff;
+    background: none;
+    border: none;
+}
+
+.like {
+    color: #ff4d4d;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.card-container {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 10px;
+    padding: 10px;
+}
+
+.like-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,255,255,0.06);
+    border: none;
+    padding: 6px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.like-icon {
+    font-size: 20px;
+    color: #aaa;
+    transition: 0.2s;
+}
+
+.like-btn.liked .like-icon {
+    color: #ff3b5c;
+    transform: scale(1.2);
+}
+
+@media (max-width: 600px) {
+
+        .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
+        padding: 12px 14px;
+        font-size: 16px;
+
+        background: rgba(28, 28, 28, 0.85);
+        backdrop-filter: blur(10px);
+
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    /* 🔙 BACK BUTTON */
+    .back-btn {
+        font-size: 13px;
+        color: #fff;
+        text-decoration: none;
+
+        background: rgba(255,255,255,0.08);
+        padding: 6px 10px;
+        border-radius: 8px;
+
+        transition: 0.2s;
+    }
+
+    .back-btn:active {
+        transform: scale(0.95);
+    }
+
+    /* 🔥 TITLE CENTER EFFECT */
+    .header-title {
+        flex: 1;
+        text-align: center;
+        font-weight: 600;
+        font-size: 16px;
+        color: #fff;
+    }
+
+    /* 📦 CONTAINER */
+    .card-container {
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        gap: 12px;
+
+        /* 🔥 chetlardan bo‘shliq */
+        padding: 12px 10px;
+
+        box-sizing: border-box;
+    }
+
+    /* 🧊 CARD */
+    .card {
+        border-radius: 14px;
+        overflow: hidden;
+        margin: 0;
+
+        /* yumshoq ko‘rinish */
+        border: 1px solid rgba(255, 255, 255, 0.05);
+
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    /* ✨ tap effect (mobile hover o‘rniga) */
+    .card:active {
+        transform: scale(0.98);
+    }
+
+    /* 🖼 IMAGE */
+    .card img {
+        width: 100%;
+        height: auto;
+        object-fit: contain;
+        display: block;
+        background: #000;
+    }
+
+    /* 📰 TITLE */
+    .title {
+        font-size: 16px;
+        font-weight: 600;
+        line-height: 1.3;
+    }
+
+    /* 📝 DESCRIPTION */
+    .desc {
+        font-size: 13px;
+        color: #bbb;
+        line-height: 1.4;
+
+        /* 3 qator limit */
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    /* ❤️ + BUTTONS */
+    .actions {
+        padding: 8px;
+    }
+
+    .btn {
+        font-size: 13px;
+    }
+}
+
+
+@media (min-width: 768px) {
+    .card-container {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .card {
+        border-radius: 14px;
+        overflow: hidden;
+        transition: transform 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+    }
+
+    .card img {
+        width: 100%;
+        height: auto;
+        object-fit: contain; /* rasm qirqilmasin */
+    }
+
+    .title {
+        font-size: 19px;
+    }
+
+    .desc {
+        font-size: 14px;
+    }
+}
+
+
+
+/* 🖥 DESKTOP */
+@media (min-width: 1024px) {
+    .card-container {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+</style>
+
+<meta name="google-site-verification" content="GOOGLE_CODE">
+</head>
+
+<body>
+
+<div class="header">
+
+    <!-- LEFT: BACK -->
+    <a href="{% url 'home' %}" class="nav-btn">
+        ⬅ Orqaga
+    </a>
+
+    <!-- CENTER TITLE -->
+    <div class="nav-title">
+        AniStream NEWS
+    </div>
+
+    <!-- RIGHT SETTINGS -->
+    <div class="settings-wrapper">
+        <button onclick="toggleSettings()" class="nav-btn">
+            ⚙ Sozlamalar
+        </button>
+
+        <!-- DROPDOWN -->
+        <div id="settingsPanel" class="settings-panel">
+
+            <h4>🎨 Background tanlash</h4>
+
+            <div class="bg-list">
+                <img src="https://i.pinimg.com/736x/5b/53/88/5b53888b7f316b71d14f25932d09a7a8.jpg"
+                     onclick="setBg(this.src)">
+
+                <img src="https://i.pinimg.com/736x/2f/3e/24/2f3e24af82da99275c2d8677985c5a26.jpg"
+                     onclick="setBg(this.src)">
+            </div>
+
+            <button onclick="resetBg()" class="reset-btn">Reset</button>
+
+        </div>
+    </div>
+
+</div>
+
+<div class="card-container">
+
+{% for news in news_list %}
+
+<div class="card">
+
+    <!-- 🔥 CARD FULL CLICK -->
+    <a href="{% url 'news_detail' news.id %}" class="card-link"></a>
+
+    <a href="{% url 'news_detail' news.id %}">
+        <img src="{{ news.image.url }}" alt="news image">
+    </a>
+
+    <div class="content">
+        <div class="title">{{ news.title }}</div>
+        <div class="desc">
+            {{ news.description|truncatechars:120 }}
+        </div>
+    </div>
+
+    <div class="actions">
+
+        <button class="like-btn {% if user in news.likes.all %}liked{% endif %}"
+                onclick="likeNews({{ news.id }})">
+
+            <i class="bx {% if user in news.likes.all %}bxs-heart{% else %}bx-heart{% endif %} like-icon"></i>
+
+            <span id="like-{{ news.id }}">{{ news.total_likes }}</span>
+        </button>
+
+        <!-- 📖 O‘QISH -->
+        <a href="{% url 'news_detail' news.id %}" class="btn">📖 O‘qish</a>
+
+    </div>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+<script>
+
+let settingsOpen = false;
+
+function likeNews(id) {
+
+    const btn = document.querySelector(`#like-${id}`).closest(".like-btn");
+
+    fetch(`/news/${id}/like/`, {
+        method: "GET",
+        headers: {
+            "X-Requested-With": "XMLHttpRequest"
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        document.getElementById(`like-${id}`).innerText = data.total_likes;
+
+        if (data.liked) {
+            btn.classList.add("liked");
+            btn.querySelector("i").className = "bx bxs-heart like-icon";
+        } else {
+            btn.classList.remove("liked");
+            btn.querySelector("i").className = "bx bx-heart like-icon";
+        }
+
+    });
+}
+
+
+
+function setBg(url) {
+    document.body.style.backgroundImage = `url(${url})`;
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundPosition = "center";
+
+    localStorage.setItem("bg", url);
+}
+
+function resetBg() {
+    document.body.style.backgroundImage = "none";
+    localStorage.removeItem("bg");
+}
+
+/* LOAD SAVED BG */
+window.onload = function () {
+    const bg = localStorage.getItem("bg");
+    if (bg) setBg(bg);
+}
+
+function toggleSettings() {
+    const panel = document.getElementById("settingsPanel");
+    settingsOpen = !settingsOpen;
+    panel.style.display = settingsOpen ? "block" : "none";
+}
+
+function closeSettings() {
+    const panel = document.getElementById("settingsPanel");
+    panel.style.display = "none";
+    settingsOpen = false;
+}
+
+/* scroll bo‘lsa */
+window.addEventListener("scroll", () => {
+    if (settingsOpen) closeSettings();
+});
+
+/* ekranga touch bo‘lsa */
+document.addEventListener("touchstart", (e) => {
+    const panel = document.getElementById("settingsPanel");
+    const button = document.querySelector(".settings-wrapper");
+
+    if (settingsOpen && !button.contains(e.target)) {
+        closeSettings();
+    }
+});
+
+window.addEventListener("scroll", function () {
+    localStorage.setItem("scrollPos", window.scrollY);
+});
+
+</script>
+
+</body>
+</html>
