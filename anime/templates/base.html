@@ -883,6 +883,7 @@
 
     <div class="nav-menu">
         <a href="{% url 'anime_catalog' %}" class="pill-nav-item"><i class='bx bx-play-circle'></i> KATALOG</a>
+        <a href="{% url 'anime_schedule' %}" class="pill-nav-item"><i class='bx bx-calendar'></i> JADVAL</a>
         <a href="{% url 'chat' %}" class="pill-nav-item"><i class='bx bx-message-dots'></i> CHAT</a>
         <a href="javascript:void(0)" class="pill-nav-item" onclick="toggleProfileMenu()"><i class='bx bx-user'></i> PROFIL</a>
         <a href="{% url 'home' %}" class="pill-nav-item"><i class='bx bx-home-alt'></i> BOSH SAHIFA</a>
@@ -928,6 +929,13 @@
         <a href="{% url 'anime_catalog' %}" class="mobile-menu-item">
             <i class='bx bx-play-circle'></i>
             Katalog
+            <i class='bx bx-chevron-right m-arrow'></i>
+        </a>
+        <hr class="mobile-hr">
+
+        <a href="{% url 'anime_schedule' %}" class="mobile-menu-item">
+            <i class='bx bx-calendar'></i>
+            Jadval
             <i class='bx bx-chevron-right m-arrow'></i>
         </a>
         <hr class="mobile-hr">
