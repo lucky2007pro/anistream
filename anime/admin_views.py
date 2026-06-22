@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
 from django.http import JsonResponse
 from django.urls import reverse
-from .models import CustomUser, Movie, MovieEpisode, Category, ChatMessage, SubscriptionReceipt, ProfileAvatar, VipUser, MovieComment
+from .models import CustomUser, Movie, MovieEpisode, Category, ChatMessage, SubscriptionReceipt, ProfileAvatar, VipUser, MovieComment, AnimeSchedule
 
 def is_admin(user):
     return user.is_authenticated and (user.is_staff or user.is_superuser or user.is_admin_user)
@@ -452,3 +452,67 @@ def admin_story_delete(request, pk):
     story.delete()
     messages.success(request, "Story o'chirildi!")
     return redirect('admin_stories')
+
+
+# =======================
+# ANIME SCHEDULE ADMIN
+# =======================
+@user_passes_test(is_admin, login_url='/')
+def admin_schedule(request):
+    schedules = AnimeSchedule.objects.select_related('anime').all()
+    context = {
+        'schedules': schedules,
+        'day_choices': AnimeSchedule.DAY_CHOICES,
+    }
+    return render(request, 'custom_admin/schedule_list.html', context)
+
+
+@user_passes_test(is_admin, login_url='/')
+def admin_schedule_form(request, pk=None):
+    schedule = get_object_or_404(AnimeSchedule, pk=pk) if pk else None
+    movies = Movie.objects.all().order_by('title')
+
+    if request.method == 'POST':
+        anime_id   = request.POST.get('anime')
+        day        = request.POST.get('day_of_week')
+        episode    = request.POST.get('episode_number', 1)
+        fandub     = request.POST.get('fandub', 'AniStream')
+        air_time   = request.POST.get('air_time', '')
+        order      = request.POST.get('order', 0)
+        is_active  = request.POST.get('is_active') == 'on'
+
+        if not anime_id or not day:
+            messages.error(request, "Anime va hafta kunini tanlang!")
+            return render(request, 'custom_admin/schedule_form.html', {
+                'schedule': schedule, 'movies': movies,
+                'day_choices': AnimeSchedule.DAY_CHOICES
+            })
+
+        anime = get_object_or_404(Movie, pk=anime_id)
+        if not schedule:
+            schedule = AnimeSchedule()
+
+        schedule.anime        = anime
+        schedule.day_of_week  = day
+        schedule.episode_number = int(episode)
+        schedule.fandub       = fandub
+        schedule.air_time     = air_time
+        schedule.order        = int(order)
+        schedule.is_active    = is_active
+        schedule.save()
+        messages.success(request, "Jadval muvaffaqiyatli saqlandi!")
+        return redirect('admin_schedule')
+
+    return render(request, 'custom_admin/schedule_form.html', {
+        'schedule': schedule,
+        'movies': movies,
+        'day_choices': AnimeSchedule.DAY_CHOICES,
+    })
+
+
+@user_passes_test(is_admin, login_url='/')
+def admin_schedule_delete(request, pk):
+    schedule = get_object_or_404(AnimeSchedule, pk=pk)
+    schedule.delete()
+    messages.success(request, "Jadvaldan o'chirildi!")
+    return redirect('admin_schedule')

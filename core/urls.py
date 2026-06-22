@@ -76,6 +76,11 @@ urlpatterns = [
     path('control-panel/stories/<int:pk>/edit/', admin_story_form, name='admin_story_form'),
     path('control-panel/stories/<int:pk>/delete/', admin_story_delete, name='admin_story_delete'),
 
+    path('control-panel/schedule/', admin_schedule, name='admin_schedule'),
+    path('control-panel/schedule/add/', admin_schedule_form, name='admin_schedule_form'),
+    path('control-panel/schedule/<int:pk>/edit/', admin_schedule_form, name='admin_schedule_form_edit'),
+    path('control-panel/schedule/<int:pk>/delete/', admin_schedule_delete, name='admin_schedule_delete'),
+
     path(
         'sitemap.xml',
         sitemap,
@@ -107,6 +112,9 @@ urlpatterns = [
     path('settings/premium/', views.settings_premium, name='settings_premium'),
     path('settings/devices/', views.settings_devices, name='settings_devices'),
     path('settings/privacy/', views.settings_privacy, name='settings_privacy'),
+
+    # SCHEDULE
+    path('jadval/', views.anime_schedule, name='anime_schedule'),
 ]
 
 

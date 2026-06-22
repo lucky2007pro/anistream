@@ -1,0 +1,121 @@
+{% extends 'custom_admin/base.html' %}
+
+{% block title %}{% if schedule %}Jadvalni tahrirlash{% else %}Yangi jadval{% endif %} — Admin{% endblock %}
+{% block page_title %}Anime Jadvali{% endblock %}
+
+{% block extra_css %}
+.form-card { background:#09090b; border:1px solid #1e1e24; border-radius:12px; padding:28px; max-width:560px; }
+.form-title { font-size:1.05rem; font-weight:900; margin-bottom:24px; display:flex; align-items:center; gap:10px; }
+.form-title i { color:#ff3366; }
+.form-group { margin-bottom:18px; }
+label { display:block; font-size:0.78rem; font-weight:800; color:#8892b0; letter-spacing:0.5px; margin-bottom:7px; text-transform:uppercase; }
+input[type="text"], input[type="number"], select, textarea {
+    width:100%; background:#050508; border:1px solid #1e1e24;
+    border-radius:10px; padding:12px 14px; color:#fff; font-size:0.9rem;
+    font-family:inherit; transition:border-color 0.2s; outline:none;
+}
+input:focus, select:focus { border-color:#ff3366; }
+select option { background:#09090b; }
+.toggle-row { display:flex; align-items:center; gap:12px; }
+.toggle-switch { width:44px; height:24px; appearance:none; background:#1e1e24; border-radius:12px; cursor:pointer; transition:background 0.2s; flex-shrink:0; position:relative; }
+.toggle-switch:checked { background:#ff3366; }
+.toggle-switch::after { content:''; position:absolute; width:18px; height:18px; background:#fff; border-radius:50%; top:3px; left:3px; transition:left 0.2s; }
+.toggle-switch:checked::after { left:23px; }
+.toggle-label { font-size:0.88rem; font-weight:700; color:#8892b0; }
+.btn-row { display:flex; gap:12px; margin-top:24px; }
+.btn-save { background:linear-gradient(135deg,#ff003c,#ff4d6d); color:#fff; padding:12px 28px; border-radius:10px; border:none; font-size:0.9rem; font-weight:800; cursor:pointer; transition:opacity 0.2s; display:flex; align-items:center; gap:8px; }
+.btn-save:hover { opacity:0.85; }
+.btn-cancel { background:rgba(255,255,255,0.05); color:#8892b0; padding:12px 20px; border-radius:10px; border:1px solid #1e1e24; font-size:0.9rem; font-weight:700; text-decoration:none; display:flex; align-items:center; gap:8px; transition:background 0.2s; }
+.btn-cancel:hover { background:rgba(255,255,255,0.1); }
+.hint { font-size:0.72rem; color:#555; margin-top:5px; }
+.alert { padding:12px 16px; border-radius:8px; font-size:0.85rem; font-weight:700; margin-bottom:18px; }
+.alert-error { background:rgba(255,59,48,0.1); border:1px solid rgba(255,59,48,0.2); color:#ff3b30; }
+{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <div class="form-title">
+        <i class='bx bx-calendar-plus'></i>
+        {% if schedule %}Jadvalni tahrirlash{% else %}Yangi jadval qo'shish{% endif %}
+    </div>
+
+    {% if messages %}
+        {% for msg in messages %}
+        <div class="alert {% if msg.tags == 'error' %}alert-error{% endif %}">{{ msg }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label>Anime</label>
+            <select name="anime" required>
+                <option value="">— Tanlang —</option>
+                {% for movie in movies %}
+                <option value="{{ movie.pk }}"
+                    {% if schedule and schedule.anime_id == movie.pk %}selected{% endif %}>
+                    {{ movie.title }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Hafta kuni</label>
+            <select name="day_of_week" required>
+                <option value="">— Tanlang —</option>
+                {% for val, label in day_choices %}
+                <option value="{{ val }}"
+                    {% if schedule and schedule.day_of_week == val %}selected{% endif %}>
+                    {{ label }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label>Chiqadigan qism raqami</label>
+            <input type="number" name="episode_number" min="1"
+                   value="{% if schedule %}{{ schedule.episode_number }}{% else %}1{% endif %}">
+        </div>
+
+        <div class="form-group">
+            <label>Fandub studiya</label>
+            <input type="text" name="fandub" placeholder="AniStream"
+                   value="{% if schedule %}{{ schedule.fandub }}{% else %}AniStream{% endif %}">
+        </div>
+
+        <div class="form-group">
+            <label>Chiqish vaqti (ixtiyoriy)</label>
+            <input type="text" name="air_time" placeholder="18:00"
+                   value="{% if schedule %}{{ schedule.air_time|default:'' }}{% endif %}">
+            <div class="hint">Masalan: 18:00 yoki 20:30</div>
+        </div>
+
+        <div class="form-group">
+            <label>Tartib (kichik raqam avval)</label>
+            <input type="number" name="order" min="0"
+                   value="{% if schedule %}{{ schedule.order }}{% else %}0{% endif %}">
+        </div>
+
+        <div class="form-group">
+            <div class="toggle-row">
+                <input type="checkbox" name="is_active" id="is_active"
+                       class="toggle-switch"
+                       {% if not schedule or schedule.is_active %}checked{% endif %}>
+                <label for="is_active" class="toggle-label">Faol ko'rsatish</label>
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <button type="submit" class="btn-save">
+                <i class='bx bx-save'></i> Saqlash
+            </button>
+            <a href="{% url 'admin_schedule' %}" class="btn-cancel">
+                <i class='bx bx-x'></i> Bekor qilish
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

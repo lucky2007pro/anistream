@@ -525,3 +525,58 @@ class UserSettings(models.Model):
 
     def __str__(self):
         return f"{self.user.username} – sozlamalar"
+
+
+# =======================
+# ANIME SCHEDULE (Haftalik jadval)
+# =======================
+class AnimeSchedule(models.Model):
+    DAY_CHOICES = [
+        ('dushanba',   'Dushanba'),
+        ('seshanba',   'Seshanba'),
+        ('chorshanba', 'Chorshanba'),
+        ('payshanba',  'Payshanba'),
+        ('juma',       'Juma'),
+        ('shanba',     'Shanba'),
+        ('yakshanba',  'Yakshanba'),
+    ]
+
+    anime = models.ForeignKey(
+        Movie,
+        on_delete=models.CASCADE,
+        related_name='schedules',
+        verbose_name='Anime'
+    )
+    day_of_week = models.CharField(
+        max_length=20,
+        choices=DAY_CHOICES,
+        verbose_name="Hafta kuni"
+    )
+    episode_number = models.PositiveIntegerField(
+        default=1,
+        verbose_name="Chiqadigan qism"
+    )
+    fandub = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        default='AniStream',
+        verbose_name="Fandub studiya"
+    )
+    air_time = models.CharField(
+        max_length=10,
+        blank=True,
+        null=True,
+        help_text="Masalan: 18:00",
+        verbose_name="Chiqish vaqti"
+    )
+    is_active = models.BooleanField(default=True, verbose_name="Faol")
+    order = models.PositiveSmallIntegerField(default=0, verbose_name="Tartib")
+
+    class Meta:
+        ordering = ['day_of_week', 'order']
+        verbose_name = "Anime Jadvali"
+        verbose_name_plural = "Anime Jadvallari"
+
+    def __str__(self):
+        return f"{self.anime.title} – {self.get_day_of_week_display()} ({self.episode_number}-qism)"

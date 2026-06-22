@@ -1,0 +1,308 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Anime Chiqish Jadvali — AniStream{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ===== SCHEDULE PAGE ===== */
+.schedule-page {
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 24px 5% 100px;
+}
+
+.schedule-header {
+    margin-bottom: 20px;
+}
+
+.schedule-header h1 {
+    font-size: 1.65rem;
+    font-weight: 900;
+    color: var(--text-light, #fff);
+    margin-bottom: 6px;
+}
+
+.schedule-header h1 span {
+    color: #00e5ff;
+}
+
+.schedule-subtitle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.8rem;
+    color: var(--text-dim, #8a8a9d);
+    font-weight: 600;
+}
+
+.schedule-subtitle i { color: #00e5ff; }
+
+/* ===== DAY TABS ===== */
+.day-tabs {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-bottom: 20px;
+    scrollbar-width: none;
+}
+.day-tabs::-webkit-scrollbar { display: none; }
+
+.day-tab {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 10px 14px;
+    border-radius: 14px;
+    background: rgba(255,255,255,0.04);
+    border: 1.5px solid rgba(255,255,255,0.07);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    color: var(--text-dim, #8a8a9d);
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.3px;
+    min-width: 70px;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.day-tab i {
+    font-size: 1.1rem;
+}
+
+.day-tab:hover {
+    background: rgba(255,255,255,0.08);
+    color: var(--text-light, #fff);
+    transform: translateY(-2px);
+}
+
+.day-tab.active {
+    background: linear-gradient(135deg, #ff003c, #ff4d6d);
+    border-color: transparent;
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(255,0,60,0.35);
+    transform: translateY(-2px);
+}
+
+/* ===== SCHEDULE ITEMS ===== */
+.schedule-panel { display: none; }
+.schedule-panel.active { display: block; }
+
+.schedule-item {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px;
+    margin-bottom: 12px;
+    transition: background 0.2s, border-color 0.2s;
+}
+
+.schedule-item:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(255,0,60,0.2);
+}
+
+.schedule-item-img {
+    width: 70px;
+    height: 90px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+}
+
+.schedule-item-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.schedule-item-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: var(--text-light, #fff);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.schedule-item-genre {
+    font-size: 0.72rem;
+    color: #ff3366;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.schedule-item-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.schedule-meta-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.76rem;
+    color: var(--text-dim, #8a8a9d);
+    font-weight: 600;
+}
+
+.schedule-meta-row i {
+    color: #00e5ff;
+    font-size: 0.9rem;
+    margin-right: 5px;
+}
+
+.schedule-meta-val {
+    color: #ff3366;
+    font-weight: 900;
+}
+
+.schedule-item-btn {
+    display: block;
+    margin-top: 10px;
+    background: linear-gradient(135deg, #ff003c, #ff4d6d);
+    color: #fff;
+    text-align: center;
+    padding: 9px 16px;
+    border-radius: 10px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.2s;
+    letter-spacing: 0.5px;
+}
+.schedule-item-btn:hover { opacity: 0.88; transform: translateY(-1px); }
+.schedule-item-btn i { margin-right: 4px; }
+
+/* Empty state */
+.schedule-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 50px 0;
+    color: var(--text-dim, #8a8a9d);
+    text-align: center;
+}
+.schedule-empty i {
+    font-size: 2.8rem;
+    opacity: 0.35;
+}
+.schedule-empty p {
+    font-size: 0.88rem;
+    font-weight: 600;
+    opacity: 0.7;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="schedule-page">
+
+    <!-- Header -->
+    <div class="schedule-header">
+        <h1>Anime <span>chiqish kunlari</span></h1>
+        <div class="schedule-subtitle">
+            <i class='bx bx-calendar-check'></i>
+            Sevimli animelaringiz yangi qismini qachon chiqishini bilib oling!
+        </div>
+    </div>
+
+    <!-- Day Tabs -->
+    <div class="day-tabs" id="dayTabs">
+        {% for day_key, day_name in days_items %}
+        <button class="day-tab {% if day_key == today_key %}active{% endif %}"
+                data-day="{{ day_key }}"
+                onclick="switchDay('{{ day_key }}')">
+            <i class='bx {{ day_key|slugify }}-icon'
+               style="font-size:1.1rem;">
+            </i>
+            {{ day_name }}
+        </button>
+        {% endfor %}
+    </div>
+
+    <!-- Schedule Panels -->
+    {% for day_key, items in schedule_list %}
+    <div class="schedule-panel {% if day_key == today_key %}active{% endif %}" id="panel-{{ day_key }}">
+        {% if items %}
+            {% for s in items %}
+            <div class="schedule-item">
+                {% if s.anime.image %}
+                    <img class="schedule-item-img"
+                         src="{{ s.anime.image.url }}"
+                         alt="{{ s.anime.title }}"
+                         loading="lazy">
+                {% else %}
+                    <div class="schedule-item-img" style="background:rgba(255,255,255,0.05); display:flex; align-items:center; justify-content:center;">
+                        <i class='bx bx-movie-play' style="font-size:2rem; color:rgba(255,255,255,0.2);"></i>
+                    </div>
+                {% endif %}
+
+                <div class="schedule-item-info">
+                    <div class="schedule-item-title">{{ s.anime.title }}</div>
+                    {% if s.anime.category %}
+                    <div class="schedule-item-genre">{{ s.anime.category.name }}</div>
+                    {% endif %}
+                    <div class="schedule-item-meta">
+                        <div class="schedule-meta-row">
+                            <span><i class='bx bx-play-circle'></i>Chiqadigan qism:</span>
+                            <span class="schedule-meta-val">{{ s.episode_number }}</span>
+                        </div>
+                        {% if s.fandub %}
+                        <div class="schedule-meta-row">
+                            <span><i class='bx bx-microphone'></i>Fandub:</span>
+                            <span class="schedule-meta-val">{{ s.fandub }}</span>
+                        </div>
+                        {% endif %}
+                        {% if s.air_time %}
+                        <div class="schedule-meta-row">
+                            <span><i class='bx bx-time'></i>Vaqt:</span>
+                            <span class="schedule-meta-val">{{ s.air_time }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <a href="{% url 'movie_detail' s.anime.id %}" class="schedule-item-btn">
+                        <i class='bx bx-play'></i> KO'RISH
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="schedule-empty">
+                <i class='bx bx-calendar-x'></i>
+                <p>Bu kunda rejalashtirilgan anime yo'q</p>
+            </div>
+        {% endif %}
+    </div>
+    {% endfor %}
+
+</div>
+
+<script>
+function switchDay(day) {
+    // Remove active from all tabs and panels
+    document.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.schedule-panel').forEach(p => p.classList.remove('active'));
+
+    // Activate selected
+    const tab = document.querySelector('.day-tab[data-day="' + day + '"]');
+    const panel = document.getElementById('panel-' + day);
+    if (tab)   tab.classList.add('active');
+    if (panel) panel.classList.add('active');
+
+    // Scroll tab into view
+    if (tab) tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+}
+</script>
+{% endblock %}

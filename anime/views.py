@@ -18,7 +18,7 @@ from django.contrib.sessions.models import Session
 
 from .models import (
     CustomUser, VipUser, Category, Movie, SiteSettings, MP3, ChatMessage, SubscriptionReceipt, ProfileAvatar, AnimeNews, NewsLike,
-    Story, StoryView, Reel, ReelLike, ReelComment, ReelShare,UserSettings
+    Story, StoryView, Reel, ReelLike, ReelComment, ReelShare, UserSettings, AnimeSchedule
 )
 
 User = get_user_model()
@@ -1132,4 +1132,52 @@ def settings_devices(request):
         'sessions':          sessions,
         'current_session':   session_key,
         'active_section':    'devices',
+    })
+
+
+# =======================
+# ANIME SCHEDULE (Haftalik jadval)
+# =======================
+def anime_schedule(request):
+    DAYS_ORDER = ['dushanba', 'seshanba', 'chorshanba', 'payshanba', 'juma', 'shanba', 'yakshanba']
+    DAYS_NAMES = {
+        'dushanba':   'Dushanba',
+        'seshanba':   'Seshanba',
+        'chorshanba': 'Chorshanba',
+        'payshanba':  'Payshanba',
+        'juma':       'Juma',
+        'shanba':     'Shanba',
+        'yakshanba':  'Yakshanba',
+    }
+    DAY_ICONS = {
+        'dushanba':   'bx-sun',
+        'seshanba':   'bx-sun',
+        'chorshanba': 'bx-calendar',
+        'payshanba':  'bx-cloud',
+        'juma':       'bx-star',
+        'shanba':     'bx-moon',
+        'yakshanba':  'bx-sun',
+    }
+
+    all_schedules = (
+        AnimeSchedule.objects
+        .filter(is_active=True)
+        .select_related('anime', 'anime__category')
+        .order_by('order')
+    )
+
+    schedule_by_day = {day: [] for day in DAYS_ORDER}
+    for s in all_schedules:
+        if s.day_of_week in schedule_by_day:
+            schedule_by_day[s.day_of_week].append(s)
+
+    # Bugungi kun (Uzbekistan)
+    from datetime import date
+    weekday_map = {0:'dushanba',1:'seshanba',2:'chorshanba',3:'payshanba',4:'juma',5:'shanba',6:'yakshanba'}
+    today_key = weekday_map.get(date.today().weekday(), 'dushanba')
+
+    return render(request, 'jadval.html', {
+        'schedule_list':   [(day, schedule_by_day[day]) for day in DAYS_ORDER],
+        'days_items':      [(day, DAYS_NAMES[day]) for day in DAYS_ORDER],
+        'today_key':       today_key,
     })

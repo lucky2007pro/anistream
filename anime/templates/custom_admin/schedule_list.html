@@ -1,0 +1,103 @@
+{% extends 'custom_admin/base.html' %}
+
+{% block title %}Anime Jadvali — Admin{% endblock %}
+{% block page_title %}Anime Jadvali{% endblock %}
+
+{% block extra_css %}
+.card { background:#09090b; border:1px solid #1e1e24; border-radius:12px; padding:24px; }
+.card-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
+.card-title { font-size:1.1rem; font-weight:800; }
+.btn-add { background:linear-gradient(135deg,#ff003c,#ff4d6d); color:#fff; padding:10px 20px; border-radius:10px; text-decoration:none; font-size:0.85rem; font-weight:800; display:inline-flex; align-items:center; gap:8px; transition:opacity 0.2s; }
+.btn-add:hover { opacity:0.85; }
+.btn-add i { font-size:1.1rem; }
+
+.day-group { margin-bottom:28px; }
+.day-label { font-size:0.72rem; font-weight:900; letter-spacing:2px; text-transform:uppercase; color:#8892b0; margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+.day-label::after { content:''; flex:1; height:1px; background:#1e1e24; }
+
+.schedule-row { background:#050508; border:1px solid #1e1e24; border-radius:10px; display:flex; align-items:center; gap:12px; padding:12px 14px; margin-bottom:8px; }
+.schedule-row:hover { border-color:#ff336633; }
+.schedule-row img { width:44px; height:56px; border-radius:6px; object-fit:cover; flex-shrink:0; }
+.row-info { flex:1; min-width:0; }
+.row-title { font-weight:800; font-size:0.9rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.row-meta { font-size:0.74rem; color:#8892b0; margin-top:3px; }
+.row-meta span { margin-right:10px; }
+.row-actions { display:flex; gap:8px; flex-shrink:0; }
+.btn-edit, .btn-del { padding:7px 14px; border-radius:8px; font-size:0.78rem; font-weight:800; text-decoration:none; border:none; cursor:pointer; transition:opacity 0.2s; }
+.btn-edit { background:rgba(0,243,255,0.1); color:#00f3ff; }
+.btn-edit:hover { background:rgba(0,243,255,0.2); }
+.btn-del { background:rgba(255,59,48,0.1); color:#ff3b30; }
+.btn-del:hover { background:rgba(255,59,48,0.2); }
+.badge-active { background:rgba(74,222,128,0.15); color:#4ade80; font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:20px; }
+.badge-inactive { background:rgba(255,255,255,0.06); color:#8892b0; font-size:0.68rem; font-weight:800; padding:2px 8px; border-radius:20px; }
+.empty-day { color:#3a3a4a; font-size:0.82rem; padding:8px 0; }
+.messages-box { margin-bottom:20px; }
+.alert { padding:12px 16px; border-radius:8px; font-size:0.85rem; font-weight:700; margin-bottom:8px; }
+.alert-success { background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.2); color:#4ade80; }
+.alert-error { background:rgba(255,59,48,0.1); border:1px solid rgba(255,59,48,0.2); color:#ff3b30; }
+{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">📅 Anime Haftalik Jadvali</div>
+        <a href="{% url 'admin_schedule_form' %}" class="btn-add">
+            <i class='bx bx-plus'></i> Yangi qo'shish
+        </a>
+    </div>
+
+    {% if messages %}
+    <div class="messages-box">
+        {% for msg in messages %}
+        <div class="alert {% if msg.tags == 'error' %}alert-error{% else %}alert-success{% endif %}">
+            {{ msg }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% for day_key, day_name in day_choices %}
+    <div class="day-group">
+        <div class="day-label">{{ day_name }}</div>
+        {% with day_items=schedules|dictsort:"day_of_week" %}
+        {% for s in schedules %}
+            {% if s.day_of_week == day_key %}
+            <div class="schedule-row">
+                {% if s.anime.image %}
+                    <img src="{{ s.anime.image.url }}" alt="{{ s.anime.title }}">
+                {% else %}
+                    <div style="width:44px;height:56px;border-radius:6px;background:#1e1e24;flex-shrink:0;"></div>
+                {% endif %}
+                <div class="row-info">
+                    <div class="row-title">{{ s.anime.title }}</div>
+                    <div class="row-meta">
+                        <span>{{ s.episode_number }}-qism</span>
+                        {% if s.fandub %}<span>{{ s.fandub }}</span>{% endif %}
+                        {% if s.air_time %}<span>⏰ {{ s.air_time }}</span>{% endif %}
+                    </div>
+                </div>
+                <div style="margin-right:8px;">
+                    {% if s.is_active %}
+                    <span class="badge-active">Faol</span>
+                    {% else %}
+                    <span class="badge-inactive">Nofaol</span>
+                    {% endif %}
+                </div>
+                <div class="row-actions">
+                    <a href="{% url 'admin_schedule_form_edit' s.pk %}" class="btn-edit">
+                        <i class='bx bx-edit'></i> Tahrirlash
+                    </a>
+                    <a href="{% url 'admin_schedule_delete' s.pk %}"
+                       onclick="return confirm('O\'chirishni tasdiqlaysizmi?')"
+                       class="btn-del">
+                        <i class='bx bx-trash'></i>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        {% endfor %}
+        {% endwith %}
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
