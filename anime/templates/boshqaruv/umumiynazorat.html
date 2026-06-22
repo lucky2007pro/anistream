@@ -332,6 +332,72 @@ input[type="color"] {
 
 .live-preview-bar i { font-size: 1rem; }
 
+/* ==================== FON RASMI ==================== */
+.bg-images-row {
+    display: flex;
+    gap: 12px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    align-items: center;
+}
+.bg-images-row::-webkit-scrollbar {
+    height: 6px;
+}
+.bg-images-row::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+}
+.bg-img-btn {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 50%;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    position: relative;
+}
+.bg-img-btn img {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid transparent;
+    transition: all 0.2s;
+}
+.bg-img-btn:hover { transform: scale(1.05); }
+.bg-img-btn.selected img {
+    border-color: var(--accent);
+    box-shadow: 0 0 10px rgba(0,243,255,0.4);
+}
+.bg-remove-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-dim);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: 700;
+    transition: color 0.2s;
+    margin-left: 8px;
+}
+.bg-remove-btn:hover { color: var(--accent); }
+.bg-remove-btn .icon-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 2px dashed rgba(255,255,255,0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    transition: border-color 0.2s;
+}
+.bg-remove-btn:hover .icon-circle { border-color: var(--accent); }
+
 {% endblock %}
 
 {% block settings_content %}
@@ -456,6 +522,47 @@ input[type="color"] {
             <span class="color-preview-text" id="customColorText">
                 {{ settings.bg_color_custom|default:'#0a0a0f' }}
             </span>
+        </div>
+    </div>
+
+    <!-- ==================== FON RASMI ==================== -->
+    <div class="s-card">
+        <div class="s-card-title">
+            <i class='bx bx-image-alt'></i>
+            Fon Rasmi
+        </div>
+
+        <div class="live-preview-bar" style="margin-bottom: 12px;">
+            <i class='bx bx-info-circle'></i>
+            Fon rasmini tanlang (saytning orqa foniga qo'yiladi)
+        </div>
+
+        <div class="bg-images-row">
+            <button type="button" class="bg-img-btn" id="siteBgBtn1"
+                    onclick="setSiteBgImage('https://i.pinimg.com/736x/e0/c5/f7/e0c5f736c37a1153bef186a984a2fc74.jpg')">
+                <img src="https://i.pinimg.com/736x/e0/c5/f7/e0c5f736c37a1153bef186a984a2fc74.jpg" alt="Fon 1" loading="lazy">
+            </button>
+            <button type="button" class="bg-img-btn" id="siteBgBtn2"
+                    onclick="setSiteBgImage('https://i.pinimg.com/736x/49/26/85/492685785b09d8ef14a4ca36c1b7fabc.jpg')">
+                <img src="https://i.pinimg.com/736x/49/26/85/492685785b09d8ef14a4ca36c1b7fabc.jpg" alt="Fon 2" loading="lazy">
+            </button>
+            <button type="button" class="bg-img-btn" id="siteBgBtn3"
+                    onclick="setSiteBgImage('https://i.pinimg.com/736x/96/43/0a/96430a62debd30f8e8e2d2074dc9729e.jpg')">
+                <img src="https://i.pinimg.com/736x/96/43/0a/96430a62debd30f8e8e2d2074dc9729e.jpg" alt="Fon 3" loading="lazy">
+            </button>
+            <button type="button" class="bg-img-btn" id="siteBgBtn4"
+                    onclick="setSiteBgImage('https://i.pinimg.com/736x/db/d1/e8/dbd1e8c885246d27c3a00b40935d4b0f.jpg')">
+                <img src="https://i.pinimg.com/736x/db/d1/e8/dbd1e8c885246d27c3a00b40935d4b0f.jpg" alt="Fon 4" loading="lazy">
+            </button>
+            <button type="button" class="bg-img-btn" id="siteBgBtn5"
+                    onclick="setSiteBgImage('https://i.pinimg.com/736x/16/aa/d7/16aad7f5390ff2e41f03b2f8f66d6db1.jpg')">
+                <img src="https://i.pinimg.com/736x/16/aa/d7/16aad7f5390ff2e41f03b2f8f66d6db1.jpg" alt="Fon 5" loading="lazy">
+            </button>
+            
+            <button type="button" class="bg-remove-btn" onclick="removeSiteBgImage()">
+                <div class="icon-circle"><i class='bx bx-x'></i></div>
+                <span>Default</span>
+            </button>
         </div>
     </div>
 
@@ -608,5 +715,38 @@ if (settingsForm) {
         });
     });
 }
+
+/* ==================== SITE BG IMAGE ==================== */
+function markSelectedSiteBg() {
+    var savedUrl = localStorage.getItem("site_bg_url");
+    document.querySelectorAll(".bg-img-btn").forEach(function(btn) {
+        var img = btn.querySelector("img");
+        if (img && savedUrl && img.src === savedUrl) {
+            btn.classList.add("selected");
+        } else {
+            btn.classList.remove("selected");
+        }
+    });
+}
+
+function setSiteBgImage(url) {
+    localStorage.setItem("site_bg_url", url);
+    document.body.style.backgroundImage = "url('" + url + "')";
+    document.body.style.backgroundSize = "cover";
+    document.body.style.backgroundAttachment = "fixed";
+    document.body.style.backgroundPosition = "center";
+    markSelectedSiteBg();
+}
+
+function removeSiteBgImage() {
+    localStorage.removeItem("site_bg_url");
+    document.body.style.backgroundImage = "none";
+    markSelectedSiteBg();
+}
+
+// Sahifa yuklanganda tanlangan rasmni belgilash
+document.addEventListener("DOMContentLoaded", function() {
+    markSelectedSiteBg();
+});
 </script>
 {% endblock %}

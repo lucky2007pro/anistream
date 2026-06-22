@@ -861,6 +861,17 @@
     {% endif %}
     {% endwith %}
     {% endif %}
+    
+    <script>
+        (function() {
+            var bgUrl = localStorage.getItem("site_bg_url");
+            if (bgUrl) {
+                var style = document.createElement("style");
+                style.innerHTML = "body { background-image: url('" + bgUrl + "'); background-size: cover; background-attachment: fixed; background-position: center; }";
+                document.head.appendChild(style);
+            }
+        })();
+    </script>
 </head>
 <body>
 
