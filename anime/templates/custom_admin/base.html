@@ -151,7 +151,7 @@
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleAdminSidebar(false)"></div>
 
     <aside class="sidebar">
-        <a href="{% url 'home' %}" class="brand" aria-label="Ani Best bosh sahifa">
+        <a href="{% url 'home' %}" class="brand" aria-label="AniStream bosh sahifa">
             <span class="brand-text">ANI <span>BEST</span></span>
         </a>
         <span class="brand-sub">Admin panel</span>
@@ -173,6 +173,7 @@
             <li><a href="{% url 'admin_subscriptions' %}" class="{% if request.resolver_match.url_name == 'admin_subscriptions' %}active{% endif %}"><i class='bx bx-credit-card-front'></i> Obunalar</a></li>
             <li><a href="{% url 'admin_chat' %}" class="{% if request.resolver_match.url_name == 'admin_chat' %}active{% endif %}"><i class='bx bx-message-dots'></i> Chat</a></li>
             <li><a href="{% url 'admin_comments' %}" class="{% if request.resolver_match.url_name == 'admin_comments' or request.resolver_match.url_name == 'admin_comment_edit' %}active{% endif %}"><i class='bx bx-comment-dots'></i> Izohlar</a></li>
+            <li><a href="{% url 'admin_reels' %}" class="{% if request.resolver_match.url_name == 'admin_reels' %}active{% endif %}"><i class='bx bx-video'></i> Shorts (Reels)</a></li>
         </ul>
 
         <div class="sidebar-bottom">

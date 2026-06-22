@@ -388,3 +388,21 @@ def admin_comment_delete(request, pk):
     comment.delete()
     messages.success(request, "Izoh o'chirildi!")
     return redirect('admin_comments')
+
+@user_passes_test(is_admin, login_url='/')
+def admin_reels(request):
+    from .models import Reel
+    reels_qs = Reel.objects.select_related('user').all().order_by('-created_at')
+    return render(request, 'custom_admin/list_base.html', {
+        'page_title': 'Shorts (Reels)',
+        'items': reels_qs,
+        'type': 'reel'
+    })
+
+@user_passes_test(is_admin, login_url='/')
+def admin_reel_delete(request, pk):
+    from .models import Reel
+    reel = get_object_or_404(Reel, pk=pk)
+    reel.delete()
+    messages.success(request, "Reel o'chirildi!")
+    return redirect('admin_reels')

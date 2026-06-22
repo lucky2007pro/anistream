@@ -28,7 +28,6 @@ urlpatterns = [
     path('news/', views.news_feed, name='news_feed'),
     path('news/<int:pk>/', views.news_detail, name='news_detail'),
     path('news/<int:pk>/like/', views.toggle_like, name='toggle_like'),
-    path('reels/', views.reels_feed, name='reels'),
     path('aloqa/', views.aloqa, name='aloqa'),
 
     path('chat/', views.chat, name='chat'),
@@ -69,6 +68,9 @@ urlpatterns = [
     path('control-panel/comments/<int:pk>/edit/', admin_comment_edit, name='admin_comment_edit'),
     path('control-panel/comments/<int:pk>/delete/', admin_comment_delete, name='admin_comment_delete'),
 
+    path('control-panel/reels/', admin_reels, name='admin_reels'),
+    path('control-panel/reels/<int:pk>/delete/', admin_reel_delete, name='admin_reel_delete'),
+
     path(
         'sitemap.xml',
         sitemap,
@@ -86,6 +88,8 @@ urlpatterns = [
     path('story/<int:story_id>/prev/', views.prev_story_view, name='prev_story'),
 
     # REELS
+    path('reels/', views.reels_feed, name='reels'),
+    path('reels/upload/', views.upload_reel, name='upload_reel'),
     path('reels/<int:reel_id>/', views.reel_detail, name='reel_detail'),
     path('reels/<int:reel_id>/like/', views.toggle_reel_like, name='toggle_reel_like'),
     path('reels/<int:reel_id>/comment/', views.add_reel_comment, name='add_reel_comment'),

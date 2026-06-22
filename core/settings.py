@@ -186,7 +186,7 @@ if ENVIRONMENT == 'production' and not DEBUG and USE_HTTPS:
     SECURE_HSTS_PRELOAD = True
 
 # `login_required` noto‘g‘ri default login sahifaga redirect qilmasligi uchun.
-LOGIN_URL = 'auth_page'
+LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_REDIRECT_URL = 'home'
 

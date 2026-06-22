@@ -1,180 +1,160 @@
-<!DOCTYPE html>
-<html lang="uz">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reels</title>
+{% extends 'base.html' %}
+{% load static %}
 
+{% block title %}Shorts | AniStream{% endblock %}
+
+{% block extra_css %}
 <style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
+/* SHORTS FEED PAGE STYLES */
+.shorts-container {
+    padding: 20px;
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-/* ===== BACKGROUND ===== */
-body {
-    min-height: 100vh;
-    color: white;
-
-    background: url("https://i.pinimg.com/736x/b1/1b/28/b11b28e99d63dc22d6d2ff2a05a860cd.jpg") no-repeat center center fixed;
-    background-size: cover;
+.shorts-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
-/* dark overlay */
-body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.65);
-    z-index: -1;
-}
-
-/* ===== TOP BAR ===== */
-.top-bar {
+.shorts-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--accent);
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    max-width: 700px;
-    margin: auto;
-    padding: 15px;
+    gap: 10px;
 }
 
-.back-btn {
-    background: #00d4ff;
-    color: #000;
-    padding: 10px 15px;
-    border-radius: 8px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: 0.3s;
+.shorts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
 }
 
-.back-btn:hover {
-    transform: scale(1.05);
-    background: #00aacc;
+.short-card {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 9/16;
+    background: #111;
+    cursor: pointer;
+    transition: transform 0.3s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
 }
 
-h1 {
-    font-size: 22px;
-    text-align: center;
-    flex: 1;
+.short-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
 }
 
-/* ===== BOX ===== */
-.reels-box {
-    max-width: 700px;
-    margin: auto;
-    background: rgba(255,255,255,0.06);
-    backdrop-filter: blur(10px);
-    padding: 20px;
-    border-radius: 15px;
+.short-video-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-/* TITLE */
-.reels-box h2 {
-    text-align: center;
-    margin-bottom: 15px;
-    color: #00d4ff;
-}
-
-/* ===== REEL ITEM ===== */
-.reel-item {
-    margin: 12px 0;
-    padding: 14px;
-    background: rgba(255,255,255,0.08);
-    border-radius: 10px;
-
-    animation: floatMove 3s ease-in-out infinite;
-    transition: 0.3s;
-}
-
-.reel-item:hover {
-    transform: scale(1.05);
-    background: rgba(0,212,255,0.18);
-    animation: none;
-}
-
-.reel-item a {
+.short-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 40px 10px 10px;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
     color: white;
-    text-decoration: none;
-    display: block;
-    font-size: 16px;
+    pointer-events: none;
 }
 
-/* ===== FLOAT ANIMATION ===== */
-@keyframes floatMove {
-    0%   { transform: translateY(0); }
-    50%  { transform: translateY(-6px); }
-    100% { transform: translateY(0); }
+.short-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 5px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-/* ===== ANIMATION BOX ===== */
-@keyframes fadeIn {
-    from {opacity: 0; transform: scale(0.98);}
-    to {opacity: 1; transform: scale(1);}
+.short-stats {
+    font-size: 12px;
+    color: #ccc;
+    display: flex;
+    gap: 10px;
 }
 
-.reels-box {
-    animation: fadeIn 0.6s ease-in-out;
+.no-reels {
+    text-align: center;
+    padding: 50px;
+    color: var(--text-dim);
 }
 
-/* ===== MOBILE (600px) ===== */
-@media (max-width: 600px) {
-
-    .top-bar {
-        flex-direction: column;
-        gap: 10px;
-        text-align: center;
-    }
-
-    h1 {
-        font-size: 18px;
-    }
-
-    .back-btn {
-        font-size: 14px;
-        padding: 8px 12px;
-    }
-
-    .reels-box {
-        margin: 10px;
-        padding: 15px;
-    }
-
-    .reel-item {
-        font-size: 14px;
-        padding: 12px;
+@media (max-width: 768px) {
+    .shorts-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     }
 }
 </style>
+{% endblock %}
 
-</head>
+{% block content %}
+<main class="main-content">
+    <div class="shorts-container">
+        <div class="shorts-header">
+            <h1 class="shorts-title"><i class='bx bxs-videos'></i> Shorts</h1>
+            {% if user.is_authenticated %}
+            <a href="{% url 'upload_reel' %}" class="btn-main" style="padding:8px 16px; border-radius:8px; background:var(--accent); color:black; font-weight:800; text-decoration:none; font-size:14px;">
+                <i class='bx bx-plus'></i> Yangi qo'shish
+            </a>
+            {% endif %}
+        </div>
 
-<body>
-
-<div class="top-bar">
-    <a href="/" class="back-btn">⬅ Orqaga</a>
-    <h1>Reels</h1>
-</div>
-
-<div class="reels-box">
-    <h2>Mavjud reelslar</h2>
-
-    <div class="reel-item">
-        <a href="https://anistream-official.uz/reels/1" target="_blank">
-            🎬 Reels 1 - Ko‘rish
-        </a>
+        {% if reels %}
+        <div class="shorts-grid">
+            {% for reel in reels %}
+            <a href="{% url 'reel_detail' reel.id %}" style="text-decoration: none;">
+                <div class="short-card" onmouseenter="playPreview(this)" onmouseleave="pausePreview(this)">
+                    <video class="short-video-preview" src="{{ reel.get_video_src }}" muted loop playsinline preload="metadata"></video>
+                    <div class="short-overlay">
+                        <div class="short-title">{{ reel.title|default:"AniStream Shorts" }}</div>
+                        <div class="short-stats">
+                            <span><i class='bx bx-play'></i> {{ reel.views_count }}</span>
+                            <span><i class='bx bxs-heart'></i> {{ reel.likes.count }}</span>
+                        </div>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-reels">
+            <i class='bx bx-video-off' style="font-size:4rem; margin-bottom:15px; opacity:0.5;"></i>
+            <h3>Hozircha videolar yo'q</h3>
+            <p>Birinchilardan bo'lib qisqa video yuklang!</p>
+        </div>
+        {% endif %}
     </div>
+</main>
 
-    <div class="reel-item">
-        <a href="https://anistream-official.uz/reels/2" target="_blank">
-            🎬 Reels 2 - Ko‘rish
-        </a>
-    </div>
+<script>
+function playPreview(element) {
+    const video = element.querySelector('video');
+    if(video) {
+        let playPromise = video.play();
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                // Auto-play was prevented
+            });
+        }
+    }
+}
 
-</div>
-
-</body>
-</html>
+function pausePreview(element) {
+    const video = element.querySelector('video');
+    if(video) {
+        video.pause();
+    }
+}
+</script>
+{% endblock %}

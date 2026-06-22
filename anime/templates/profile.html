@@ -164,6 +164,14 @@
             </form>
         </div>
 
+        <div class="profile-info" style="text-align: center;">
+            <h3 style="margin-bottom:15px; color:var(--accent);">Reels/Shorts Qo'shish</h3>
+            <p style="color:var(--text-dim); margin-bottom: 15px;">O'zingizning qisqa videolaringizni yuklang va boshqalar bilan baham ko'ring.</p>
+            <a href="{% url 'upload_reel' %}" class="btn-main" style="display:inline-block; padding:12px 24px; border-radius:8px; background:#00d4ff; color:black; font-weight:800; text-decoration:none; box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);">
+                <i class='bx bx-video-plus'></i> Yangi Reels Yuklash
+            </a>
+        </div>
+
         <div class="site-info">
             <p>Saytdagi jami foydalanuvchilar: {{ total_users }}</p>
         </div>

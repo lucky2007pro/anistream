@@ -74,6 +74,8 @@
                 <th>Nomi</th><th>Rasm</th><th>Sana</th><th>Harakatlar</th>
                 {% elif type == 'comment' %}
                 <th>Foydalanuvchi</th><th>Anime</th><th>Izoh</th><th>Sana</th><th>Harakatlar</th>
+                {% elif type == 'reel' %}
+                <th>Foydalanuvchi</th><th>Sarlavha</th><th>Ko'rishlar</th><th>Sana</th><th>Harakatlar</th>
                 {% endif %}
             </tr>
         </thead>
@@ -137,6 +139,11 @@
                 <td style="font-weight:600;">{{ item.movie.title }}</td>
                 <td>{{ item.text|truncatechars:50 }}</td>
                 <td>{{ item.created_at|date:"d.m.Y H:i" }}</td>
+                {% elif type == 'reel' %}
+                <td style="font-weight:600;">{{ item.user.username }}</td>
+                <td>{{ item.title|default:"Sarlavha yo'q"|truncatechars:30 }}</td>
+                <td>{{ item.views_count }}</td>
+                <td>{{ item.created_at|date:"d.m.Y H:i" }}</td>
                 {% endif %}
                 
                 <td>
@@ -181,11 +188,13 @@
                     {% elif type == 'comment' %}
                         <a href="{% url 'admin_comment_edit' item.id %}" class="action-btn">Tahrirlash</a>
                         <a href="{% url 'admin_comment_delete' item.id %}" class="action-btn delete" onclick="return confirm('Rostdan ham o\'chirmoqchimisiz?');">O'chirish</a>
+                    {% elif type == 'reel' %}
+                        <a href="{% url 'admin_reel_delete' item.id %}" class="action-btn delete" onclick="return confirm('Rostdan ham o\'chirmoqchimisiz?');">O'chirish</a>
                     {% endif %}
                 </td>
             </tr>
             {% empty %}
-            <tr><td colspan="{% if type == 'movie' %}4{% elif type == 'genre' %}3{% elif type == 'episode' %}4{% elif type == 'chat' %}4{% elif type == 'user' %}5{% elif type == 'receipt' %}5{% elif type == 'avatar' %}4{% elif type == 'comment' %}5{% else %}4{% endif %}" style="text-align:center; padding:30px; color:gray;">Hech narsa topilmadi!</td></tr>
+            <tr><td colspan="{% if type == 'movie' %}4{% elif type == 'genre' %}3{% elif type == 'episode' %}4{% elif type == 'chat' %}4{% elif type == 'user' %}5{% elif type == 'receipt' %}5{% elif type == 'avatar' %}4{% elif type == 'comment' %}5{% elif type == 'reel' %}4{% else %}4{% endif %}" style="text-align:center; padding:30px; color:gray;">Hech narsa topilmadi!</td></tr>
             {% endfor %}
         </tbody>
     </table>

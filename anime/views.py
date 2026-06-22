@@ -734,10 +734,38 @@ def prev_story_view(request, story_id):
 # REELS — views.py ga qo'shing
 @login_required
 def reels_feed(request):
-    latest = Reel.objects.order_by('-created_at').first()
-    if latest:
-        return redirect('reel_detail', reel_id=latest.id)
-    return render(request, 'reels.html', {'reels': [], 'liked_ids': []})
+    reels = Reel.objects.order_by('-created_at')
+    liked_ids = []
+    if request.user.is_authenticated:
+        liked_ids = list(ReelLike.objects.filter(user=request.user).values_list('reel_id', flat=True))
+    return render(request, 'reels.html', {'reels': reels, 'liked_ids': liked_ids})
+
+@login_required
+def upload_reel(request):
+    if request.method == 'POST':
+        title = request.POST.get('title', '').strip()
+        description = request.POST.get('description', '').strip()
+        video_file = request.FILES.get('video_file')
+
+        if not video_file:
+            messages.error(request, "Video faylni yuklash majburiy.")
+            return redirect('upload_reel')
+
+        # check file type basic
+        if not video_file.name.endswith('.mp4'):
+            messages.warning(request, "Faqat .mp4 formatidagi videolar qabul qilinadi.")
+
+        Reel.objects.create(
+            user=request.user,
+            title=title,
+            description=description,
+            video_file=video_file
+        )
+        messages.success(request, "Reels muvaffaqiyatli yuklandi!")
+        return redirect('reels')
+
+    return render(request, 'upload_reel.html')
+
 
 
 @login_required

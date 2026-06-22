@@ -321,6 +321,39 @@
     opacity: 1;
     transform: translateX(-50%) translateY(0);
   }
+
+  /* ===== NAVIGATION BUTTONS ===== */
+  .shorts-nav-controls {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    z-index: 10;
+  }
+
+  .nav-btn {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.5);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    text-decoration: none;
+    border: 1px solid rgba(255,255,255,0.2);
+    transition: 0.3s;
+    backdrop-filter: blur(5px);
+  }
+
+  .nav-btn:hover {
+    background: rgba(255,255,255,0.2);
+    transform: scale(1.1);
+  }
 </style>
 
 <div class="reel-detail-page">
@@ -342,6 +375,20 @@
         </div>
       {% endif %}
       <div class="play-pause-indicator" id="playIcon">⏸</div>
+      
+      <!-- NAVIGATION CONTROLS -->
+      <div class="shorts-nav-controls">
+          {% if prev_reel %}
+          <a href="{% url 'reel_detail' prev_reel.id %}" class="nav-btn prev-btn" title="Oldingi (Tepaga)">
+              <i class='bx bx-chevron-up'></i>
+          </a>
+          {% endif %}
+          {% if next_reel %}
+          <a href="{% url 'reel_detail' next_reel.id %}" class="nav-btn next-btn" title="Keyingi (Pastga)">
+              <i class='bx bx-chevron-down'></i>
+          </a>
+          {% endif %}
+      </div>
     </div>
 
     <!-- ===== INFO ===== -->
@@ -453,6 +500,49 @@
       setTimeout(() => { playIcon.style.opacity = '0'; }, 800);
     });
   }
+
+  // ===== SCROLL / SWIPE NAVIGATION =====
+  let touchStartY = 0;
+  let touchEndY = 0;
+  
+  document.addEventListener('touchstart', e => {
+      touchStartY = e.changedTouches[0].screenY;
+  });
+
+  document.addEventListener('touchend', e => {
+      touchEndY = e.changedTouches[0].screenY;
+      handleSwipe();
+  });
+
+  function handleSwipe() {
+      const threshold = 100;
+      if (touchStartY - touchEndY > threshold) {
+          // Swipe up -> Next Video
+          {% if next_reel %}
+          window.location.href = "{% url 'reel_detail' next_reel.id %}";
+          {% endif %}
+      }
+      if (touchEndY - touchStartY > threshold) {
+          // Swipe down -> Prev Video
+          {% if prev_reel %}
+          window.location.href = "{% url 'reel_detail' prev_reel.id %}";
+          {% endif %}
+      }
+  }
+
+  document.addEventListener('wheel', (e) => {
+      if(e.target.closest('.comments-section')) return; // Don't trigger if scrolling comments
+      
+      if (e.deltaY > 50) {
+          {% if next_reel %}
+          window.location.href = "{% url 'reel_detail' next_reel.id %}";
+          {% endif %}
+      } else if (e.deltaY < -50) {
+          {% if prev_reel %}
+          window.location.href = "{% url 'reel_detail' prev_reel.id %}";
+          {% endif %}
+      }
+  });
 
   // ===== LOAD COMMENTS =====
   function loadComments() {
