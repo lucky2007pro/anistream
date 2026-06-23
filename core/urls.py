@@ -2,6 +2,8 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from django.urls import re_path
+from django.views.static import serve
 from anime import views
 from anime.admin_views import *
 from anime.sitemaps import NewsSitemap
@@ -120,7 +122,12 @@ urlpatterns = [
     path('jadval/', views.anime_schedule, name='anime_schedule'),
 ]
 
+# Serve media files globally (temporary workaround for Gunicorn without Nginx)
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {
+        'document_root': settings.MEDIA_ROOT,
+    }),
+]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

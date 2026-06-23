@@ -7,13 +7,34 @@ from .serializers import (
     CategorySerializer, 
     ReelSerializer,
     CustomUserSerializer,
-    AnimeNewsSerializer
+    AnimeNewsSerializer,
+    StorySerializer
 )
+from django.utils import timezone
+from django.db import models
 
 class MovieListView(generics.ListAPIView):
     queryset = Movie.objects.all().order_by('-created_at')
     serializer_class = MovieListSerializer
     permission_classes = [AllowAny]
+
+class HeroMovieListView(generics.ListAPIView):
+    serializer_class = MovieListSerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        return Movie.objects.filter(is_home_featured=True).order_by('home_featured_order', '-created_at')[:7]
+
+class StoryListView(generics.ListAPIView):
+    serializer_class = StorySerializer
+    permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        return self.serializer_class.Meta.model.objects.filter(
+            is_active=True
+        ).filter(
+            models.Q(expires_at__gt=timezone.now()) | models.Q(expires_at__isnull=True)
+        ).order_by('-created_at')
 
 class MovieDetailView(generics.RetrieveAPIView):
     queryset = Movie.objects.all()

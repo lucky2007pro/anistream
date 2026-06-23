@@ -3,6 +3,8 @@ from . import api_views
 
 urlpatterns = [
     path('movies/', api_views.MovieListView.as_view(), name='api_movies'),
+    path('hero-movies/', api_views.HeroMovieListView.as_view(), name='api_hero_movies'),
+    path('stories/', api_views.StoryListView.as_view(), name='api_stories'),
     path('movies/<int:pk>/', api_views.MovieDetailView.as_view(), name='api_movie_detail'),
     path('categories/', api_views.CategoryListView.as_view(), name='api_categories'),
     path('reels/', api_views.ReelListView.as_view(), name='api_reels'),

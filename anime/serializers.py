@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Movie, Category, MovieEpisode, Reel, CustomUser, AnimeNews
+from .models import Movie, Category, MovieEpisode, Reel, CustomUser, AnimeNews, Story
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -48,3 +48,8 @@ class AnimeNewsSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnimeNews
         fields = '__all__'
+
+class StorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Story
+        fields = ['id', 'image', 'video', 'link_url', 'expires_at', 'created_at']
