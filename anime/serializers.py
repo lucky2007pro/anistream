@@ -59,10 +59,16 @@ class ReelSerializer(serializers.ModelSerializer):
 
 class CustomUserSerializer(serializers.ModelSerializer):
     tier = serializers.CharField(source='active_tier', read_only=True)
+    avatar = serializers.SerializerMethodField()
 
     class Meta:
         model = CustomUser
         fields = ['id', 'username', 'email', 'phone', 'tier', 'avatar']
+
+    def get_avatar(self, obj):
+        if obj.avatar and obj.avatar.image:
+            return obj.avatar.image.url
+        return None
 
 class AnimeNewsSerializer(serializers.ModelSerializer):
     class Meta:
