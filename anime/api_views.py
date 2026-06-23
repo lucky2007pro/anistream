@@ -171,3 +171,19 @@ class ReelCommentListView(generics.ListAPIView):
     def get_queryset(self):
         reel_id = self.kwargs['pk']
         return ReelComment.objects.filter(reel_id=reel_id).order_by('-created_at')
+
+class RegisterAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        username = request.data.get('username', '').strip()
+        password = request.data.get('password', '')
+        
+        if not username or not password:
+            return Response({'error': 'Username va parol kiritilishi shart'}, status=400)
+            
+        if CustomUser.objects.filter(username=username).exists():
+            return Response({'error': 'Bu foydalanuvchi nomi band'}, status=400)
+            
+        user = CustomUser.objects.create_user(username=username, password=password)
+        return Response({'success': True, 'message': 'Muvaffaqiyatli ro\'yxatdan o\'tdingiz'}, status=201)
