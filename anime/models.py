@@ -512,6 +512,9 @@ class UserSettings(models.Model):
         ('white', 'Oq'),
         ('rose', "Qizil / Ro'za"),
         ('premium', "Premium (To'q binafsha)"),
+        ('pink', "Pushti"),
+        ('ocean', "Okean"),
+        ('forest', "O'rmon"),
     ]
 
     user = models.OneToOneField(
