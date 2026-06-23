@@ -1,7 +1,7 @@
 from rest_framework import generics, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from django.utils import timezone
 from .models import Movie, Category, Reel, CustomUser, AnimeNews, FavoriteAnime, WatchHistory, ReelComment, ReelLike, Story, AnimeSchedule, MovieComment, ChatMessage
 from .serializers import (
@@ -83,7 +83,7 @@ class CategoryListView(generics.ListAPIView):
 class ReelListView(generics.ListAPIView):
     queryset = Reel.objects.all().order_by('-created_at')
     serializer_class = ReelSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticatedOrReadOnly]
 
 class AnimeNewsListView(generics.ListAPIView):
     queryset = AnimeNews.objects.all().order_by('-created_at')
