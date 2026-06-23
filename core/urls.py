@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from anime import views
@@ -90,6 +90,9 @@ urlpatterns = [
 
     # Django default admin
     path('admin/', admin.site.urls),
+
+    # REST API endpoints
+    path('api/', include('anime.api_urls')),
 
     # STORY VIEW
     path('story/<int:story_id>/', views.story_view, name='story_view'),

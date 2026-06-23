@@ -58,6 +58,8 @@ DEFAULT_CSRF_TRUSTED_ORIGINS = [
 ALLOWED_HOSTS = list(dict.fromkeys(_split_csv_env('ALLOWED_HOSTS') + DEFAULT_ALLOWED_HOSTS))
 CSRF_TRUSTED_ORIGINS = list(dict.fromkeys(_split_csv_env('CSRF_TRUSTED_ORIGINS') + DEFAULT_CSRF_TRUSTED_ORIGINS))
 
+CORS_ALLOW_ALL_ORIGINS = True
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -70,6 +72,8 @@ INSTALLED_APPS = [
     'django.contrib.sitemaps',
 
     # Third party apps
+    'rest_framework',
+    'corsheaders',
 
     # Local apps
     'anime.apps.AnimeConfig',
@@ -81,6 +85,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Static files uchun
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',

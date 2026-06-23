@@ -1,0 +1,11 @@
+from django.urls import path
+from . import api_views
+
+urlpatterns = [
+    path('movies/', api_views.MovieListView.as_view(), name='api_movies'),
+    path('movies/<int:pk>/', api_views.MovieDetailView.as_view(), name='api_movie_detail'),
+    path('categories/', api_views.CategoryListView.as_view(), name='api_categories'),
+    path('reels/', api_views.ReelListView.as_view(), name='api_reels'),
+    path('news/', api_views.AnimeNewsListView.as_view(), name='api_news'),
+    path('user/', api_views.CurrentUserView.as_view(), name='api_current_user'),
+]
