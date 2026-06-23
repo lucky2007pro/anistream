@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from django.utils import timezone
-from .models import Movie, Category, Reel, CustomUser, AnimeNews, FavoriteAnime, WatchHistory, ReelComment, ReelLike, Story, AnimeSchedule, MovieComment, ChatMessage, AppSettings
+from .models import Movie, Category, Reel, CustomUser, AnimeNews, FavoriteAnime, WatchHistory, ReelComment, ReelLike, Story, AnimeSchedule, MovieComment, ChatMessage, AppSettings, UserSettings
 from .serializers import (
     MovieListSerializer, 
     MovieDetailSerializer, 
@@ -18,7 +18,8 @@ from .serializers import (
     AnimeScheduleSerializer,
     MovieCommentSerializer,
     ChatMessageSerializer,
-    AppSettingsSerializer
+    AppSettingsSerializer,
+    UserSettingsSerializer
 )
 from django.utils import timezone
 from django.db import models
@@ -284,3 +285,20 @@ class AppSettingsAPIView(APIView):
             settings = AppSettings.objects.create()
         serializer = AppSettingsSerializer(settings)
         return Response(serializer.data)
+
+class UserSettingsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        settings, _ = UserSettings.objects.get_or_create(user=request.user)
+        serializer = UserSettingsSerializer(settings)
+        return Response(serializer.data)
+
+    def post(self, request):
+        settings, _ = UserSettings.objects.get_or_create(user=request.user)
+        serializer = UserSettingsSerializer(settings, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+

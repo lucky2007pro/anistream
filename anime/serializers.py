@@ -1,5 +1,10 @@
 from rest_framework import serializers
-from .models import Movie, Category, MovieEpisode, Reel, CustomUser, AnimeNews, Story, FavoriteAnime, WatchHistory, ReelComment, MovieComment, AnimeSchedule, ChatMessage, AppSettings
+from .models import Movie, Category, MovieEpisode, Reel, CustomUser, AnimeNews, Story, FavoriteAnime, WatchHistory, ReelComment, MovieComment, AnimeSchedule, ChatMessage, AppSettings, UserSettings
+
+class UserSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserSettings
+        fields = ['theme', 'bg_color', 'bg_color_custom', 'bg_image', 'tabbar_on']
 
 class AppSettingsSerializer(serializers.ModelSerializer):
     class Meta:

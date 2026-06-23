@@ -30,4 +30,5 @@ urlpatterns = [
     path('chat/', api_views.ChatListView.as_view(), name='api_chat_list'),
     path('chat/add/', api_views.AddChatView.as_view(), name='api_add_chat'),
     path('app-settings/', api_views.AppSettingsAPIView.as_view(), name='api_app_settings'),
+    path('user-settings/', api_views.UserSettingsAPIView.as_view(), name='api_user_settings'),
 ]

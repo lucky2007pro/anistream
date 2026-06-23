@@ -538,6 +538,12 @@ class UserSettings(models.Model):
         blank=True, null=True
     )
 
+    bg_image = models.CharField(
+        max_length=255,
+        blank=True, null=True,
+        help_text="Foydalanuvchi tanlagan fon rasmi URL si"
+    )
+
     tabbar_on = models.BooleanField(default=True)
 
     telegram_username = models.CharField(max_length=100, blank=True, null=True)
