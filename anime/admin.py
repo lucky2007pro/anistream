@@ -6,7 +6,7 @@ from .models import (
     SubscriptionReceipt, FavoriteAnime, WatchHistory,
     MovieComment, ActiveSession, AnimeNews, NewsLike,
     Story, StoryView, Reel, ReelLike, ReelComment, ReelShare,
-    UserSettings
+    UserSettings, AnimeSchedule
 )
 
 
@@ -116,3 +116,10 @@ class ReelAdmin(admin.ModelAdmin):
 class UserSettingsAdmin(admin.ModelAdmin):
     list_display = ('user', 'theme', 'tabbar_on')
     list_filter = ('theme', 'tabbar_on')
+
+
+@admin.register(AnimeSchedule)
+class AnimeScheduleAdmin(admin.ModelAdmin):
+    list_display = ('anime', 'day_of_week', 'air_time', 'episode_number')
+    list_filter = ('day_of_week',)
+    search_fields = ('anime__title',)

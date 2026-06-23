@@ -187,3 +187,38 @@ class RegisterAPIView(APIView):
             
         user = CustomUser.objects.create_user(username=username, password=password)
         return Response({'success': True, 'message': 'Muvaffaqiyatli ro\'yxatdan o\'tdingiz'}, status=201)
+
+class AnimeScheduleListView(generics.ListAPIView):
+    queryset = AnimeSchedule.objects.filter(is_active=True).order_by('day_of_week', 'order')
+    serializer_class = AnimeScheduleSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
+
+class MovieCommentListView(generics.ListAPIView):
+    serializer_class = MovieCommentSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
+
+    def get_queryset(self):
+        movie_id = self.kwargs['pk']
+        return MovieComment.objects.filter(movie_id=movie_id).order_by('-created_at')
+
+class AddMovieCommentView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            movie = Movie.objects.get(pk=pk)
+            text = request.data.get('text', '').strip()
+            if not text:
+                return Response({'error': 'Izoh bo\'sh bo\'lishi mumkin emas'}, status=400)
+            
+            comment = MovieComment.objects.create(
+                user=request.user,
+                movie=movie,
+                text=text
+            )
+            serializer = MovieCommentSerializer(comment)
+            return Response(serializer.data, status=201)
+        except Movie.DoesNotExist:
+            return Response({'error': 'Kino topilmadi'}, status=404)

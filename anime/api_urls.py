@@ -23,4 +23,7 @@ urlpatterns = [
     path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('register/', api_views.RegisterAPIView.as_view(), name='api_register'),
+    path('schedule/', api_views.AnimeScheduleListView.as_view(), name='api_schedule'),
+    path('movies/<int:pk>/comments/', api_views.MovieCommentListView.as_view(), name='api_movie_comments'),
+    path('movies/<int:pk>/comment/', api_views.AddMovieCommentView.as_view(), name='api_add_movie_comment'),
 ]

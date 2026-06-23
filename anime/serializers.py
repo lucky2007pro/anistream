@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Movie, Category, MovieEpisode, Reel, CustomUser, AnimeNews, Story, FavoriteAnime, WatchHistory, ReelComment
+from .models import Movie, Category, MovieEpisode, Reel, CustomUser, AnimeNews, Story, FavoriteAnime, WatchHistory, ReelComment, MovieComment, AnimeSchedule
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -80,3 +80,24 @@ class ReelCommentSerializer(serializers.ModelSerializer):
         if obj.user.avatar and obj.user.avatar.image:
             return obj.user.avatar.image.url
         return None
+
+class MovieCommentSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.username', read_only=True)
+    user_avatar = serializers.SerializerMethodField()
+
+    class Meta:
+        model = MovieComment
+        fields = ['id', 'user_name', 'user_avatar', 'text', 'created_at']
+
+    def get_user_avatar(self, obj):
+        if obj.user.avatar and obj.user.avatar.image:
+            return obj.user.avatar.image.url
+        return None
+
+class AnimeScheduleSerializer(serializers.ModelSerializer):
+    anime_title = serializers.CharField(source='anime.title', read_only=True)
+    anime_image = serializers.ImageField(source='anime.image', read_only=True)
+
+    class Meta:
+        model = AnimeSchedule
+        fields = ['id', 'anime_title', 'anime_image', 'day_of_week', 'episode_number', 'fandub', 'air_time']
