@@ -29,13 +29,21 @@ class MovieDetailSerializer(serializers.ModelSerializer):
 class ReelSerializer(serializers.ModelSerializer):
     user_name = serializers.CharField(source='user.username', read_only=True)
     video_src = serializers.SerializerMethodField()
+    total_likes = serializers.SerializerMethodField()
+    total_comments = serializers.SerializerMethodField()
 
     class Meta:
         model = Reel
-        fields = ['id', 'user_name', 'title', 'description', 'video_src', 'thumbnail', 'views_count', 'shares_count', 'created_at']
+        fields = ['id', 'user_name', 'title', 'description', 'video_src', 'thumbnail', 'views_count', 'shares_count', 'total_likes', 'total_comments', 'created_at']
 
     def get_video_src(self, obj):
         return obj.get_video_src()
+
+    def get_total_likes(self, obj):
+        return obj.total_likes()
+
+    def get_total_comments(self, obj):
+        return obj.total_comments()
 
 class CustomUserSerializer(serializers.ModelSerializer):
     tier = serializers.CharField(source='active_tier', read_only=True)
