@@ -15,9 +15,12 @@
     .stat-value { font-size: 2.5rem; font-weight: 900; color: white; display: flex; align-items: center; gap: 10px; text-shadow: 0 0 15px rgba(255,255,255,0.2);}
     .stat-desc { font-size: 0.85rem; color: var(--text-dim); margin-top: 5px; }
     
-    .panel-header { margin-bottom: 20px; }
+    .panel-header { margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
     .panel-header h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; }
     .panel-header p { font-size: 0.9rem; color: var(--text-dim); }
+    .panel-header-no-flex { display: block; margin-bottom: 20px; }
+    .panel-header-no-flex h2 { font-size: 1.4rem; font-weight: 800; margin-bottom: 5px; }
+    .panel-header-no-flex p { font-size: 0.9rem; color: var(--text-dim); }
 
     .tables-container { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 40px; }
     .table-wrap { width: 100%; overflow-x: auto; }
@@ -45,13 +48,14 @@
     @media (max-width: 480px) {
         .stats-grid { grid-template-columns: 1fr; }
         .panel-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+        .table-wrap table { min-width: 100%; } /* Allow tables to shrink to fit if needed */
     }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="glass-panel">
-    <div class="panel-header">
+    <div class="panel-header-no-flex">
         <h2>Umumiy ko'rsatkichlar</h2>
         <p>Kontent holatini tezkor ko'rish</p>
     </div>
@@ -82,7 +86,7 @@
 
 <div class="tables-container">
     <div class="glass-panel">
-        <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="panel-header">
             <div>
                 <h2>Oxirgi qo'shilgan anime</h2>
                 <p>So'nggi 5 ta yozuv</p>
@@ -114,7 +118,7 @@
     </div>
 
     <div class="glass-panel">
-        <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
+        <div class="panel-header">
             <div>
                 <h2>Yangi foydalanuvchilar</h2>
                 <p>So'nggi 5 ta a'zolar</p>
@@ -146,7 +150,7 @@
 </div>
 
 <div class="glass-panel" style="margin-top: 40px;">
-    <div class="panel-header" style="display:flex; justify-content:space-between; align-items:center;">
+    <div class="panel-header">
         <div>
             <h2>Oxirgi chat xabarlari</h2>
             <p>So'nggi 10 ta xabar</p>

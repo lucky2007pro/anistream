@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Movie, Category, MovieEpisode, Reel, CustomUser, AnimeNews, Story
+from .models import Movie, Category, MovieEpisode, Reel, CustomUser, AnimeNews, Story, FavoriteAnime, WatchHistory, ReelComment
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,4 +52,31 @@ class AnimeNewsSerializer(serializers.ModelSerializer):
 class StorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Story
-        fields = ['id', 'image', 'video', 'link_url', 'expires_at', 'created_at']
+        fields = ['id', 'image', 'video', 'link', 'expires_at', 'created_at']
+
+class FavoriteAnimeSerializer(serializers.ModelSerializer):
+    movie = MovieListSerializer(read_only=True)
+
+    class Meta:
+        model = FavoriteAnime
+        fields = ['id', 'movie', 'created_at']
+
+class WatchHistorySerializer(serializers.ModelSerializer):
+    movie = MovieListSerializer(read_only=True)
+
+    class Meta:
+        model = WatchHistory
+        fields = ['id', 'movie', 'last_watched']
+
+class ReelCommentSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.username', read_only=True)
+    user_avatar = serializers.SerializerMethodField()
+
+    class Meta:
+        model = ReelComment
+        fields = ['id', 'user_name', 'user_avatar', 'text', 'created_at', 'reply_to']
+
+    def get_user_avatar(self, obj):
+        if obj.user.avatar and obj.user.avatar.image:
+            return obj.user.avatar.image.url
+        return None
