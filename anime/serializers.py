@@ -31,10 +31,11 @@ class ReelSerializer(serializers.ModelSerializer):
     video_src = serializers.SerializerMethodField()
     total_likes = serializers.SerializerMethodField()
     total_comments = serializers.SerializerMethodField()
+    is_liked = serializers.SerializerMethodField()
 
     class Meta:
         model = Reel
-        fields = ['id', 'user_name', 'title', 'description', 'video_src', 'thumbnail', 'views_count', 'shares_count', 'total_likes', 'total_comments', 'created_at']
+        fields = ['id', 'user_name', 'title', 'description', 'video_src', 'thumbnail', 'views_count', 'shares_count', 'total_likes', 'total_comments', 'is_liked', 'created_at']
 
     def get_video_src(self, obj):
         return obj.get_video_src()
@@ -44,6 +45,12 @@ class ReelSerializer(serializers.ModelSerializer):
 
     def get_total_comments(self, obj):
         return obj.total_comments()
+
+    def get_is_liked(self, obj):
+        request = self.context.get('request')
+        if request and request.user and request.user.is_authenticated:
+            return obj.likes.filter(user=request.user).exists()
+        return False
 
 class CustomUserSerializer(serializers.ModelSerializer):
     tier = serializers.CharField(source='active_tier', read_only=True)
