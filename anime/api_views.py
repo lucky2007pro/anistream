@@ -21,9 +21,20 @@ from django.db.models import F
 from django.shortcuts import get_object_or_404
 
 class MovieListView(generics.ListAPIView):
-    queryset = Movie.objects.all().order_by('-created_at')
     serializer_class = MovieListSerializer
     permission_classes = [AllowAny]
+
+    def get_queryset(self):
+        queryset = Movie.objects.all().order_by('-created_at')
+        search_query = self.request.query_params.get('search', None)
+        category_id = self.request.query_params.get('category', None)
+        
+        if search_query:
+            queryset = queryset.filter(models.Q(title__icontains=search_query) | models.Q(description__icontains=search_query))
+        if category_id:
+            queryset = queryset.filter(category_id=category_id)
+            
+        return queryset
 
 class HeroMovieListView(generics.ListAPIView):
     serializer_class = MovieListSerializer
