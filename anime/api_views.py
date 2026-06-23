@@ -2,7 +2,8 @@ from rest_framework import generics, viewsets
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from .models import Movie, Category, Reel, CustomUser, AnimeNews, FavoriteAnime, WatchHistory, ReelComment, ReelLike
+from django.utils import timezone
+from .models import Movie, Category, Reel, CustomUser, AnimeNews, FavoriteAnime, WatchHistory, ReelComment, ReelLike, Story, AnimeSchedule, MovieComment
 from .serializers import (
     MovieListSerializer, 
     MovieDetailSerializer, 
@@ -220,5 +221,24 @@ class AddMovieCommentView(APIView):
             )
             serializer = MovieCommentSerializer(comment)
             return Response(serializer.data, status=201)
+        except Movie.DoesNotExist:
+            return Response({'error': 'Kino topilmadi'}, status=404)
+
+class AddWatchHistoryView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        try:
+            movie = Movie.objects.get(pk=pk)
+            # Update or create watch history
+            history, created = WatchHistory.objects.get_or_create(
+                user=request.user,
+                movie=movie,
+                defaults={'last_watched': timezone.now()}
+            )
+            if not created:
+                history.last_watched = timezone.now()
+                history.save()
+            return Response({'success': True}, status=200)
         except Movie.DoesNotExist:
             return Response({'error': 'Kino topilmadi'}, status=404)

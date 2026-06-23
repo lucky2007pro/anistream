@@ -16,6 +16,7 @@ urlpatterns = [
     path('reels/<int:pk>/comment/', api_views.AddReelCommentView.as_view(), name='api_add_reel_comment'),
     path('reels/<int:pk>/comments/', api_views.ReelCommentListView.as_view(), name='api_reel_comments'),
     path('history/', api_views.WatchHistoryListView.as_view(), name='api_history'),
+    path('history/<int:pk>/add/', api_views.AddWatchHistoryView.as_view(), name='api_add_history'),
     path('favorites/', api_views.FavoriteAnimeListView.as_view(), name='api_favorites'),
     path('favorites/<int:pk>/toggle/', api_views.ToggleFavoriteView.as_view(), name='api_toggle_favorite'),
     path('news/', api_views.AnimeNewsListView.as_view(), name='api_news'),
