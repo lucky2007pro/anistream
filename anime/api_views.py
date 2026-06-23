@@ -14,7 +14,9 @@ from .serializers import (
     StorySerializer,
     FavoriteAnimeSerializer,
     WatchHistorySerializer,
-    ReelCommentSerializer
+    ReelCommentSerializer,
+    AnimeScheduleSerializer,
+    MovieCommentSerializer
 )
 from django.utils import timezone
 from django.db import models
