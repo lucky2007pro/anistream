@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Movie, Category, MovieEpisode, Reel, CustomUser, AnimeNews, Story, FavoriteAnime, WatchHistory, ReelComment, MovieComment, AnimeSchedule
+from .models import Movie, Category, MovieEpisode, Reel, CustomUser, AnimeNews, Story, FavoriteAnime, WatchHistory, ReelComment, MovieComment, AnimeSchedule, ChatMessage
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:
@@ -101,3 +101,31 @@ class AnimeScheduleSerializer(serializers.ModelSerializer):
     class Meta:
         model = AnimeSchedule
         fields = ['id', 'anime_title', 'anime_image', 'day_of_week', 'episode_number', 'fandub', 'air_time']
+
+class ChatMessageSerializer(serializers.ModelSerializer):
+    user_name = serializers.CharField(source='user.username', read_only=True)
+    user_avatar = serializers.SerializerMethodField()
+    is_vip = serializers.SerializerMethodField()
+    is_premium = serializers.SerializerMethodField()
+    is_admin = serializers.BooleanField(read_only=True)
+
+    class Meta:
+        model = ChatMessage
+        fields = ['id', 'user_name', 'user_avatar', 'is_vip', 'is_premium', 'is_admin', 'message', 'created_at']
+
+    def get_user_avatar(self, obj):
+        if obj.user.avatar and obj.user.avatar.image:
+            return obj.user.avatar.image.url
+        return None
+
+    def get_is_vip(self, obj):
+        try:
+            return obj.user.vip_data.tier == 'vip'
+        except Exception:
+            return False
+
+    def get_is_premium(self, obj):
+        try:
+            return obj.user.vip_data.tier == 'premium'
+        except Exception:
+            return False

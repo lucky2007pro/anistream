@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from django.utils import timezone
-from .models import Movie, Category, Reel, CustomUser, AnimeNews, FavoriteAnime, WatchHistory, ReelComment, ReelLike, Story, AnimeSchedule, MovieComment
+from .models import Movie, Category, Reel, CustomUser, AnimeNews, FavoriteAnime, WatchHistory, ReelComment, ReelLike, Story, AnimeSchedule, MovieComment, ChatMessage
 from .serializers import (
     MovieListSerializer, 
     MovieDetailSerializer, 
@@ -16,7 +16,8 @@ from .serializers import (
     WatchHistorySerializer,
     ReelCommentSerializer,
     AnimeScheduleSerializer,
-    MovieCommentSerializer
+    MovieCommentSerializer,
+    ChatMessageSerializer
 )
 from django.utils import timezone
 from django.db import models
@@ -244,3 +245,31 @@ class AddWatchHistoryView(APIView):
             return Response({'success': True}, status=200)
         except Movie.DoesNotExist:
             return Response({'error': 'Kino topilmadi'}, status=404)
+
+class ChatListView(generics.ListAPIView):
+    serializer_class = ChatMessageSerializer
+    permission_classes = [AllowAny]
+    pagination_class = None
+
+    def get_queryset(self):
+        # Return last 100 messages for example
+        return ChatMessage.objects.filter(is_banned=False).select_related('user', 'user__avatar', 'user__vip_data').order_by('-created_at')[:100]
+
+class AddChatView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        if request.user.is_banned:
+            return Response({'error': 'Siz ban olgansiz va xabar yoza olmaysiz!'}, status=403)
+            
+        text = request.data.get('message', '').strip()
+        if not text:
+            return Response({'error': 'Xabar bo\'sh bo\'lishi mumkin emas'}, status=400)
+            
+        chat = ChatMessage.objects.create(
+            user=request.user,
+            message=text,
+            is_admin=request.user.is_admin_user
+        )
+        serializer = ChatMessageSerializer(chat)
+        return Response(serializer.data, status=201)

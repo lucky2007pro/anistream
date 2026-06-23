@@ -27,4 +27,6 @@ urlpatterns = [
     path('schedule/', api_views.AnimeScheduleListView.as_view(), name='api_schedule'),
     path('movies/<int:pk>/comments/', api_views.MovieCommentListView.as_view(), name='api_movie_comments'),
     path('movies/<int:pk>/comment/', api_views.AddMovieCommentView.as_view(), name='api_add_movie_comment'),
+    path('chat/', api_views.ChatListView.as_view(), name='api_chat_list'),
+    path('chat/add/', api_views.AddChatView.as_view(), name='api_add_chat'),
 ]

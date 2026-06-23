@@ -582,3 +582,4 @@ class AnimeSchedule(models.Model):
 
     def __str__(self):
         return f"{self.anime.title} – {self.get_day_of_week_display()} ({self.episode_number}-qism)"
+
