@@ -1,5 +1,10 @@
 from rest_framework import serializers
-from .models import Movie, Category, MovieEpisode, Reel, CustomUser, AnimeNews, Story, FavoriteAnime, WatchHistory, ReelComment, MovieComment, AnimeSchedule, ChatMessage
+from .models import Movie, Category, MovieEpisode, Reel, CustomUser, AnimeNews, Story, FavoriteAnime, WatchHistory, ReelComment, MovieComment, AnimeSchedule, ChatMessage, AppSettings
+
+class AppSettingsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AppSettings
+        fields = '__all__'
 
 class CategorySerializer(serializers.ModelSerializer):
     class Meta:

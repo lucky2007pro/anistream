@@ -29,4 +29,5 @@ urlpatterns = [
     path('movies/<int:pk>/comment/', api_views.AddMovieCommentView.as_view(), name='api_add_movie_comment'),
     path('chat/', api_views.ChatListView.as_view(), name='api_chat_list'),
     path('chat/add/', api_views.AddChatView.as_view(), name='api_add_chat'),
+    path('app-settings/', api_views.AppSettingsAPIView.as_view(), name='api_app_settings'),
 ]

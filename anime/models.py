@@ -180,6 +180,33 @@ class SiteSettings(models.Model):
 
 
 # =======================
+# APP SETTINGS (FLUTTER UCHUN)
+# =======================
+class AppSettings(models.Model):
+    allow_stickers = models.BooleanField(default=True, verbose_name="Stikerlarga ruxsat")
+    allow_emojis = models.BooleanField(default=True, verbose_name="Emojilarga ruxsat")
+    
+    THEME_CHOICES = [
+        ('dark', "Qorong'i"),
+        ('light', "Yorug'"),
+        ('system', "Tizim sozlamasi"),
+    ]
+    default_theme = models.CharField(max_length=20, choices=THEME_CHOICES, default='dark', verbose_name="Standart mavzu")
+    
+    primary_color = models.CharField(max_length=20, default="#FF5733", verbose_name="Asosiy rang (HEX)")
+    background_image = models.ImageField(upload_to='app_backgrounds/', blank=True, null=True, verbose_name="Orqa fon rasmi (URL)")
+    
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return "Ilova Sozlamalari"
+    
+    class Meta:
+        verbose_name = "Ilova Sozlamasi"
+        verbose_name_plural = "Ilova Sozlamalari"
+
+
+# =======================
 # MP3 FILES
 # =======================
 class MP3(models.Model):

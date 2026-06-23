@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from .models import (
     CustomUser, VipUser, Category, Movie, MovieEpisode,
-    SiteSettings, MP3, ChatMessage, ProfileAvatar,
+    SiteSettings, AppSettings, MP3, ChatMessage, ProfileAvatar,
     SubscriptionReceipt, FavoriteAnime, WatchHistory,
     MovieComment, ActiveSession, AnimeNews, NewsLike,
     Story, StoryView, Reel, ReelLike, ReelComment, ReelShare,
@@ -48,6 +48,11 @@ class MovieEpisodeAdmin(admin.ModelAdmin):
 @admin.register(SiteSettings)
 class SiteSettingsAdmin(admin.ModelAdmin):
     list_display = ('__str__', 'updated_at')
+
+
+@admin.register(AppSettings)
+class AppSettingsAdmin(admin.ModelAdmin):
+    list_display = ('__str__', 'default_theme', 'allow_stickers', 'updated_at')
 
 
 @admin.register(MP3)

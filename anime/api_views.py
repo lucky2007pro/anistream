@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated, IsAuthenticatedOrReadOnly
 from django.utils import timezone
-from .models import Movie, Category, Reel, CustomUser, AnimeNews, FavoriteAnime, WatchHistory, ReelComment, ReelLike, Story, AnimeSchedule, MovieComment, ChatMessage
+from .models import Movie, Category, Reel, CustomUser, AnimeNews, FavoriteAnime, WatchHistory, ReelComment, ReelLike, Story, AnimeSchedule, MovieComment, ChatMessage, AppSettings
 from .serializers import (
     MovieListSerializer, 
     MovieDetailSerializer, 
@@ -17,7 +17,8 @@ from .serializers import (
     ReelCommentSerializer,
     AnimeScheduleSerializer,
     MovieCommentSerializer,
-    ChatMessageSerializer
+    ChatMessageSerializer,
+    AppSettingsSerializer
 )
 from django.utils import timezone
 from django.db import models
@@ -273,3 +274,13 @@ class AddChatView(APIView):
         )
         serializer = ChatMessageSerializer(chat)
         return Response(serializer.data, status=201)
+
+class AppSettingsAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        settings = AppSettings.objects.first()
+        if not settings:
+            settings = AppSettings.objects.create()
+        serializer = AppSettingsSerializer(settings)
+        return Response(serializer.data)
