@@ -872,13 +872,28 @@
         .slide { padding: 30px 14px 50px; display: flex; flex-direction: column; justify-content: flex-end; }
         .tags { gap: 6px; margin-bottom: 8px; }
         .slide-title {
-        font-size: 1.8rem;
+        font-size: 1.6rem;
         font-weight: 900;
         line-height: 1.1;
         margin-bottom: 15px;
         text-shadow: 0 8px 20px rgba(0,0,0,0.8);
         letter-spacing: -0.02em;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+        hyphens: auto;
     }
+        .hero-badge-yangi, .hero-badge-year, .hero-badge-episodes {
+            padding: 3px 8px;
+            font-size: 0.72rem;
+        }
+        .hero-badges {
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        .btn-play-pink {
+            padding: 10px 24px;
+            font-size: 0.95rem;
+        }
         .slider-controls { bottom: 10px; }
         .cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
         .anime-card { height: 200px; }
