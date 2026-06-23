@@ -48,11 +48,8 @@ class ReelSerializer(serializers.ModelSerializer):
 
     def get_is_liked(self, obj):
         request = self.context.get('request')
-        if request and hasattr(request, 'user') and request.user.is_authenticated:
-            is_liked = obj.likes.filter(user=request.user).exists()
-            print(f"DEBUG: Reel {obj.id} for user {request.user.username} is_liked: {is_liked}")
-            return is_liked
-        print(f"DEBUG: Reel {obj.id} - Request or User missing/unauthenticated. request: {request}, user: {getattr(request, 'user', None)}")
+        if request and request.user and request.user.is_authenticated:
+            return obj.likes.filter(user=request.user).exists()
         return False
 
 class CustomUserSerializer(serializers.ModelSerializer):

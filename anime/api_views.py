@@ -83,7 +83,7 @@ class CategoryListView(generics.ListAPIView):
 class ReelListView(generics.ListAPIView):
     queryset = Reel.objects.all().order_by('-created_at')
     serializer_class = ReelSerializer
-    permission_classes = [IsAuthenticatedOrReadOnly]
+    permission_classes = [AllowAny]
 
 class AnimeNewsListView(generics.ListAPIView):
     queryset = AnimeNews.objects.all().order_by('-created_at')
