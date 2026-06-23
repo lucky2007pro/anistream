@@ -849,24 +849,9 @@
     }
 
     @media (max-width: 480px) {
-        .slider-wrapper-outer {
-        width: 100%;
-        max-width: 1400px;
-        margin: 20px auto;
-        padding: 0 5%;
-    }
-        .slider-container {
-        position: relative;
-        width: 100%;
-        aspect-ratio: 16 / 9;
-        height: auto;
-        min-height: 220px;
-        overflow: hidden;
-        border-radius: 12px;
-        margin: 0 auto;
-        box-shadow: 0 0 0 1px rgba(255,255,255,0.05), 0 10px 25px rgba(0,0,0,0.5);
-    }
-        .slide { padding: 15px 14px 30px; display: flex; flex-direction: column; justify-content: flex-end; }
+        .slider-wrapper-outer { padding: 0; }
+        .slider-container { aspect-ratio: 4 / 3; min-height: 260px; max-height: 80vw; border-radius: 0; box-shadow: none; margin-top: 0; }
+        .slide { padding: 30px 14px 50px; display: flex; flex-direction: column; justify-content: flex-end; }
         .tags { gap: 6px; margin-bottom: 8px; }
         .slide-title {
         font-size: 1.6rem;
