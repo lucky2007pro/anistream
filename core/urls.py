@@ -51,6 +51,11 @@ urlpatterns = [
     path('control-panel/genres/add/', admin_genre_form, name='admin_genre_form'),
     path('control-panel/genres/<int:pk>/edit/', admin_genre_form, name='admin_genre_form'),
     path('control-panel/genres/<int:pk>/delete/', admin_genre_delete, name='admin_genre_delete'),
+    
+    path('control-panel/news/', admin_news, name='admin_news'),
+    path('control-panel/news/add/', admin_news_form, name='admin_news_form'),
+    path('control-panel/news/<int:pk>/edit/', admin_news_form, name='admin_news_form'),
+    path('control-panel/news/<int:pk>/delete/', admin_news_delete, name='admin_news_delete'),
     path('control-panel/episodes/', admin_episodes, name='admin_episodes'),
     path('control-panel/episodes/add/', admin_episode_form, name='admin_episode_form'),
     path('control-panel/episodes/<int:pk>/edit/', admin_episode_form, name='admin_episode_form'),

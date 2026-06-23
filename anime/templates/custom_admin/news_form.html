@@ -1,0 +1,49 @@
+{% extends 'custom_admin/base.html' %}
+
+{% block page_title %}{% if news %}Yangilik Tahrirlash{% else %}Yangi Yangilik Qo'shish{% endif %}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .glass-panel { padding: 30px; }
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; margin-bottom: 8px; color: var(--text-dim); font-size: 0.9rem; }
+    .form-control { width: 100%; padding: 12px; background: #111; border: 1px solid #333; color: white; border-radius: 6px; outline: none; }
+    .form-control:focus { border-color: var(--accent); }
+    .btn-submit { background: var(--accent); color: black; padding: 12px 25px; border: none; font-weight: bold; border-radius: 6px; cursor: pointer; transition: 0.3s; }
+    .btn-submit:hover { box-shadow: 0 0 15px var(--accent-glow); background: white; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="glass-panel">
+    <h2 style="margin-bottom:20px;">{% if news %}Yangilik Tahrirlash{% else %}Yangi Yangilik Qo'shish{% endif %}</h2>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        <div class="form-group">
+            <label>Sarlavha</label>
+            <input type="text" name="title" class="form-control" value="{{ news.title|default:'' }}" required placeholder="Yangilik sarlavhasi...">
+        </div>
+        <div class="form-group">
+            <label>Batafsil ma'lumot (Ta'rif)</label>
+            <textarea name="description" class="form-control" rows="6" required placeholder="Yangilik haqida batafsil...">{{ news.description|default:'' }}</textarea>
+        </div>
+        <div class="form-group">
+            <label>Rasm yuklash</label>
+            <input type="file" name="image" class="form-control" accept="image/*" {% if not news %}required{% endif %}>
+            {% if news and news.image %}
+            <p style="margin-top:10px;"><img src="{{ news.image.url }}" style="height:100px; border-radius:8px;"></p>
+            {% endif %}
+        </div>
+        <div class="form-group">
+            <label>Video yuklash (ixtiyoriy)</label>
+            <input type="file" name="video" class="form-control" accept="video/*">
+            {% if news and news.video %}
+            <p style="margin-top:10px; color:var(--accent);">Video mavjud: {{ news.video.name }}</p>
+            {% endif %}
+        </div>
+        
+        <button type="submit" class="btn-submit">Saqlash</button>
+        <a href="{% url 'admin_news' %}" style="color:var(--text-dim); text-decoration:none; margin-left:15px;">Bekor qilish</a>
+    </form>
+</div>
+{% endblock %}

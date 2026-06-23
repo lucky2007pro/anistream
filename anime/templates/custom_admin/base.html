@@ -193,6 +193,11 @@
                     <i class='bx bx-calendar'></i> Jadval
                 </a>
             </li>
+            <li>
+                <a href="{% url 'admin_news' %}" class="{% if 'news' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class='bx bx-news'></i> Yangiliklar
+                </a>
+            </li>
         </ul>
 
         <div class="sidebar-bottom">

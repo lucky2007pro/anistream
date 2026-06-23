@@ -516,3 +516,52 @@ def admin_schedule_delete(request, pk):
     schedule.delete()
     messages.success(request, "Jadvaldan o'chirildi!")
     return redirect('admin_schedule')
+
+# =======================
+# NEWS ADMIN
+# =======================
+@user_passes_test(is_admin, login_url='/')
+def admin_news(request):
+    from .models import AnimeNews
+    news_qs = AnimeNews.objects.all().order_by('-id')
+    return render(request, 'custom_admin/list_base.html', {
+        'page_title': 'Yangiliklar',
+        'items': news_qs,
+        'type': 'news'
+    })
+
+@user_passes_test(is_admin, login_url='/')
+def admin_news_form(request, pk=None):
+    from .models import AnimeNews
+    news = get_object_or_404(AnimeNews, pk=pk) if pk else None
+    
+    if request.method == 'POST':
+        title = request.POST.get('title', '')
+        description = request.POST.get('description', '')
+        image = request.FILES.get('image')
+        video = request.FILES.get('video')
+
+        if not news:
+            news = AnimeNews()
+            
+        news.title = title
+        news.description = description
+        
+        if image:
+            news.image = image
+        if video:
+            news.video = video
+            
+        news.save()
+        messages.success(request, "Yangilik muvaffaqiyatli saqlandi!")
+        return redirect('admin_news')
+        
+    return render(request, 'custom_admin/news_form.html', {'news': news})
+
+@user_passes_test(is_admin, login_url='/')
+def admin_news_delete(request, pk):
+    from .models import AnimeNews
+    news = get_object_or_404(AnimeNews, pk=pk)
+    news.delete()
+    messages.success(request, "Yangilik o'chirildi!")
+    return redirect('admin_news')
